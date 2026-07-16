@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="auth-container">
+    <div class="auth-card glass-panel">
+        <div class="auth-header">
+            <div class="logo-icon">🚀</div>
+            <h2 class="glow-text">Welcome Back</h2>
+            <p class="form-label" style="margin-top: 5px;">Log in to continue your adaptive learning path</p>
+        </div>
+        
+        <div id="error-message" class="aptitude-result aptitude-result-incorrect" style="margin-bottom: 20px; text-align: center;"></div>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="e.g. learner@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn-primary" id="submit-btn">Log In</button>
+        </form>
+        
+        <div class="auth-footer">
+            Don't have an account? <a href="/signup" class="auth-link">Sign Up</a>
+        </div>
+    </div>
+    
+    <script src="/static/js/auth.js"></script>
+    <script>
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorMsg = document.getElementById("error-message");
+            const submitBtn = document.getElementById("submit-btn");
+            
+            errorMsg.style.display = "none";
+            submitBtn.textContent = "Logging in...";
+            submitBtn.disabled = true;
+            
+            try {
+                const res = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    setAccessToken(data.access_token);
+                    setRefreshToken(data.refresh_token);
+                    setUser(data.user);
+                    window.location.href = "/dashboard";
+                } else {
+                    const error = await res.json();
+                    errorMsg.textContent = error.detail || "Invalid email or password.";
+                    errorMsg.style.display = "block";
+                }
+            } catch (err) {
+                console.error("Login error:", err);
+                errorMsg.textContent = "Connection to server failed. Please try again.";
+                errorMsg.style.display = "block";
+            } finally {
+                submitBtn.textContent = "Log In";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

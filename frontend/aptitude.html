@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aptitude Section | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand">🚀 <span>EduAI Platform</span></a>
+        <div class="nav-user">
+            <a href="/dashboard" class="btn-secondary" style="text-decoration: none;">&larr; Back to Dashboard</a>
+            <div class="user-badge">
+                <span id="user-name">Learner</span>
+                <span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Workspace -->
+    <main class="aptitude-container">
+        <header class="dashboard-hero" style="margin-bottom: 30px;">
+            <h1 class="dashboard-title">🧠 Aptitude Question Bank</h1>
+            <p class="dashboard-subtitle">Sharpen your logical reasoning, mathematics, and computer science fundamentals. Immediate feedback is provided for each answer.</p>
+        </header>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <div class="user-badge" style="background: rgba(88, 166, 255, 0.08); border-color: rgba(88, 166, 255, 0.2);">
+                <span>Score: <strong id="score-counter" style="color: var(--accent-primary);">0 / 4</strong></span>
+            </div>
+            <button class="btn-chip" id="reset-quiz-btn" style="border-radius: 8px; padding: 8px 16px;">Reset Quiz</button>
+        </div>
+        
+        <!-- Questions Area -->
+        <div id="questions-wrapper">
+            <!-- Dynamically populated from JS -->
+            <div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                Loading assessment queries...
+            </div>
+        </div>
+    </main>
+    
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/aptitude.js"></script>
+</body>
+</html>

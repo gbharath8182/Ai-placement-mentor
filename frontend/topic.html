@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic Study | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand">🚀 <span>EduAI Platform</span></a>
+        <div class="nav-user">
+            <a href="/dashboard" class="btn-secondary" style="text-decoration: none;">&larr; Back to Dashboard</a>
+            <div class="user-badge">
+                <span id="user-name">Learner</span>
+                <span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Workspace -->
+    <div class="topic-page-layout">
+        
+        <!-- Left Column: Content + Coding Compiler -->
+        <div class="topic-content-container">
+            <a href="/dashboard" class="back-link">&larr; Dashboard</a>
+            
+            <div class="topic-header-area">
+                <h1 id="topic-title" class="glow-text" style="font-size: 2rem; margin-bottom: 8px;">Loading topic...</h1>
+                <span id="topic-difficulty-badge" class="status-badge" style="font-size: 0.8rem;">Difficulty</span>
+            </div>
+            
+            <!-- Dynamic Content Blocks -->
+            <div class="content-blocks" id="content-blocks-area">
+                <p style="color: var(--text-muted);">Fetching educational resources...</p>
+            </div>
+            
+            <!-- Coding Playground -->
+            <div class="practice-section" id="practice-playground" style="display: none;">
+                <h2 style="font-size: 1.4rem; margin-bottom: 15px; font-family: var(--font-display);">Code Playground & Compiler</h2>
+                <p class="form-label" style="margin-bottom: 20px;">Solve the problem below. Test cases will run in a secure sandbox via the Piston compiler.</p>
+                
+                <div class="problem-card glass-panel" id="problem-info-card">
+                    <div class="problem-header">
+                        <h3 id="problem-title" style="font-size: 1.2rem;">Problem Title</h3>
+                        <span id="problem-difficulty-badge" class="problem-difficulty diff-easy">Easy</span>
+                    </div>
+                    <p class="problem-desc" id="problem-desc">Problem description goes here...</p>
+                    
+                    <!-- Coding Editor -->
+                    <div class="playground-editor-wrapper">
+                        <div class="playground-header">
+                            <div class="lang-selector-wrapper">
+                                <span>Language:</span>
+                                <select id="lang-select" class="form-select" style="padding: 4px 28px 4px 10px; font-size: 0.85rem; width: 140px; background-position: right 8px center;">
+                                    <option value="python">Python</option>
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="cpp">C++</option>
+                                    <option value="c">C</option>
+                                    <option value="java">Java</option>
+                                </select>
+                            </div>
+                            <span class="form-label" style="margin-bottom: 0; font-size: 0.8rem;">editor.io</span>
+                        </div>
+                        <textarea id="editor" class="editor-textarea" spellcheck="false" placeholder="# Write your code here..."></textarea>
+                        <div class="playground-actions">
+                            <button class="btn-secondary" id="reset-code-btn" style="padding: 8px 16px; font-size: 0.9rem;">Reset Code</button>
+                            <button class="btn-primary" id="run-code-btn" style="padding: 8px 24px; font-size: 0.9rem; width: auto; font-family: var(--font-sans);">Run Solution</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Compilation Status output -->
+                    <div class="compiler-output-panel glass-panel" id="compiler-output">
+                        <div class="compiler-output-header" id="compiler-status-title">Test Results</div>
+                        <div class="test-case-results" id="test-case-container">
+                            <!-- Dynamic test cases check -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: AI Tutor Chat Drawer -->
+        <aside class="ai-sidebar-container">
+            <div class="ai-sidebar-header">
+                <div class="ai-avatar">🤖</div>
+                <div class="ai-meta">
+                    <span class="ai-name">EduAI Assistant</span>
+                    <span class="ai-status" id="ai-status-text">Active & Grounded</span>
+                </div>
+            </div>
+            
+            <!-- AI Shortcuts -->
+            <div class="ai-actions-bar">
+                <button class="btn-chip" id="chip-explain-simply">Explain Simply</button>
+                <button class="btn-chip" id="chip-deep-dive">Deeper Dive</button>
+                <button class="btn-chip" id="chip-quiz">Quiz Me</button>
+            </div>
+            
+            <!-- Chat logs -->
+            <div class="ai-chat-logs" id="ai-chat-logs">
+                <div class="chat-bubble bubble-assistant">
+                    Hi! I'm your grounded AI tutor for this topic. I've read the reference materials on the left.
+                    <br><br>
+                    You can ask me to write code analogies, review your logic, or customize your learning plan!
+                </div>
+            </div>
+            
+            <!-- Chat Input form -->
+            <div class="ai-chat-input-area">
+                <form id="ai-chat-form" style="display: flex; gap: 8px; align-items: center;">
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Ask EduAI a question..." autocomplete="off" required>
+                        <button type="submit" class="btn-send" id="chat-send-btn">🚀</button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+        
+    </div>
+    
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/topic.js"></script>
+    <script src="/static/js/ai-sidebar.js"></script>
+</body>
+</html>
