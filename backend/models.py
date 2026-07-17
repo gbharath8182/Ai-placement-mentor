@@ -33,6 +33,13 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
 # Content Schemas
 class ContentBlock(BaseModel):
     type: str  # text, code, resource_link
@@ -41,13 +48,18 @@ class ContentBlock(BaseModel):
     label: Optional[str] = None
     url: Optional[str] = None
 
+class SubTopic(BaseModel):
+    title: str
+    content_blocks: List[Dict[str, Any]]
+
 class TopicResponse(BaseModel):
     id: str
     domain_slug: str
     slug: str
     title: str
-    content_blocks: List[Dict[str, Any]]
+    content_blocks: Optional[List[Dict[str, Any]]] = []
     difficulty: str
+    subtopics: Optional[List[SubTopic]] = []
 
 class DomainResponse(BaseModel):
     id: str

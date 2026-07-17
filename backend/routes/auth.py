@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Response, Request
 from backend.database import get_collection
-from backend.models import UserCreate, UserLogin, UserResponse, TokenResponse, UserProfile
-from backend.auth import hash_password, verify_password, create_access_token, create_refresh_token, decode_token, get_current_user
+from backend.models import UserCreate, UserLogin, UserResponse, TokenResponse, UserProfile, ForgotPasswordRequest, ResetPasswordRequest
+from backend.auth import hash_password, verify_password, create_access_token, create_refresh_token, create_reset_token, decode_token, get_current_user
+from backend.config import settings
 from datetime import datetime, timezone
 from bson import ObjectId
 
@@ -138,3 +139,95 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 async def logout(response: Response):
     response.delete_cookie("refresh_token")
     return {"message": "Logged out successfully"}
+
+import smtplib
+from email.mime.text import MIMEText
+
+import logging
+logger = logging.getLogger("uvicorn.error")
+
+def send_reset_email(to_email: str, reset_link: str):
+    # Log to uvicorn console so it's guaranteed to show up in terminal logs
+    logger.warning("\n" + "="*80)
+    logger.warning(f" PASSWORD RESET REQUESTED FOR: {to_email}")
+    logger.warning(f" RESET LINK: {reset_link}")
+    logger.warning("="*80 + "\n")
+    
+    if not settings.SMTP_HOST:
+        return
+        
+    try:
+        msg = MIMEText(f"Hello,\n\nPlease click the following link to reset your password:\n{reset_link}\n\nThis link is valid for 15 minutes.\n")
+        msg['Subject'] = "Password Reset Request"
+        msg['From'] = settings.SMTP_FROM_EMAIL
+        msg['To'] = to_email
+        
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
+                server.starttls()
+                server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+            server.send_message(msg)
+    except Exception as e:
+        logger.error(f"Failed to send email via SMTP: {e}")
+
+@router.post("/forgot-password")
+async def forgot_password(req: ForgotPasswordRequest, request: Request):
+    users_coll = get_collection("users")
+    user = await users_coll.find_one({"email": req.email})
+    
+    token = create_reset_token(req.email)
+    
+    # Generate the base URL dynamically based on the request host
+    base_url = str(request.base_url).rstrip('/')
+    reset_link = f"{base_url}/reset-password?token={token}"
+    
+    if user:
+        send_reset_email(req.email, reset_link)
+        
+    # Return success message; in dev mode (no SMTP host), also return the reset link in the response
+    response_data = {"message": "If the email exists in our system, a reset link has been sent."}
+    if not settings.SMTP_HOST and user:
+        response_data["reset_link"] = reset_link
+        
+    return response_data
+
+@router.post("/reset-password")
+async def reset_password(req: ResetPasswordRequest):
+    try:
+        payload = decode_token(req.token)
+    except HTTPException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid or expired reset token: {e.detail}"
+        )
+        
+    if payload.get("type") != "reset":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token type"
+        )
+        
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token subject"
+        )
+        
+    users_coll = get_collection("users")
+    user = await users_coll.find_one({"email": email})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User not found"
+        )
+        
+    # Update user's password
+    new_hash = hash_password(req.password)
+    await users_coll.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    return {"message": "Password has been reset successfully."}
+

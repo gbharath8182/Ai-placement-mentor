@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AI-Assisted Learning Platform API",
-    description="Backend for GFG-style adaptive learning platform with Groq and Piston compiler.",
+    description="Backend for placement-focused adaptive learning platform with Groq and Pyodide compiler.",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -60,6 +60,14 @@ async def read_login():
 async def read_signup():
     return FileResponse("frontend/signup.html")
 
+@app.get("/forgot-password")
+async def read_forgot_password():
+    return FileResponse("frontend/forgot-password.html")
+
+@app.get("/reset-password")
+async def read_reset_password():
+    return FileResponse("frontend/reset-password.html")
+
 @app.get("/dashboard")
 async def read_dashboard():
     return FileResponse("frontend/dashboard.html")
@@ -72,6 +80,14 @@ async def read_topic_page(slug: str):
 @app.get("/aptitude")
 async def read_aptitude_page():
     return FileResponse("frontend/aptitude.html")
+
+@app.get("/playground")
+async def read_playground_page():
+    return FileResponse("frontend/playground.html")
+
+@app.get("/cheatsheets")
+async def read_cheatsheets_page():
+    return FileResponse("frontend/cheatsheets.html")
 
 if __name__ == "__main__":
     import uvicorn

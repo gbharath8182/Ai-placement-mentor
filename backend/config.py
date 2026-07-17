@@ -16,5 +16,12 @@ class Settings:
     
     # Port to run FastAPI
     PORT: int = int(os.getenv("PORT", 8000))
+    
+    # SMTP Settings for Password Reset
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", 587))
+    SMTP_USERNAME: str = os.getenv("SMTP_USERNAME", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM_EMAIL: str = os.getenv("SMTP_FROM_EMAIL", "noreply@eduaiplatform.local")
 
 settings = Settings()

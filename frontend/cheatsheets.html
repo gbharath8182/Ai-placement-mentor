@@ -1,0 +1,547 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheat Sheets & Textbook Hub | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        (function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();
+    </script>
+    <style>
+        .cs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .cs-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        .cs-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .cs-tab-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-display);
+            font-weight: 500;
+            white-space: nowrap;
+            transition: var(--transition-smooth);
+        }
+        .cs-tab-btn:hover, .cs-tab-btn.active {
+            border-color: var(--accent-primary);
+            color: var(--text-main);
+            background: rgba(37, 99, 235, 0.05);
+        }
+        .cs-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .cs-panel.active {
+            display: block;
+        }
+        .cs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .cs-card {
+            padding: 24px;
+            border-radius: 16px;
+            height: 100%;
+        }
+        .cs-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.25rem;
+            color: var(--accent-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .cs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+        .cs-table th, .cs-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .cs-table th {
+            font-family: var(--font-display);
+            color: var(--accent-primary);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .light-theme .cs-table th {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .code-snippet {
+            margin: 10px 0;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            overflow-x: auto;
+            color: #e6edf3;
+        }
+        .light-theme .code-snippet {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .book-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            transition: var(--transition-smooth);
+        }
+        .book-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-primary);
+        }
+        .book-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        .book-author {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+        .book-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+        .book-btn:hover {
+            background: var(--accent-primary);
+            color: #fff;
+            border-color: var(--accent-primary);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#navGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                <defs>
+                    <linearGradient id="navGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#38bdf8"/>
+                        <stop offset="100%" stop-color="#c084fc"/>
+                    </linearGradient>
+                </defs>
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+            </svg>
+            <span>EduAI Platform</span>
+        </a>
+        <div class="nav-user">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+            <a href="/playground" class="btn-secondary" style="text-decoration: none; border-color: var(--accent-primary); color: var(--accent-primary); margin-right: 8px;">Playground</a>
+            <a href="/dashboard" class="btn-secondary" style="text-decoration: none;">&larr; Back to Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <div class="cs-container">
+        <header class="cs-header">
+            <h1 class="glow-text" style="font-size: 2.2rem; margin-bottom: 8px;">Placement Cheat Sheets Hub</h1>
+            <p style="color: var(--text-muted);">Quick-reference summaries, complexities, and standard references to ace your tech interviews.</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="cs-tabs">
+            <button class="cs-tab-btn active" data-target="python">Python Programming</button>
+            <button class="cs-tab-btn" data-target="dsa">Structures & Algorithms</button>
+            <button class="cs-tab-btn" data-target="sql">SQL & Databases</button>
+            <button class="cs-tab-btn" data-target="system">System Design</button>
+            <button class="cs-tab-btn" data-target="ml">Machine Learning</button>
+            <button class="cs-tab-btn" data-target="books">Textbook Library</button>
+        </div>
+
+        <!-- Python Programming Panel -->
+        <div class="cs-panel active" id="panel-python">
+            <div class="cs-grid">
+                <div class="cs-card glass-panel">
+                    <h3>Lists & List Comprehensions</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">Python lists are dynamic arrays. List comprehensions provide a concise way to create lists.</p>
+                    <div class="code-snippet"># List comprehension template
+[expression for item in iterable if condition]
+
+# Slicing syntax: list[start:stop:step]
+nums = [0, 1, 2, 3, 4, 5]
+evens = [x for x in nums if x % 2 == 0] # [0, 2, 4]
+reverse = nums[::-1] # [5, 4, 3, 2, 1, 0]</div>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Dictionaries & Sets</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">Hash-map and Hash-set implementations with O(1) average lookup/insert time complexity.</p>
+                    <div class="code-snippet"># Dictionary operations
+student = {"name": "Dev", "grade": "A"}
+score = student.get("score", 100) # Safe default lookup
+
+# Set operations (uniqueness & intersections)
+set_a = {1, 2, 3, 4}
+set_b = {3, 4, 5, 6}
+common = set_a & set_b # Intersect: {3, 4}</div>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Decorators & Generics</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">Decorators modify behavior of functions dynamically using closures.</p>
+                    <div class="code-snippet"># Decorator structure
+def log_decorator(func):
+    def wrapper(*args, **kwargs):
+        print(f"Calling {func.__name__}")
+        return func(*args, **kwargs)
+    return wrapper
+
+@log_decorator
+def greet(name):
+    return f"Hello {name}"</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DSA Panel -->
+        <div class="cs-panel" id="panel-dsa">
+            <div class="cs-card glass-panel" style="margin-bottom: 20px;">
+                <h3>Data Structure Complexity Cheat Sheet</h3>
+                <table class="cs-table">
+                    <thead>
+                        <tr>
+                            <th>Data Structure</th>
+                            <th>Access (Average)</th>
+                            <th>Search (Average)</th>
+                            <th>Insertion (Average)</th>
+                            <th>Deletion (Average)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Array (Dynamic)</strong></td>
+                            <td>O(1)</td>
+                            <td>O(N)</td>
+                            <td>O(N)</td>
+                            <td>O(N)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Singly Linked List</strong></td>
+                            <td>O(N)</td>
+                            <td>O(N)</td>
+                            <td>O(1)</td>
+                            <td>O(1)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hash Table</strong></td>
+                            <td>N/A</td>
+                            <td>O(1)</td>
+                            <td>O(1)</td>
+                            <td>O(1)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Binary Search Tree</strong></td>
+                            <td>O(log N)</td>
+                            <td>O(log N)</td>
+                            <td>O(log N)</td>
+                            <td>O(log N)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AVL Tree (Balanced)</strong></td>
+                            <td>O(log N)</td>
+                            <td>O(log N)</td>
+                            <td>O(log N)</td>
+                            <td>O(log N)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="cs-card glass-panel">
+                <h3>Sorting Complexity Cheat Sheet</h3>
+                <table class="cs-table">
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>Best Case Time</th>
+                            <th>Average Case Time</th>
+                            <th>Worst Case Time</th>
+                            <th>Space Complexity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Bubble Sort</strong></td>
+                            <td>O(N)</td>
+                            <td>O(N<sup>2</sup>)</td>
+                            <td>O(N<sup>2</sup>)</td>
+                            <td>O(1)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Merge Sort</strong></td>
+                            <td>O(N log N)</td>
+                            <td>O(N log N)</td>
+                            <td>O(N log N)</td>
+                            <td>O(N)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quick Sort</strong></td>
+                            <td>O(N log N)</td>
+                            <td>O(N log N)</td>
+                            <td>O(N<sup>2</sup>)</td>
+                            <td>O(log N)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Heap Sort</strong></td>
+                            <td>O(N log N)</td>
+                            <td>O(N log N)</td>
+                            <td>O(N log N)</td>
+                            <td>O(1)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SQL & Databases Panel -->
+        <div class="cs-panel" id="panel-sql">
+            <div class="cs-grid">
+                <div class="cs-card glass-panel">
+                    <h3>ACID Properties</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">The four properties required to guarantee database transactions are processed reliably:</p>
+                    <ul style="padding-left: 20px; line-height: 1.8; font-size: 0.9rem;">
+                        <li><strong>Atomicity</strong>: Entire transaction succeeds, or entire transaction rolls back.</li>
+                        <li><strong>Consistency</strong>: Database goes from one valid state to another.</li>
+                        <li><strong>Isolation</strong>: Transactions execute independently without interleaving.</li>
+                        <li><strong>Durability</strong>: Once committed, changes survive power outages or crashes.</li>
+                    </ul>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Normalization Forms</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">Steps to design clean tables and eliminate anomalies:</p>
+                    <ul style="padding-left: 20px; line-height: 1.8; font-size: 0.9rem;">
+                        <li><strong>1NF</strong>: Atomic values; no repeating groups.</li>
+                        <li><strong>2NF</strong>: Meets 1NF; eliminates partial dependencies (all non-key columns depend on the entire primary key).</li>
+                        <li><strong>3NF</strong>: Meets 2NF; eliminates transitive dependencies (non-key columns do not depend on other non-key columns).</li>
+                    </ul>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Core Joins</h3>
+                    <div class="code-snippet">-- INNER JOIN: Matches rows in both
+SELECT * FROM users u 
+INNER JOIN orders o ON u.id = o.user_id;
+
+-- LEFT JOIN: All from left, matches from right
+SELECT * FROM users u
+LEFT JOIN orders o ON u.id = o.user_id;</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Design Panel -->
+        <div class="cs-panel" id="panel-system">
+            <div class="cs-grid">
+                <div class="cs-card glass-panel">
+                    <h3>CAP Theorem</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">A distributed data store can simultaneously provide at most two of the three guarantees:</p>
+                    <ul style="padding-left: 20px; line-height: 1.8; font-size: 0.9rem;">
+                        <li><strong>Consistency</strong>: Every read receives the most recent write or an error.</li>
+                        <li><strong>Availability</strong>: Every request receives a non-error response, without the guarantee that it contains the most recent write.</li>
+                        <li><strong>Partition Tolerance</strong>: System continues to operate despite an arbitrary number of messages being dropped/delayed by network partitions.</li>
+                    </ul>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Load Balancing Strategies</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">How traffic is distributed across healthy application nodes:</p>
+                    <ul style="padding-left: 20px; line-height: 1.8; font-size: 0.9rem;">
+                        <li><strong>Round Robin</strong>: Sequentially passes requests to servers.</li>
+                        <li><strong>Least Connections</strong>: Directs traffic to the server with the fewest active sessions.</li>
+                        <li><strong>IP Hash</strong>: Maps client's IP to a specific target server.</li>
+                    </ul>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Caching Policies</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">Caching strategies for optimal read/write throughput:</p>
+                    <ul style="padding-left: 20px; line-height: 1.8; font-size: 0.9rem;">
+                        <li><strong>Write-Through</strong>: Data is written to both cache and backend DB in parallel (consistency but high write latency).</li>
+                        <li><strong>Write-Back (Write-Behind)</strong>: Written only to cache first; database update is deferred/batched (high write performance, risk of loss).</li>
+                        <li><strong>Cache-Aside</strong>: Application queries cache; on miss, loads from DB and updates cache.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Machine Learning Panel -->
+        <div class="cs-panel" id="panel-ml">
+            <div class="cs-grid">
+                <div class="cs-card glass-panel">
+                    <h3>Common Activation Functions</h3>
+                    <table class="cs-table">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>Formula</th>
+                                <th>Range</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Sigmoid</strong></td>
+                                <td>$$\sigma(x) = \frac{1}{1 + e^{-x}}$$</td>
+                                <td>(0, 1)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanh</strong></td>
+                                <td>$$\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$$</td>
+                                <td>(-1, 1)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ReLU</strong></td>
+                                <td>$$f(x) = \max(0, x)$$</td>
+                                <td>[0, &infin;)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Loss Functions</h3>
+                    <ul style="padding-left: 20px; line-height: 1.8; font-size: 0.9rem;">
+                        <li><strong>Mean Squared Error (Regression)</strong>:
+                            $$MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$$
+                        </li>
+                        <li><strong>Binary Cross-Entropy (Binary Classification)</strong>:
+                            $$BCE = -\frac{1}{n} \sum_{i=1}^{n} [y_i \log(\hat{y}_i) + (1-y_i) \log(1-\hat{y}_i)]$$
+                        </li>
+                    </ul>
+                </div>
+                <div class="cs-card glass-panel">
+                    <h3>Self-Attention (Transformer)</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 10px;">Computes structural similarities between words using Query, Key, and Value vectors:</p>
+                    <div class="code-snippet">Attention(Q, K, V) = softmax( (Q * K^T) / sqrt(d_k) ) * V</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Textbook Library Panel -->
+        <div class="cs-panel" id="panel-books">
+            <div class="library-grid">
+                <div class="book-card glass-panel">
+                    <div>
+                        <div class="book-title">Think Python (2nd Edition)</div>
+                        <div class="book-author">Allen B. Downey</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A clean, standardized guide to programming principles, functions, variables, and logic using Python.</p>
+                    </div>
+                    <a href="https://greenteapress.com/thinkpython2/thinkpython2.pdf" target="_blank" class="book-btn">ðŸ“– Open Free PDF</a>
+                </div>
+
+                <div class="book-card glass-panel">
+                    <div>
+                        <div class="book-title">Algorithms</div>
+                        <div class="book-author">Jeff Erickson</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">One of the most famous university textbooks on algorithms, recursion, graphs, dynamic programming, and complexity.</p>
+                    </div>
+                    <a href="https://jeffe.cs.illinois.edu/teaching/algorithms/book/Algorithms-JeffErickson.pdf" target="_blank" class="book-btn">ðŸ“– Open Free PDF</a>
+                </div>
+
+                <div class="book-card glass-panel">
+                    <div>
+                        <div class="book-title">Open Data Structures</div>
+                        <div class="book-author">Pat Morin</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">An open-source reference guide with full implementations in Python and Java covering lists, hashing, and trees.</p>
+                    </div>
+                    <a href="https://opendatastructures.org/ods-python.pdf" target="_blank" class="book-btn">ðŸ“– Open Free PDF</a>
+                </div>
+
+                <div class="book-card glass-panel">
+                    <div>
+                        <div class="book-title">Operating Systems: Three Easy Pieces</div>
+                        <div class="book-author">Remzi & Andrea Arpaci-Dusseau</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">World-class textbook breaking down virtualization, concurrency, and persistence in operating systems.</p>
+                    </div>
+                    <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" class="book-btn">ðŸ“– View Free Book</a>
+                </div>
+
+                <div class="book-card glass-panel">
+                    <div>
+                        <div class="book-title">Eloquent JavaScript (3rd Edition)</div>
+                        <div class="book-author">Marijn Haverbeke</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A premium handbook on JavaScript syntax, scopes, async operations, DOM node manipulation, and Node.js.</p>
+                    </div>
+                    <a href="https://eloquentjavascript.net/Eloquent_JavaScript.pdf" target="_blank" class="book-btn">ðŸ“– Open Free PDF</a>
+                </div>
+
+                <div class="book-card glass-panel">
+                    <div>
+                        <div class="book-title">Understanding Machine Learning</div>
+                        <div class="book-author">Shai Shalev-Shwartz & Shai Ben-David</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A comprehensive textbook analyzing ML theory, classification models, generalization bounds, and SGD.</p>
+                    </div>
+                    <a href="https://www.cs.huji.ac.il/~shais/UnderstandingMachineLearning/understanding-machine-learning-theory-algorithms.pdf" target="_blank" class="book-btn">ðŸ“– Open Free PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to manage tab switches -->
+    <script>
+        document.querySelectorAll('.cs-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.cs-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.cs-panel').forEach(p => p.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const target = btn.getAttribute('data-target');
+                document.getElementById('panel-' + target).classList.add('active');
+            });
+        });
+    </script>
+    <script>
+        // Load MathJax for LaTeX processing
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+    <script src="/static/js/theme.js"></script>
+</body>
+</html>
+

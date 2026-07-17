@@ -7,6 +7,7 @@ from backend.database import get_collection
 from backend.models import AIRecommendRequest, AIChatRequest, AIExplainRequest
 from backend.auth import get_current_user
 from backend.config import settings
+from bson import ObjectId
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 

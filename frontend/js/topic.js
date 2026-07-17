@@ -1,6 +1,9 @@
 let currentTopicSlug = "";
 let currentProblemId = "";
 let starterCodeCache = "";
+let currentProblemTestCases = [];
+let pyodideInstance = null;
+let isPyodideLoading = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Set user info in navbar
@@ -49,7 +52,48 @@ async function loadTopicData() {
             diffBadge.textContent = topic.difficulty;
             diffBadge.className = `status-badge status-${topic.difficulty === "beginner" ? "not-started" : (topic.difficulty === "intermediate" ? "in-progress" : "completed")}`;
             
-            renderContentBlocks(topic.content_blocks);
+            // Render subtopics list in sidebar
+            const sidebar = document.getElementById("subtopics-list-container");
+            sidebar.innerHTML = "";
+            
+            if (topic.subtopics && topic.subtopics.length > 0) {
+                topic.subtopics.forEach((sub, idx) => {
+                    const item = document.createElement("div");
+                    item.className = "topic-item glass-panel";
+                    item.style.cssText = "padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 0.88rem; transition: var(--transition-smooth); display: flex; align-items: center; border: 1px solid var(--border-color); color: var(--text-muted); margin-bottom: 2px;";
+                    item.innerHTML = `<span style="font-weight: 500; font-family: var(--font-display); margin-right: 6px; color: var(--accent-primary);">${idx + 1}.</span> <span style="text-align: left;">${escapeHtml(sub.title)}</span>`;
+                    
+                    item.addEventListener("click", () => {
+                        // Highlight active subtopic
+                        document.querySelectorAll("#subtopics-list-container .topic-item").forEach(el => {
+                            el.style.borderColor = "var(--border-color)";
+                            el.style.background = "transparent";
+                            el.style.color = "var(--text-muted)";
+                        });
+                        item.style.borderColor = "var(--accent-primary)";
+                        item.style.background = "rgba(37, 99, 235, 0.05)";
+                        item.style.color = "var(--text-main)";
+                        
+                        // Update subtopic badge & content
+                        document.getElementById("subtopic-title-badge").textContent = sub.title;
+                        renderContentBlocks(sub.content_blocks);
+                        
+                        // Trigger MathJax typeset to render any LaTeX math expressions
+                        if (window.MathJax && window.MathJax.typeset) {
+                            window.MathJax.typeset();
+                        }
+                    });
+                    
+                    sidebar.appendChild(item);
+                });
+                
+                // Select the first subtopic by default
+                sidebar.firstChild.click();
+            } else {
+                sidebar.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">No subtopics found.</div>`;
+                document.getElementById("subtopic-title-badge").textContent = "General";
+                renderContentBlocks(topic.content_blocks);
+            }
             
             // Mark topic progress as "in_progress" in background
             updateTopicProgress("in_progress");
@@ -72,12 +116,22 @@ function renderContentBlocks(blocks) {
         return;
     }
     
+    // Separate resource_links to render at the bottom
+    const contentBlocks = [];
+    const resourceBlocks = [];
     blocks.forEach(block => {
+        if (block.type === "resource_link") {
+            resourceBlocks.push(block);
+        } else {
+            contentBlocks.push(block);
+        }
+    });
+    
+    contentBlocks.forEach(block => {
         const element = document.createElement("div");
         
         if (block.type === "text") {
             element.className = "block-text";
-            // Replace linebreaks with <br> for simple HTML formatting, escape HTML to avoid XSS
             const escapedVal = block.value
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
@@ -85,13 +139,41 @@ function renderContentBlocks(blocks) {
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
             
-            // Support simple double asterisk bold formatting
             const formattedVal = escapedVal
                 .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
                 .replace(/`(.*?)`/g, "<code style='background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; font-family: var(--font-code); font-size: 0.9rem;'>$1</code>");
                 
             element.innerHTML = formattedVal.replace(/\n/g, "<br>");
         } 
+        else if (block.type === "heading") {
+            element.className = "block-heading";
+            const level = block.level || 2;
+            element.innerHTML = `<h${level} style="font-family: var(--font-display); color: var(--text-main); margin: 8px 0 4px 0; font-size: ${level === 2 ? '1.4rem' : '1.15rem'}; border-bottom: ${level === 2 ? '1px solid var(--border-color)' : 'none'}; padding-bottom: ${level === 2 ? '8px' : '0'};">${escapeHtml(block.value)}</h${level}>`;
+        }
+        else if (block.type === "divider") {
+            element.innerHTML = `<hr style="border: none; border-top: 1px solid var(--border-color); margin: 12px 0;">`;
+        }
+        else if (block.type === "list") {
+            element.className = "block-list";
+            const items = block.items || [];
+            const listStyle = block.ordered ? "ol" : "ul";
+            element.innerHTML = `<${listStyle} style="margin: 0; padding-left: 24px; line-height: 1.9; color: var(--text-main);">${items.map(item => {
+                const escaped = item.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                    .replace(/`(.*?)`/g, "<code style='background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;font-family:var(--font-code);font-size:0.9rem;'>$1</code>");
+                return `<li>${escaped}</li>`;
+            }).join("")}</${listStyle}>`;
+        }
+        else if (block.type === "callout") {
+            const colors = { tip: "var(--accent-green)", warning: "var(--accent-yellow)", info: "var(--accent-primary)", important: "var(--accent-secondary)" };
+            const icons = { tip: "💡", warning: "⚠️", info: "ℹ️", important: "📌" };
+            const kind = block.kind || "info";
+            const borderColor = colors[kind] || colors.info;
+            element.innerHTML = `<div style="border-left: 4px solid ${borderColor}; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 4px 0;">
+                <strong style="color: ${borderColor};">${icons[kind] || ""} ${(block.title || kind).toUpperCase()}</strong>
+                <p style="margin: 6px 0 0 0; color: var(--text-main); line-height: 1.7;">${escapeHtml(block.value).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/`(.*?)`/g, "<code style='background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;font-family:var(--font-code);font-size:0.9rem;'>$1</code>").replace(/\n/g, "<br>")}</p>
+            </div>`;
+        }
         else if (block.type === "code") {
             element.className = "block-code";
             const lang = block.language || "code";
@@ -99,9 +181,20 @@ function renderContentBlocks(blocks) {
                 <span class="code-lang-label">${lang}</span>
                 <pre style="margin: 0;"><code class="language-${lang}">${escapeHtml(block.value)}</code></pre>
             `;
-        } 
-        else if (block.type === "resource_link") {
-            element.innerHTML = `
+        }
+        
+        area.appendChild(element);
+    });
+    
+    // Render resource links in a grouped section at the bottom
+    if (resourceBlocks.length > 0) {
+        const refSection = document.createElement("div");
+        refSection.style.cssText = "margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;";
+        refSection.innerHTML = `<h3 style="font-family: var(--font-display); color: var(--text-muted); font-size: 1rem; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px;">📚 References & Recommended Reading</h3>`;
+        
+        resourceBlocks.forEach(block => {
+            const linkEl = document.createElement("div");
+            linkEl.innerHTML = `
                 <a href="${block.url}" target="_blank" class="block-resource">
                     <span class="resource-icon">🔗</span>
                     <div style="display: flex; flex-direction: column;">
@@ -110,10 +203,11 @@ function renderContentBlocks(blocks) {
                     </div>
                 </a>
             `;
-        }
+            refSection.appendChild(linkEl);
+        });
         
-        area.appendChild(element);
-    });
+        area.appendChild(refSection);
+    }
 }
 
 async function loadPracticeProblem() {
@@ -126,6 +220,7 @@ async function loadPracticeProblem() {
                 const problem = problems[0]; // Display the primary problem
                 currentProblemId = problem.id;
                 starterCodeCache = problem.starter_code;
+                currentProblemTestCases = problem.test_cases || [];
                 
                 document.getElementById("problem-title").textContent = problem.title;
                 document.getElementById("problem-desc").textContent = problem.description;
@@ -151,78 +246,235 @@ async function runCodeSubmission() {
     const container = document.getElementById("test-case-container");
     const statusTitle = document.getElementById("compiler-status-title");
     
-    runBtn.textContent = "Compiling...";
+    runBtn.textContent = "Running...";
     runBtn.disabled = true;
     outputPanel.style.display = "block";
-    container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem;">Executing code in sandboxed runtime... Please wait.</div>`;
+    container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem;">Executing code in browser sandbox...</div>`;
     
     try {
-        const res = await authFetch(`/practice/${currentProblemId}/run`, {
-            method: "POST",
-            body: { language, code }
-        });
+        let testCases = currentProblemTestCases;
+        if (!testCases || testCases.length === 0) {
+            testCases = [{ input: "", expected_output: "" }];
+        }
         
-        if (res.ok) {
-            const data = await res.json();
-            container.innerHTML = "";
-            
-            if (data.success) {
-                statusTitle.textContent = "🟢 All Test Cases Passed!";
-                statusTitle.className = "compiler-output-header tc-success";
+        let results = [];
+        let overallPassed = true;
+        
+        if (language === "python") {
+            if (!pyodideInstance) {
+                if (isPyodideLoading) return;
+                isPyodideLoading = true;
+                container.innerHTML = `<div style="color: var(--accent-primary); font-size: 0.9rem;">Initializing Pyodide WebAssembly runtime (approx 5-10s)...</div>`;
+                pyodideInstance = await loadPyodide();
                 
-                // Show notification in AI sidebar that problem is solved
-                if (window.appendAssistantMessage) {
-                    window.appendAssistantMessage("🎉 Excellent job! You've successfully passed all compiler test cases for this topic's coding exercise. Let me know if you want to optimize your code further or take a short quiz!");
-                }
-            } else {
-                statusTitle.textContent = "🔴 Test Cases Failed";
-                statusTitle.className = "compiler-output-header tc-failed";
+                // Set up Mock Stdin helper once loaded
+                await pyodideInstance.runPythonAsync(`
+import sys
+import io
+import builtins
+
+class MockStdin:
+    def __init__(self, data=""):
+        self.data = data
+        self.lines = data.split('\\n')
+        self.index = 0
+    def readline(self):
+        if self.index < len(self.lines):
+            val = self.lines[self.index]
+            self.index += 1
+            return val + '\\n'
+        return ''
+    def read(self):
+        return self.data
+
+def set_mock_stdin(data):
+    sys.stdin = MockStdin(data)
+    builtins.input = lambda prompt="": sys.stdin.readline().rstrip('\\r\\n')
+`);
+                isPyodideLoading = false;
             }
             
-            data.results.forEach(tc => {
-                const tcItem = document.createElement("div");
-                tcItem.className = "test-case-item";
+            for (let idx = 0; idx < testCases.length; idx++) {
+                const tc = testCases[idx];
+                let tcOutput = "";
+                let tcError = "";
                 
-                const statusIcon = tc.passed ? "✓ Passed" : "✗ Failed";
-                const statusClass = tc.passed ? "tc-success" : "tc-failed";
+                pyodideInstance.setStdout({
+                    write: (text) => {
+                        tcOutput += text;
+                        return text.length;
+                    }
+                });
+                pyodideInstance.setStderr({
+                    write: (text) => {
+                        tcError += text;
+                        return text.length;
+                    }
+                });
                 
-                let detailsHtml = "";
-                if (!tc.passed) {
-                    detailsHtml = `
-                        <div class="test-case-details">
-                            ${tc.input ? `<div><strong>Input:</strong> ${escapeHtml(tc.input)}</div>` : ''}
-                            <div><strong>Expected Output:</strong> ${escapeHtml(tc.expected)}</div>
-                            <div><strong>Actual Output:</strong> ${escapeHtml(tc.actual || "[No Output]")}</div>
-                            ${tc.stderr ? `<div style="color: var(--accent-red);"><strong>Stderr:</strong> ${escapeHtml(tc.stderr)}</div>` : ''}
-                        </div>
-                    `;
-                } else {
-                    detailsHtml = `
-                        <div class="test-case-details" style="opacity: 0.8;">
-                            ${tc.input ? `<div><strong>Input:</strong> ${escapeHtml(tc.input)}</div>` : ''}
-                            <div><strong>Output:</strong> ${escapeHtml(tc.actual)}</div>
-                        </div>
-                    `;
+                try {
+                    // Set the mock stdin for this test case
+                    // Safely escape inputs
+                    const escapedInput = tc.input.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
+                    await pyodideInstance.runPythonAsync(`set_mock_stdin("${escapedInput}")`);
+                    
+                    // Run user code
+                    await pyodideInstance.runPythonAsync(code);
+                    
+                    const expected = tc.expected_output.trim().replace(/\r\n/g, "\n");
+                    const actual = tcOutput.trim().replace(/\r\n/g, "\n");
+                    const passed = (actual === expected) && !tcError;
+                    
+                    if (!passed) overallPassed = false;
+                    
+                    results.push({
+                        test_case_index: idx,
+                        input: tc.input,
+                        expected: tc.expected_output,
+                        actual: tcOutput,
+                        stderr: tcError,
+                        passed: passed
+                    });
+                } catch (err) {
+                    overallPassed = false;
+                    results.push({
+                        test_case_index: idx,
+                        input: tc.input,
+                        expected: tc.expected_output,
+                        actual: tcOutput,
+                        stderr: err.message,
+                        passed: false
+                    });
                 }
+            }
+        } 
+        else if (language === "javascript") {
+            for (let idx = 0; idx < testCases.length; idx++) {
+                const tc = testCases[idx];
+                let tcOutput = "";
+                let tcError = "";
                 
-                tcItem.innerHTML = `
-                    <div class="test-case-status ${statusClass}">
-                        <span>${statusIcon}</span>
-                        <span style="color: var(--text-muted); font-weight: normal; font-size: 0.8rem;">(Test Case #${tc.test_case_index + 1})</span>
-                    </div>
-                    ${detailsHtml}
-                `;
+                const originalLog = console.log;
+                const originalError = console.error;
                 
-                container.appendChild(tcItem);
-            });
-            
-        } else {
-            const err = await res.json();
-            container.innerHTML = `<div style="color: var(--accent-red);">${err.detail || "Compilation error occurred."}</div>`;
+                console.log = (...args) => {
+                    tcOutput += args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(" ") + "\n";
+                };
+                console.error = (...args) => {
+                    tcError += args.join(" ") + "\n";
+                };
+                
+                try {
+                    // Mock simple prompt/input lines for JavaScript
+                    window.prompt = () => {
+                        if (!window.__js_stdin_lines) {
+                            window.__js_stdin_lines = tc.input.split('\n');
+                            window.__js_stdin_idx = 0;
+                        }
+                        if (window.__js_stdin_idx < window.__js_stdin_lines.length) {
+                            return window.__js_stdin_lines[window.__js_stdin_idx++];
+                        }
+                        return "";
+                    };
+                    window.__js_stdin_lines = tc.input.split('\n');
+                    window.__js_stdin_idx = 0;
+                    
+                    new Function(code)();
+                    
+                    const expected = tc.expected_output.trim().replace(/\r\n/g, "\n");
+                    const actual = tcOutput.trim().replace(/\r\n/g, "\n");
+                    const passed = (actual === expected) && !tcError;
+                    
+                    if (!passed) overallPassed = false;
+                    
+                    results.push({
+                        test_case_index: idx,
+                        input: tc.input,
+                        expected: tc.expected_output,
+                        actual: tcOutput,
+                        stderr: tcError,
+                        passed: passed
+                    });
+                } catch (err) {
+                    overallPassed = false;
+                    results.push({
+                        test_case_index: idx,
+                        input: tc.input,
+                        expected: tc.expected_output,
+                        actual: tcOutput,
+                        stderr: err.message,
+                        passed: false
+                    });
+                } finally {
+                    console.log = originalLog;
+                    console.error = originalError;
+                }
+            }
         }
+        
+        container.innerHTML = "";
+        
+        if (overallPassed) {
+            statusTitle.textContent = "🟢 All Test Cases Passed!";
+            statusTitle.className = "compiler-output-header tc-success";
+            
+            // Call the completed endpoint to save progress
+            const res = await authFetch(`/practice/${currentProblemId}/completed`, {
+                method: "POST"
+            });
+            if (res.ok) {
+                console.log("Database updated: topic marked as completed.");
+            }
+            
+            // Show notification in AI sidebar that problem is solved
+            if (window.appendAssistantMessage) {
+                window.appendAssistantMessage("🎉 Excellent job! You've successfully passed all compiler test cases for this topic's coding exercise. Let me know if you want to optimize your code further or take a short quiz!");
+            }
+        } else {
+            statusTitle.textContent = "🔴 Test Cases Failed";
+            statusTitle.className = "compiler-output-header tc-failed";
+        }
+        
+        results.forEach(tc => {
+            const tcItem = document.createElement("div");
+            tcItem.className = "test-case-item";
+            
+            const statusIcon = tc.passed ? "✓ Passed" : "✗ Failed";
+            const statusClass = tc.passed ? "tc-success" : "tc-failed";
+            
+            let detailsHtml = "";
+            if (!tc.passed) {
+                detailsHtml = `
+                    <div class="test-case-details">
+                        ${tc.input ? `<div><strong>Input:</strong> ${escapeHtml(tc.input)}</div>` : ''}
+                        <div><strong>Expected Output:</strong> ${escapeHtml(tc.expected)}</div>
+                        <div><strong>Actual Output:</strong> ${escapeHtml(tc.actual || "[No Output]")}</div>
+                        ${tc.stderr ? `<div style="color: var(--accent-red);"><strong>Error/Stderr:</strong> ${escapeHtml(tc.stderr)}</div>` : ''}
+                    </div>
+                `;
+            } else {
+                detailsHtml = `
+                    <div class="test-case-details" style="opacity: 0.8;">
+                        ${tc.input ? `<div><strong>Input:</strong> ${escapeHtml(tc.input)}</div>` : ''}
+                        <div><strong>Output:</strong> ${escapeHtml(tc.actual)}</div>
+                    </div>
+                `;
+            }
+            
+            tcItem.innerHTML = `
+                <div class="test-case-status ${statusClass}">
+                    <span>${statusIcon}</span>
+                    <span style="color: var(--text-muted); font-weight: normal; font-size: 0.8rem;">(Test Case #${tc.test_case_index + 1})</span>
+                </div>
+                ${detailsHtml}
+            `;
+            
+            container.appendChild(tcItem);
+        });
+        
     } catch (err) {
-        console.error("Code compile failure:", err);
-        container.innerHTML = `<div style="color: var(--accent-red);">Failed to connect to execution engine. Check server link.</div>`;
+        console.error("Local compile execution error:", err);
+        container.innerHTML = `<div style="color: var(--accent-red);">Execution error occurred in local sandbox: ${err.message}</div>`;
     } finally {
         runBtn.textContent = "Run Solution";
         runBtn.disabled = false;
