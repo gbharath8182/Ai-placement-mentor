@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aptitude Section | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();
+</script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#navGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><defs><linearGradient id="navGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#c084fc"/></linearGradient></defs><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline></svg><span>EduAI Platform</span></a>
+        <div class="nav-user">
+            <button class="theme-toggle" id="theme-toggle" onclick="(function(){document.documentElement.classList.toggle('light-theme');localStorage.setItem('theme',document.documentElement.classList.contains('light-theme')?'light':'dark');var b=document.getElementById('theme-toggle');b.innerHTML=document.documentElement.classList.contains('light-theme')?'<svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;5&quot;/><line x1=&quot;12&quot; y1=&quot;1&quot; x2=&quot;12&quot; y2=&quot;3&quot;/><line x1=&quot;12&quot; y1=&quot;21&quot; x2=&quot;12&quot; y2=&quot;23&quot;/><line x1=&quot;4.22&quot; y1=&quot;4.22&quot; x2=&quot;5.64&quot; y2=&quot;5.64&quot;/><line x1=&quot;18.36&quot; y1=&quot;18.36&quot; x2=&quot;19.78&quot; y2=&quot;19.78&quot;/><line x1=&quot;1&quot; y1=&quot;12&quot; x2=&quot;3&quot; y2=&quot;12&quot;/><line x1=&quot;21&quot; y1=&quot;12&quot; x2=&quot;23&quot; y2=&quot;12&quot;/><line x1=&quot;4.22&quot; y1=&quot;19.78&quot; x2=&quot;5.64&quot; y2=&quot;18.36&quot;/><line x1=&quot;18.36&quot; y1=&quot;5.64&quot; x2=&quot;19.78&quot; y2=&quot;4.22&quot;/></svg>':'<svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path d=&quot;M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z&quot;/></svg>';})()}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+            <a href="/playground" class="btn-secondary" style="text-decoration: none; border-color: var(--accent-primary); color: var(--accent-primary); margin-right: 8px;">Playground</a>
+            <a href="/cheatsheets" class="btn-secondary" style="text-decoration: none; border-color: var(--accent-green); color: var(--accent-green); margin-right: 8px;">Cheat Sheets</a>
+            <a href="/dashboard" class="btn-secondary" style="text-decoration: none; margin-right: 8px;">&larr; Back to Dashboard</a>
+            <div class="user-badge">
+                <span id="user-name">Learner</span>
+                <span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Workspace -->
+    <main class="aptitude-container">
+        <header class="dashboard-hero" style="margin-bottom: 30px;">
+            <h1 class="dashboard-title"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px; filter: drop-shadow(0 0 8px rgba(188, 140, 255, 0.35));"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>Aptitude Question Bank</h1>
+            <p class="dashboard-subtitle">Sharpen your logical reasoning, mathematics, and computer science fundamentals. Immediate feedback is provided for each answer.</p>
+        </header>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+            <div class="user-badge" style="background: rgba(88, 166, 255, 0.08); border-color: rgba(88, 166, 255, 0.2);">
+                <span>Score: <strong id="score-counter" style="color: var(--accent-primary);">0 / 4</strong></span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <label for="company-filter" class="form-label" style="margin-bottom: 0; white-space: nowrap;">Company:</label>
+                <select id="company-filter" class="form-select" style="padding: 6px 28px 6px 10px; font-size: 0.85rem; width: 150px; background-position: right 8px center; border-radius: 8px; margin-right: 10px;">
+                    <option value="all">All Companies</option>
+                    <option value="TCS">TCS</option>
+                    <option value="Infosys">Infosys</option>
+                    <option value="Microsoft">Microsoft</option>
+                    <option value="Wipro">Wipro</option>
+                    <option value="General">General</option>
+                </select>
+                <button class="btn-chip" id="reset-quiz-btn" style="border-radius: 8px; padding: 8px 16px;">Reset Quiz</button>
+            </div>
+        </div>
+        
+        <!-- Questions Area -->
+        <div id="questions-wrapper">
+            <!-- Dynamically populated from JS -->
+            <div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                Loading assessment queries...
+            </div>
+        </div>
+    </main>
+    
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/activity.js"></script>
+    <script src="/static/js/aptitude.js"></script>
+</body>
+</html>

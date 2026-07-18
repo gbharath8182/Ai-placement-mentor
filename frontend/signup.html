@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();
+</script>
+</head>
+<body class="auth-container">
+    <div class="auth-card glass-panel" style="max-width: 520px;">
+        <div class="auth-header">
+            <div class="logo-icon">✨</div>
+            <h2 class="glow-text">Create Account</h2>
+            <p class="form-label" style="margin-top: 5px;">Join the next-generation adaptive learning environment</p>
+        </div>
+        
+        <div id="error-message" class="aptitude-result aptitude-result-incorrect" style="margin-bottom: 20px; text-align: center;"></div>
+        
+        <form id="signup-form">
+            <div class="form-group">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" id="name" class="form-input" placeholder="e.g. John Doe" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="e.g. learner@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" class="form-input" placeholder="Min 6 characters" minlength="6" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="experience" class="form-label">Coding Experience Level</label>
+                <select id="experience" class="form-select">
+                    <option value="fresher">Fresher (New to Coding / Basic Syntax)</option>
+                    <option value="intermediate">Intermediate (Comfortable with Loops & Lists)</option>
+                    <option value="experienced">Experienced (Know algorithms / design patterns)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Select Learning Interests</label>
+                <div class="interest-tag-container" id="interests-tags">
+                    <div class="interest-tag" data-val="python">Python Programming</div>
+                    <div class="interest-tag" data-val="ml">Machine Learning</div>
+                    <div class="interest-tag" data-val="dsa">Data Structures & Algos</div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-primary" id="submit-btn" style="margin-top: 10px;">Sign Up</button>
+        </form>
+        
+        <div class="auth-footer">
+            Already have an account? <a href="/login" class="auth-link">Log In</a>
+        </div>
+    </div>
+    
+    <script src="/static/js/auth.js"></script>
+    <script>
+        const selectedInterests = new Set();
+        
+        // Handle interest tags selection
+        document.querySelectorAll(".interest-tag").forEach(tag => {
+            tag.addEventListener("click", () => {
+                const interest = tag.getAttribute("data-val");
+                if (selectedInterests.has(interest)) {
+                    selectedInterests.delete(interest);
+                    tag.classList.remove("active");
+                } else {
+                    selectedInterests.add(interest);
+                    tag.classList.add("active");
+                }
+            });
+        });
+        
+        document.getElementById("signup-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const experience_level = document.getElementById("experience").value;
+            const interests = Array.from(selectedInterests);
+            
+            const errorMsg = document.getElementById("error-message");
+            const submitBtn = document.getElementById("submit-btn");
+            
+            errorMsg.style.display = "none";
+            submitBtn.textContent = "Creating Account...";
+            submitBtn.disabled = true;
+            
+            try {
+                const res = await fetch("/auth/signup", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        experience_level,
+                        interests
+                    })
+                });
+                
+                if (res.ok) {
+                    // Success! Redirect to login page for logging in and setting tokens
+                    // Or automatically log them in by requesting /auth/login.
+                    // Let's automatically log them in!
+                    const loginRes = await fetch("/auth/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    if (loginRes.ok) {
+                        const data = await loginRes.json();
+                        setAccessToken(data.access_token);
+                        setRefreshToken(data.refresh_token);
+                        setUser(data.user);
+                        window.location.href = "/dashboard";
+                    } else {
+                        window.location.href = "/login?registered=1";
+                    }
+                } else {
+                    const error = await res.json();
+                    errorMsg.textContent = error.detail || "Signup failed. Email might be in use.";
+                    errorMsg.style.display = "block";
+                }
+            } catch (err) {
+                console.error("Signup error:", err);
+                errorMsg.textContent = "Connection to server failed. Please try again.";
+                errorMsg.style.display = "block";
+            } finally {
+                submitBtn.textContent = "Sign Up";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

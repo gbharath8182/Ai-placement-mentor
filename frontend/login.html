@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();
+</script>
+</head>
+<body class="auth-container">
+    <div class="auth-card glass-panel">
+        <div class="auth-header">
+            <div class="logo-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="url(#navGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="navGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#c084fc"/></linearGradient></defs><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline></svg></div>
+            <h2 class="glow-text">Welcome Back</h2>
+            <p class="form-label" style="margin-top: 5px;">Log in to continue your adaptive learning path</p>
+        </div>
+        
+        <div id="error-message" class="aptitude-result aptitude-result-incorrect" style="margin-bottom: 20px; text-align: center;"></div>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="e.g. learner@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="btn-primary" id="submit-btn">Log In</button>
+        </form>
+        
+        <div class="auth-footer" style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <div>Don't have an account? <a href="/signup" class="auth-link">Sign Up</a></div>
+            <div><a href="/forgot-password" class="auth-link" style="font-size: 0.85rem; opacity: 0.8;">Forgot Password?</a></div>
+        </div>
+    </div>
+    
+    <script src="/static/js/auth.js"></script>
+    <script>
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorMsg = document.getElementById("error-message");
+            const submitBtn = document.getElementById("submit-btn");
+            
+            errorMsg.style.display = "none";
+            submitBtn.textContent = "Logging in...";
+            submitBtn.disabled = true;
+            
+            try {
+                const res = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    setAccessToken(data.access_token);
+                    setRefreshToken(data.refresh_token);
+                    setUser(data.user);
+                    window.location.href = "/dashboard";
+                } else {
+                    const error = await res.json();
+                    errorMsg.textContent = error.detail || "Invalid email or password.";
+                    errorMsg.style.display = "block";
+                }
+            } catch (err) {
+                console.error("Login error:", err);
+                errorMsg.textContent = "Connection to server failed. Please try again.";
+                errorMsg.style.display = "block";
+            } finally {
+                submitBtn.textContent = "Log In";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

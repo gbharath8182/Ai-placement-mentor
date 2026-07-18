@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmaps | AI Placement Mentor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();</script>
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand"><span>EduAI Platform</span></a>
+        <div class="nav-user">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+            <a href="/roadmap" class="btn-secondary nav-link-active">Roadmaps</a>
+            <a href="/profile" class="btn-secondary">Profile</a>
+            <a href="/analytics" class="btn-secondary">Analytics</a>
+            <a href="/playground" class="btn-secondary">Playground</a>
+            <a href="/dashboard" class="btn-secondary">Dashboard</a>
+            <div class="user-badge"><span id="user-name">Learner</span><span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span></div>
+        </div>
+    </nav>
+
+    <main class="dashboard-container roadmap-shell">
+        <aside class="roadmap-toc glass-panel">
+            <h2>Roadmaps</h2>
+            <div id="roadmap-toc-list">Loading...</div>
+        </aside>
+        <section class="roadmap-content">
+            <header class="dashboard-hero roadmap-hero">
+                <h1 class="dashboard-title">Domain Roadmaps</h1>
+                <p class="dashboard-subtitle">A structured, GeeksforGeeks-style path through domains, topics, subtopics, and trusted external resources.</p>
+            </header>
+            <div id="roadmap-list" class="roadmap-list"></div>
+        </section>
+    </main>
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/roadmap.js"></script>
+</body>
+</html>

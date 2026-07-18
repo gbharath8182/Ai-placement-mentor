@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | AI Placement Mentor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();</script>
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand"><span>EduAI Platform</span></a>
+        <div class="nav-user">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+            <a href="/roadmap" class="btn-secondary">Roadmaps</a>
+            <a href="/profile" class="btn-secondary nav-link-active">Profile</a>
+            <a href="/analytics" class="btn-secondary">Analytics</a>
+            <a href="/playground" class="btn-secondary">Playground</a>
+            <a href="/dashboard" class="btn-secondary">Dashboard</a>
+            <div class="user-badge"><span id="user-name">Learner</span><span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span></div>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="profile-header glass-panel">
+            <div>
+                <span class="roadmap-eyebrow">GitHub-style profile</span>
+                <h1 id="profile-name">Learner</h1>
+                <p id="profile-meta">Placement preparation dashboard</p>
+            </div>
+            <div class="profile-streak">
+                <strong id="current-streak">0</strong>
+                <span>day streak</span>
+            </div>
+        </header>
+
+        <section class="profile-grid">
+            <div class="glass-panel profile-panel heatmap-panel">
+                <div class="panel-title-row"><h2>Learning Heatmap</h2><span id="longest-streak">Longest: 0 days</span></div>
+                <div id="heatmap-wrap" class="heatmap-wrap"></div>
+            </div>
+            <div class="glass-panel profile-panel">
+                <h2>Study Time</h2>
+                <canvas id="study-chart" height="220"></canvas>
+            </div>
+        </section>
+
+        <section class="glass-panel profile-panel">
+            <div class="panel-title-row"><h2>Domain Progress</h2><a href="/roadmap">Open roadmaps</a></div>
+            <div class="progress-table-wrap">
+                <table class="progress-table">
+                    <thead><tr><th>Domain</th><th>Completed</th><th>Coverage</th></tr></thead>
+                    <tbody id="profile-progress-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/profile.js"></script>
+</body>
+</html>

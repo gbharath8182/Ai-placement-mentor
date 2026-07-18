@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic Study | AI-Assisted Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js"></script>
+    <script>
+(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();
+</script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#navGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><defs><linearGradient id="navGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#c084fc"/></linearGradient></defs><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline></svg><span>EduAI Platform</span></a>
+        <div class="nav-user">
+            <button class="theme-toggle" id="theme-toggle" onclick="(function(){document.documentElement.classList.toggle('light-theme');localStorage.setItem('theme',document.documentElement.classList.contains('light-theme')?'light':'dark');var b=document.getElementById('theme-toggle');b.innerHTML=document.documentElement.classList.contains('light-theme')?'<svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;5&quot;/><line x1=&quot;12&quot; y1=&quot;1&quot; x2=&quot;12&quot; y2=&quot;3&quot;/><line x1=&quot;12&quot; y1=&quot;21&quot; x2=&quot;12&quot; y2=&quot;23&quot;/><line x1=&quot;4.22&quot; y1=&quot;4.22&quot; x2=&quot;5.64&quot; y2=&quot;5.64&quot;/><line x1=&quot;18.36&quot; y1=&quot;18.36&quot; x2=&quot;19.78&quot; y2=&quot;19.78&quot;/><line x1=&quot;1&quot; y1=&quot;12&quot; x2=&quot;3&quot; y2=&quot;12&quot;/><line x1=&quot;21&quot; y1=&quot;12&quot; x2=&quot;23&quot; y2=&quot;12&quot;/><line x1=&quot;4.22&quot; y1=&quot;19.78&quot; x2=&quot;5.64&quot; y2=&quot;18.36&quot;/><line x1=&quot;18.36&quot; y1=&quot;5.64&quot; x2=&quot;19.78&quot; y2=&quot;4.22&quot;/></svg>':'<svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><path d=&quot;M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z&quot;/></svg>';})()}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+            <a href="/playground" class="btn-secondary" style="text-decoration: none; border-color: var(--accent-primary); color: var(--accent-primary); margin-right: 8px;">Playground</a>
+            <a href="/cheatsheets" class="btn-secondary" style="text-decoration: none; border-color: var(--accent-green); color: var(--accent-green); margin-right: 8px;">Cheat Sheets</a>
+            <a href="/dashboard" class="btn-secondary" style="text-decoration: none; margin-right: 8px;">&larr; Back to Dashboard</a>
+            <div class="user-badge">
+                <span id="user-name">Learner</span>
+                <span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Workspace -->
+    <div class="topic-page-layout">
+        
+        <!-- Left Column: Content + Coding Compiler -->
+        <div class="topic-content-container" style="display: flex; gap: 24px; padding: 30px; overflow-y: auto; max-height: calc(100vh - 73px); flex: 1;">
+            
+            <!-- Inner Left: Subtopics Sidebar List -->
+            <div class="subtopics-sidebar glass-panel" style="width: 250px; min-width: 250px; padding: 20px; border-radius: 12px; height: fit-content; max-height: calc(100vh - 133px); overflow-y: auto; position: sticky; top: 0;">
+                <h3 style="font-family: var(--font-display); font-size: 0.95rem; color: var(--accent-primary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">📖 Subtopics</h3>
+                <div class="subtopics-list" id="subtopics-list-container" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">Loading subtopics...</div>
+                </div>
+            </div>
+
+            <!-- Inner Right: Selected Subtopic Viewport -->
+            <div class="subtopic-viewport" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+                <a href="/dashboard" class="back-link" style="margin-bottom: 0;">&larr; Dashboard</a>
+                
+                <div class="topic-header-area" style="margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <h1 id="topic-title" class="glow-text" style="font-size: 1.8rem; margin-bottom: 6px;">Loading topic...</h1>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span id="topic-difficulty-badge" class="status-badge" style="font-size: 0.85rem;">Difficulty</span>
+                        <span id="subtopic-title-badge" class="experience-tag exp-intermediate" style="font-size: 0.8rem; padding: 2px 10px; border-radius: 12px;">Welcome</span>
+                    </div>
+                </div>
+                
+                <!-- Dynamic Content Blocks for current Subtopic -->
+                <div class="content-blocks" id="content-blocks-area">
+                    <p style="color: var(--text-muted);">Fetching educational resources...</p>
+                </div>
+                
+                <!-- Coding Playground -->
+                <div class="practice-section" id="practice-playground" style="display: none; margin-top: 20px;">
+                    <h2 style="font-size: 1.3rem; margin-bottom: 10px; font-family: var(--font-display);">Code Playground & Compiler</h2>
+                    <p class="form-label" style="margin-bottom: 15px; font-size: 0.9rem;">Solve the problem below. Test cases will run in a secure browser-based WebAssembly sandbox.</p>
+                    
+                    <div class="problem-card glass-panel" id="problem-info-card" style="padding: 20px;">
+                        <div class="problem-header" style="margin-bottom: 12px;">
+                            <h3 id="problem-title" style="font-size: 1.1rem;">Problem Title</h3>
+                            <span id="problem-difficulty-badge" class="problem-difficulty diff-easy">Easy</span>
+                        </div>
+                        <p class="problem-desc" id="problem-desc" style="font-size: 0.95rem; margin-bottom: 15px;">Problem description goes here...</p>
+                        
+                        <!-- Coding Editor -->
+                        <div class="playground-editor-wrapper">
+                            <div class="playground-header">
+                                <div class="lang-selector-wrapper">
+                                    <span>Language:</span>
+                                    <select id="lang-select" class="form-select" style="padding: 4px 28px 4px 10px; font-size: 0.85rem; width: 140px; background-position: right 8px center;">
+                                        <option value="python">Python</option>
+                                        <option value="javascript">JavaScript</option>
+                                    </select>
+                                </div>
+                                <span class="form-label" style="margin-bottom: 0; font-size: 0.8rem;">editor.io</span>
+                            </div>
+                            <textarea id="editor" class="editor-textarea" spellcheck="false" placeholder="# Write your code here..." style="min-height: 220px; font-size: 0.9rem;"></textarea>
+                            <div class="playground-actions">
+                                <button class="btn-secondary" id="reset-code-btn" style="padding: 8px 16px; font-size: 0.9rem;">Reset Code</button>
+                                <button class="btn-primary" id="run-code-btn" style="padding: 8px 24px; font-size: 0.9rem; width: auto; font-family: var(--font-sans);">Run Solution</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Compilation Status output -->
+                        <div class="compiler-output-panel glass-panel" id="compiler-output" style="margin-top: 15px;">
+                            <div class="compiler-output-header" id="compiler-status-title">Test Results</div>
+                            <div class="test-case-results" id="test-case-container">
+                                <!-- Dynamic test cases check -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: AI Tutor Chat Drawer -->
+        <aside class="ai-sidebar-container">
+            <div class="ai-sidebar-header">
+                <div class="ai-avatar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d1117" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"></path><rect x="4" y="8" width="16" height="12" rx="2"></rect><circle cx="9" cy="14" r="1.5" fill="#0d1117"></circle><circle cx="15" cy="14" r="1.5" fill="#0d1117"></circle></svg></div>
+                <div class="ai-meta">
+                    <span class="ai-name">EduAI Assistant</span>
+                    <span class="ai-status" id="ai-status-text">Active & Grounded</span>
+                </div>
+            </div>
+            
+            <!-- AI Shortcuts -->
+            <div class="ai-actions-bar">
+                <button class="btn-chip" id="chip-explain-simply">Explain Simply</button>
+                <button class="btn-chip" id="chip-deep-dive">Deeper Dive</button>
+                <button class="btn-chip" id="chip-quiz">Quiz Me</button>
+            </div>
+            
+            <!-- Chat logs -->
+            <div class="ai-chat-logs" id="ai-chat-logs">
+                <div class="chat-bubble bubble-assistant">
+                    Hi! I'm your grounded AI tutor for this topic. I've read the reference materials on the left.
+                    <br><br>
+                    You can ask me to write code analogies, review your logic, or customize your learning plan!
+                </div>
+            </div>
+            
+            <!-- Chat Input form -->
+            <div class="ai-chat-input-area">
+                <form id="ai-chat-form" style="display: flex; gap: 8px; align-items: center;">
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Ask EduAI a question..." autocomplete="off" required>
+                        <button type="submit" class="btn-send" id="chat-send-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="#0d1117" stroke="none"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+        
+    </div>
+    
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/activity.js"></script>
+    <script src="/static/js/topic.js"></script>
+    <script src="/static/js/ai-sidebar.js"></script>
+</body>
+</html>

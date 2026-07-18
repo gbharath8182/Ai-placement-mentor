@@ -1,0 +1,894 @@
+import asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
+from backend.config import settings
+
+async def seed_database():
+    print("Seeding database...")
+    client = AsyncIOMotorClient(settings.MONGO_URI)
+    
+    # Extract DB name from URI
+    db_name = settings.MONGO_URI.split("/")[-1].split("?")[0]
+    if not db_name:
+        db_name = "education_platform"
+    db = client[db_name]
+    
+    # Clear existing data to ensure a fresh, clean demo
+    await db.domains.delete_many({})
+    await db.topics.delete_many({})
+    await db.practice_problems.delete_many({})
+    await db.user_progress.delete_many({})
+    await db.chat_sessions.delete_many({})
+    
+    print("Cleared existing collections.")
+    
+    # 1. Seed Domains
+    domains_data = [
+        {
+            "slug": "python",
+            "title": "Python Programming",
+            "description": "Master Python syntax, functional constructs, control flow, data structures, and scripting capabilities."
+        },
+        {
+            "slug": "machine-learning",
+            "title": "Machine Learning",
+            "description": "Understand supervised models, neural networks, deep learning, and advanced architectures like Transformers."
+        },
+        {
+            "slug": "dsa",
+            "title": "Data Structures & Algorithms",
+            "description": "Deep dive into complexity analyses, arrays, linked lists, trees, graphs, sorting, and optimization."
+        },
+        {
+            "slug": "web-dev",
+            "title": "Web Development",
+            "description": "Build high-performance web applications using semantic HTML, CSS styling, and robust JavaScript logic."
+        },
+        {
+            "slug": "system-design",
+            "title": "System Design",
+            "description": "Learn to design highly scalable, fault-tolerant distributed systems, databases, and microservices."
+        },
+        {
+            "slug": "foundation-subjects",
+            "title": "Foundation Subjects",
+            "description": "Strengthen OS, DBMS, computer networks, OOP, and compiler fundamentals for placement interviews."
+        }
+    ]
+    
+    await db.domains.insert_many(domains_data)
+    print("Seeded domains.")
+    
+    # 2. Seed Topics with Subtopics
+    topics_data = [
+        # PYTHON TOPICS
+        {
+            "domain_slug": "python",
+            "slug": "intro-python",
+            "title": "Introduction to Python",
+            "difficulty": "beginner",
+            "subtopics": [
+                {
+                    "title": "Python Overview & Philosophy",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "What is Python?"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Python is a high-level, interpreted, general-purpose programming language. Created by Guido van Rossum and first released in 1991, Python's design philosophy emphasizes code readability with its notable use of significant whitespace."
+                        },
+                        {
+                            "type": "callout",
+                            "kind": "info",
+                            "title": "Core Philosophy",
+                            "value": "Beautiful is better than ugly.\nExplicit is better than implicit.\nSimple is better than complex.\nReadability counts."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Think Python (2nd Edition PDF)",
+                            "url": "https://greenteapress.com/thinkpython2/thinkpython2.pdf"
+                        }
+                    ]
+                },
+                {
+                    "title": "Variables & Dynamic Typing",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Dynamic Typing in Python"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Unlike statically-typed languages like C++ or Java, Python uses **dynamic typing**. This means you do not need to declare a variable's type before using it; Python determines the type automatically at runtime."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "# Assigning integer\nx = 5\nprint(type(x)) # <class 'int'>\n\n# Reassigning to string\nx = \"Pythonist\"\nprint(type(x)) # <class 'str'>"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Python Variables Reference Guide",
+                            "url": "https://docs.python.org/3/tutorial/introduction.html"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "python",
+            "slug": "python-loops",
+            "title": "Python Control Flow & Loops",
+            "difficulty": "beginner",
+            "subtopics": [
+                {
+                    "title": "Conditional Statements",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "The if-elif-else construct"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Python uses conditional statements `if`, `elif`, and `else` to route program execution based on boolean expressions. Indentation acts as the block delimiter."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "score = 85\nif score >= 90:\n    print(\"Grade: A\")\nelif score >= 80:\n    print(\"Grade: B\")\nelse:\n    print(\"Grade: C\")"
+                        }
+                    ]
+                },
+                {
+                    "title": "Iteration with Loops",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "For Loops & Iteration"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Python loops let you execute a block of code multiple times. `for` loops iterate over a sequence (such as a list, tuple, or range), while `while` loops repeat as long as a condition is true."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "# Iterating over a range\nfor i in range(3):\n    print(f\"Iteration {i}\")\n\n# Iterating with a while loop\ncount = 0\nwhile count < 3:\n    print(f\"Count: {count}\")\n    count += 1"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Python Control Flow Reference Docs",
+                            "url": "https://docs.python.org/3/tutorial/controlflow.html"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "python",
+            "slug": "python-collections",
+            "title": "Python Collections & Structures",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Lists and Tuples",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Lists (Mutable) vs Tuples (Immutable)"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Lists are ordered, mutable sequences. You can modify lists after creation. Tuples are ordered, immutable sequences, which are faster and can be used as dictionary keys."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "# List modification\nmy_list = [1, 2, 3]\nmy_list.append(4)\nprint(my_list) # [1, 2, 3, 4]\n\n# Tuple is immutable\nmy_tuple = (1, 2, 3)\n# my_tuple[0] = 5  # This will raise a TypeError!"
+                        }
+                    ]
+                },
+                {
+                    "title": "Dictionaries and Sets",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Dictionaries (Hash Maps) & Sets"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Dictionaries are key-value mapping stores. Sets are collections of unique elements with fast O(1) membership operations."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "# Dictionary retrieval\nstudent = {\"name\": \"Alex\", \"grade\": \"A\"}\nprint(student.get(\"name\"))\n\n# Unique set operations\nunique_nums = {1, 2, 3, 3, 4}\nprint(unique_nums) # {1, 2, 3, 4}"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Python Data Structures Tutorial",
+                            "url": "https://docs.python.org/3/tutorial/datastructures.html"
+                        }
+                    ]
+                }
+            ]
+        },
+        
+        # MACHINE LEARNING TOPICS
+        {
+            "domain_slug": "machine-learning",
+            "slug": "intro-ml",
+            "title": "Introduction to Machine Learning",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Supervised vs Unsupervised Learning",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "The Core Paradigms of Machine Learning"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Machine Learning (ML) is a subset of AI that allows systems to learn from data. It is primarily categorized into:\n1. **Supervised Learning**: Models learn on labelled datasets to make predictions (e.g. classification, regression).\n2. **Unsupervised Learning**: Models identify hidden patterns and groupings in unlabeled data (e.g. clustering with K-Means)."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Research Paper: A Few Useful Things to Know About Machine Learning (Domingos)",
+                            "url": "https://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "machine-learning",
+            "slug": "linear-regression",
+            "title": "Linear Regression",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Hypothesis & Cost Function",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Formulating Linear Regression"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Linear regression fits a straight line modeling the relationship between an independent variable X and a dependent outcome Y:\n\n$$y = \\beta_0 + \\beta_1 X + \\epsilon$$\n\nwhere $\\beta_0$ is the intercept, $\\beta_1$ is the slope, and $\\epsilon$ represents random error. We minimize the Mean Squared Error (MSE) to find optimal parameters."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Elements of Statistical Learning (Hastie et al.) PDF",
+                            "url": "https://hastie.su.domains/ElemStatLearn/printings/ESLII_print12_toc.pdf"
+                        }
+                    ]
+                },
+                {
+                    "title": "Gradient Descent Optimization",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Finding Parameters via Gradient Descent"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Gradient descent is an iterative optimization algorithm used to minimize the cost function by taking steps proportional to the negative of the gradient of the function."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "# Basic single-step weight update formula\n# w = w - learning_rate * gradient"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "machine-learning",
+            "slug": "neural-networks",
+            "title": "Neural Networks & Activation Functions",
+            "difficulty": "advanced",
+            "subtopics": [
+                {
+                    "title": "Multi-Layer Perceptron (MLP) Structure",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Neurons and Multi-layered Connections"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Artificial Neural Networks are computational models inspired by biological neural brains. They consist of layered neurons (input, hidden, output) connected by weights. Inputs are multiplied by weights, summed, passed to an activation function, and propagated forward."
+                        }
+                    ]
+                },
+                {
+                    "title": "Activation Functions: Sigmoid & ReLU",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Non-linearity in Networks"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Activation functions like Sigmoid, Tanh, and ReLU introduce non-linearity, enabling the model to learn complex, non-linear relationships."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "import math\n\ndef sigmoid(x):\n    return 1 / (1 + math.exp(-x))\n\nprint(f\"Sigmoid of 0: {sigmoid(0)}\")\nprint(f\"Sigmoid of 2: {sigmoid(2)}\")"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Deep Learning Book (Goodfellow et al.) HTML",
+                            "url": "https://www.deeplearningbook.org/"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Understanding Machine Learning (Theory & Algorithms PDF)",
+                            "url": "https://www.cs.huji.ac.il/~shais/UnderstandingMachineLearning/understanding-machine-learning-theory-algorithms.pdf"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "machine-learning",
+            "slug": "transformers-deep-learning",
+            "title": "Transformers & Deep Learning",
+            "difficulty": "advanced",
+            "subtopics": [
+                {
+                    "title": "The Self-Attention Mechanism",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Sequence transduction without recurrence"
+                        },
+                        {
+                            "type": "text",
+                            "value": "The Transformer architecture, introduced by Google in 2017, relies entirely on self-attention mechanisms, replacing traditional recurrence (RNNs) and convolution (CNNs) in sequence transduction tasks. It forms the backbone of large language models like GPT, BERT, and LLaMA."
+                        },
+                        {
+                            "type": "code",
+                            "language": "python",
+                            "value": "# Basic self-attention softmax weight calculation\nimport numpy as np\n\ndef softmax(x):\n    e_x = np.exp(x - np.max(x))\n    return e_x / e_x.sum(axis=-1, keepdims=True)\n\nscores = np.array([2.0, 1.0, 0.1])\nweights = softmax(scores)\nprint(f\"Attention weights: {weights}\")"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Research Paper: Attention Is All You Need (Vaswani et al., Google, 2017)",
+                            "url": "https://arxiv.org/pdf/1706.03762.pdf"
+                        }
+                    ]
+                }
+            ]
+        },
+        
+        # DSA TOPICS
+        {
+            "domain_slug": "dsa",
+            "slug": "dsa-arrays",
+            "title": "Arrays & Hashing",
+            "difficulty": "beginner",
+            "subtopics": [
+                {
+                    "title": "Array Structures & Memory Addressing",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Contiguous Memory Allocations"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Arrays are contiguous blocks of memory containing elements of the same type. The memory address of the $i$-th element is calculated using:\n\n$$\\text{Address}(A[i]) = \\text{Base} + i \\times \\text{Size}$$"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Open Data Structures (Java Edition PDF) - Array-Based Lists",
+                            "url": "https://opendatastructures.org/ods-java.pdf"
+                        }
+                    ]
+                },
+                {
+                    "title": "Hashing Concepts & Hash Functions",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "O(1) Access and Mapping"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Hashing maps keys to indices using a hash function, allowing O(1) average-case lookups. Collision resolution (such as Chaining or Open Addressing) is required to handle key overlap."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Algorithms (Jeff Erickson PDF)",
+                            "url": "https://jeffe.cs.illinois.edu/teaching/algorithms/book/Algorithms-JeffErickson.pdf"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "dsa",
+            "slug": "dsa-linkedlists",
+            "title": "Linked Lists",
+            "difficulty": "beginner",
+            "subtopics": [
+                {
+                    "title": "Singly Linked List Representation",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Node References"
+                        },
+                        {
+                            "type": "text",
+                            "value": "A Linked List is a linear data structure where elements are not stored in contiguous memory locations. Instead, each element (node) points to the next node using pointers/references. This allows O(1) dynamic allocations and insertions."
+                        },
+                        {
+                            "type": "callout",
+                            "kind": "info",
+                            "title": "Memory Layout Diagram",
+                            "value": "[Head Node | data, next] ---> [Node 2 | data, next] ---> [Tail Node | data, NULL]"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Open Data Structures (Python Edition PDF) - Linked Lists",
+                            "url": "https://opendatastructures.org/ods-python.pdf"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "dsa",
+            "slug": "dsa-trees",
+            "title": "Trees & Binary Search Trees",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Binary Search Trees (BST) & Properties",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Hierarchical Data Trees"
+                        },
+                        {
+                            "type": "text",
+                            "value": "A tree is a hierarchical, non-linear data structure consisting of nodes connected by edges. A Binary Search Tree (BST) maintains the property that the left child of a node contains values less than the node, and the right child contains values greater."
+                        },
+                        {
+                            "type": "callout",
+                            "kind": "tip",
+                            "title": "BST Property",
+                            "value": "For any node N:\nAll nodes in Left Subtree <= N.value\nAll nodes in Right Subtree >= N.value"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Reference Book: The Algorithm Design Manual (Steven Skiena)",
+                            "url": "http://www.algorist.com/"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "dsa",
+            "slug": "dsa-sorting",
+            "title": "Sorting Algorithms",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Divide & Conquer Sorting",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "O(N log N) Sorting Complexity"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Sorting is the process of arranging data in a specific order (ascending or descending). Classical algorithms include Bubble Sort, Insertion Sort, Merge Sort, Quick Sort, and Heap Sort, each representing different time/space tradeoffs (O(N^2) vs O(N log N))."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Reference Book: The Art of Computer Programming, Volume 3: Sorting and Searching (Donald Knuth)",
+                            "url": "https://www-cs-faculty.stanford.edu/~knuth/taocp.html"
+                        }
+                    ]
+                }
+            ]
+        },
+        
+        # WEB DEVELOPMENT
+        {
+            "domain_slug": "web-dev",
+            "slug": "html-css",
+            "title": "HTML & CSS Fundamentals",
+            "difficulty": "beginner",
+            "subtopics": [
+                {
+                    "title": "Semantic HTML & DOM Structure",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "DOM Tree Structure"
+                        },
+                        {
+                            "type": "text",
+                            "value": "HTML (HyperText Markup Language) defines the structure and semantic meaning of web content. A semantic block tag (like `<article>`, `<section>`, `<nav>`) organizes documents readable by search crawlers and screen readers."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 MDN Web Docs: HTML",
+                            "url": "https://developer.mozilla.org/"
+                        }
+                    ]
+                },
+                {
+                    "title": "CSS Layout Systems",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Flexbox vs Grid layouts"
+                        },
+                        {
+                            "type": "text",
+                            "value": "CSS (Cascading Style Sheets) controls visual styling, layouts (Flexbox, Grid), animations, and responsive design across device viewports."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "web-dev",
+            "slug": "js-essentials",
+            "title": "JavaScript Essentials",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Execution Context & Event Loop",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Understanding the Single-Threaded Runtime"
+                        },
+                        {
+                            "type": "text",
+                            "value": "JavaScript is a lightweight, interpreted, object-oriented language with first-class functions. It uses an **Event Loop** architecture to process async tasks (like `fetch`, `setTimeout`) on a single thread."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Free Textbook: Eloquent JavaScript (3rd Edition PDF)",
+                            "url": "https://eloquentjavascript.net/Eloquent_JavaScript.pdf"
+                        }
+                    ]
+                },
+                {
+                    "title": "Callbacks, Promises, and Async/Await",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Asynchronous JavaScript Operations"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Promises represent values that will be available in the future. Async/await provides clean syntax to work with asynchronous tasks without nested callback trees."
+                        },
+                        {
+                            "type": "code",
+                            "language": "javascript",
+                            "value": "// Async fetching template\nasync function fetchUserData(uid) {\n    try {\n        const response = await fetch(`/api/user/${uid}`);\n        const data = await response.json();\n        return data;\n    } catch (err) {\n        console.error(err);\n    }\n}"
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Reference Book: You Don't Know JS Yet (Kyle Simpson)",
+                            "url": "https://github.com/getify/You-Dont-Know-JS"
+                        }
+                    ]
+                }
+            ]
+        },
+        
+        # SYSTEM DESIGN
+        {
+            "domain_slug": "system-design",
+            "slug": "scalability",
+            "title": "Scalability & Cache Fundamentals",
+            "difficulty": "advanced",
+            "subtopics": [
+                {
+                    "title": "Vertical vs Horizontal Scaling",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "System Design & Scalability"
+                        },
+                        {
+                            "type": "text",
+                            "value": "System Design involves defining the architecture, components, and databases for complex applications. Scalability targets handling increased traffic using Load Balancers, Horizontal Scaling, CDN caches, and efficient database partitioning."
+                        },
+                        {
+                            "type": "callout",
+                            "kind": "tip",
+                            "title": "Horizontal Scaling",
+                            "value": "Instead of buying a bigger server (Vertical Scaling), add more standard servers to the pool and balance load between them."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "📄 Reference Book: Designing Data-Intensive Applications (Martin Kleppmann)",
+                            "url": "https://dataintensive.net/"
+                        }
+                    ]
+                },
+                {
+                    "title": "Caching Policies",
+                    "content_blocks": [
+                        {
+                            "type": "heading",
+                            "level": 2,
+                            "value": "Cache-Aside, Write-Through & Write-Back"
+                        },
+                        {
+                            "type": "text",
+                            "value": "Caching keeps copies of hot/popular data in fast memory (Redis/Memcached) to avoid expensive database reads. Caching policies dictate how write data is synced to the database."
+                        },
+                        {
+                            "type": "resource_link",
+                            "label": "💻 GitHub: The System Design Primer (Donne Martin)",
+                            "url": "https://github.com/donnemartin/system-design-primer"
+                        }
+                    ]
+                }
+            ]
+        },
+
+        # FOUNDATION SUBJECTS
+        {
+            "domain_slug": "foundation-subjects",
+            "slug": "operating-systems",
+            "title": "Operating Systems Fundamentals",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Processes, Threads, and Scheduling",
+                    "content_blocks": [
+                        {"type": "heading", "level": 2, "value": "Execution and CPU Scheduling"},
+                        {"type": "text", "value": "Operating systems manage processes, threads, memory, files, and devices. Placement interviews often focus on process states, context switching, scheduling algorithms, synchronization, and deadlocks."},
+                        {"type": "resource_link", "label": "OSTEP: Operating Systems Three Easy Pieces", "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/"}
+                    ]
+                },
+                {
+                    "title": "Memory Management",
+                    "content_blocks": [
+                        {"type": "text", "value": "Virtual memory, paging, segmentation, page replacement, and thrashing explain how programs see a large isolated address space while the OS maps it to physical memory."},
+                        {"type": "resource_link", "label": "NPTEL Operating Systems Course", "url": "https://nptel.ac.in/courses/106105214"}
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "foundation-subjects",
+            "slug": "dbms-sql",
+            "title": "DBMS and SQL",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "Relational Model and Normalization",
+                    "content_blocks": [
+                        {"type": "heading", "level": 2, "value": "Tables, Keys, and Dependencies"},
+                        {"type": "text", "value": "DBMS interviews test keys, joins, indexes, transactions, ACID properties, normalization, and SQL query writing."},
+                        {"type": "resource_link", "label": "CMU Database Systems Course", "url": "https://15445.courses.cs.cmu.edu/"}
+                    ]
+                },
+                {
+                    "title": "Transactions and Indexes",
+                    "content_blocks": [
+                        {"type": "text", "value": "Transactions protect correctness under concurrency. Indexes improve read performance by trading off storage and write overhead."},
+                        {"type": "resource_link", "label": "PostgreSQL Documentation", "url": "https://www.postgresql.org/docs/current/"}
+                    ]
+                }
+            ]
+        },
+        {
+            "domain_slug": "foundation-subjects",
+            "slug": "computer-networks",
+            "title": "Computer Networks",
+            "difficulty": "intermediate",
+            "subtopics": [
+                {
+                    "title": "TCP/IP and HTTP",
+                    "content_blocks": [
+                        {"type": "heading", "level": 2, "value": "Network Layers for Interviews"},
+                        {"type": "text", "value": "Learn OSI and TCP/IP layers, DNS, routing, TCP handshakes, congestion control, HTTP, TLS, and common status codes."},
+                        {"type": "resource_link", "label": "Computer Networking: A Top-Down Approach Resources", "url": "https://gaia.cs.umass.edu/kurose_ross/"}
+                    ]
+                },
+                {
+                    "title": "Reliability and Security",
+                    "content_blocks": [
+                        {"type": "text", "value": "Reliable transport, retransmission, checksums, TLS certificates, and firewalls often appear in service-based company interviews."},
+                        {"type": "resource_link", "label": "MDN HTTP Overview", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"}
+                    ]
+                }
+            ]
+        }
+    ]
+    
+    await db.topics.insert_many(topics_data)
+    print("Seeded topics.")
+    
+    # 3. Seed Practice Problems
+    practice_data = [
+        {
+            "topic_slug": "intro-python",
+            "title": "Hello World in Python",
+            "difficulty": "easy",
+            "description": "Write a Python script that outputs exactly 'Hello, World!' to stdout.",
+            "starter_code": "# Complete the code\nprint(\"Hello, World!\")\n",
+            "test_cases": [
+                {
+                    "input": "",
+                    "expected_output": "Hello, World!"
+                }
+            ]
+        },
+        {
+            "topic_slug": "python-loops",
+            "title": "Sum of Evens Up to N",
+            "difficulty": "easy",
+            "description": "Write a program that reads an integer N from standard input (stdin) and prints the sum of all positive even integers up to N (inclusive).\n\nInput format: a single integer.\nOutput format: a single integer representing the sum.\n\nExample:\nInput: 6\nOutput: 12 (since 2 + 4 + 6 = 12)",
+            "starter_code": "# Read integer N\nn = int(input())\n\n# Your logic below\nsum_evens = 0\nfor i in range(2, n + 1, 2):\n    sum_evens += i\nprint(sum_evens)\n",
+            "test_cases": [
+                {"input": "6", "expected_output": "12"},
+                {"input": "10", "expected_output": "30"},
+                {"input": "3", "expected_output": "2"}
+            ]
+        },
+        {
+            "topic_slug": "python-collections",
+            "title": "Find Max and Min in a List",
+            "difficulty": "medium",
+            "description": "Read a sequence of space-separated integers from stdin. Output the minimum and maximum value found in the sequence, separated by a space.\n\nInput format: space-separated integers on a single line.\nOutput format: two integers: `min max`.\n\nExample:\nInput: 5 1 9 -2 4\nOutput: -2 9",
+            "starter_code": "# Read list from stdin\nnumbers = list(map(int, input().split()))\n\n# Calculate min and max and print\nprint(f\"{min(numbers)} {max(numbers)}\")\n",
+            "test_cases": [
+                {"input": "5 1 9 -2 4", "expected_output": "-2 9"},
+                {"input": "100 100 100", "expected_output": "100 100"},
+                {"input": "-1 -5 -10 0 5", "expected_output": "-10 5"}
+            ]
+        },
+        
+        # ML Practice Problems
+        {
+            "topic_slug": "intro-ml",
+            "title": "Mean of a List of Numbers",
+            "difficulty": "easy",
+            "description": "Write a Python script that reads a list of space-separated float values representing data features from stdin, computes the arithmetic mean, and prints the result rounded to 2 decimal places.",
+            "starter_code": "# Read features list\nfeatures = list(map(float, input().split()))\n\n# Calculate mean and print rounded to 2 decimal places\nmean_val = sum(features) / len(features)\nprint(f\"{mean_val:.2f}\")\n",
+            "test_cases": [
+                {"input": "1.0 2.0 3.0 4.0 5.0", "expected_output": "3.00"},
+                {"input": "10.5 20.5 30.5", "expected_output": "20.50"},
+                {"input": "1.25 1.75 3.5 4.5", "expected_output": "2.75"}
+            ]
+        },
+        {
+            "topic_slug": "linear-regression",
+            "title": "Calculate Mean Squared Error",
+            "difficulty": "medium",
+            "description": "Compute the Mean Squared Error (MSE) between actual labels and predicted labels.\nInput format: Two lines of space-separated floats. Line 1: actual labels (Y). Line 2: predicted values (Y_pred).\nOutput format: The MSE float value rounded to 3 decimal places.",
+            "starter_code": "# Read inputs\ny_true = list(map(float, input().split()))\ny_pred = list(map(float, input().split()))\n\n# Calculate Mean Squared Error\nmse = sum((t - p) ** 2 for t, p in zip(y_true, y_pred)) / len(y_true)\nprint(f\"{mse:.3f}\")\n",
+            "test_cases": [
+                {"input": "1.0 2.0 3.0\n1.1 1.9 3.05", "expected_output": "0.005"},
+                {"input": "10.0 20.0\n9.0 21.0", "expected_output": "1.000"}
+            ]
+        },
+        {
+            "topic_slug": "neural-networks",
+            "title": "Sigmoid Activation",
+            "difficulty": "easy",
+            "description": "Write a python function that reads a float weight input X from standard input and prints the sigmoid activation result rounded to 4 decimal places.",
+            "starter_code": "import math\nx = float(input())\n# Print sigmoid value of x rounded to 4 decimal places\nsig = 1 / (1 + math.exp(-x))\nprint(f\"{sig:.4f}\")\n",
+            "test_cases": [
+                {"input": "0.0", "expected_output": "0.5000"},
+                {"input": "2.0", "expected_output": "0.8808"},
+                {"input": "-2.0", "expected_output": "0.1192"}
+            ]
+        },
+        {
+            "topic_slug": "transformers-deep-learning",
+            "title": "Softmax Activation Function",
+            "difficulty": "medium",
+            "description": "Calculate the softmax values for a list of logits read from stdin. Softmax outputs a probability distribution summing to 1.\nInput format: A list of space-separated float logits.\nOutput format: The softmax values separated by space, rounded to 4 decimal places.",
+            "starter_code": "import math\nlogits = list(map(float, input().split()))\n# Calculate and print softmax values\nexp_vals = [math.exp(l) for l in logits]\nsum_exp = sum(exp_vals)\nsm = [e / sum_exp for e in exp_vals]\nprint(\" \".join(f\"{val:.4f}\" for val in sm))\n",
+            "test_cases": [
+                {"input": "1.0 2.0 3.0", "expected_output": "0.0900 0.2447 0.6652"},
+                {"input": "0.0 0.0", "expected_output": "0.5000 0.5000"}
+            ]
+        },
+        
+        # DSA Practice Problems
+        {
+            "topic_slug": "dsa-arrays",
+            "title": "Check Duplicate in Array",
+            "difficulty": "easy",
+            "description": "Given a space-separated list of integers from stdin, check if any value appears at least twice in the array.\nOutput 'true' if duplicate exists, else output 'false'.",
+            "starter_code": "nums = list(map(int, input().split()))\n# Print true/false\nhas_dup = len(nums) != len(set(nums))\nprint(str(has_dup).lower())\n",
+            "test_cases": [
+                {"input": "1 2 3 1", "expected_output": "true"},
+                {"input": "1 2 3 4", "expected_output": "false"},
+                {"input": "5 5 5", "expected_output": "true"}
+            ]
+        },
+        {
+            "topic_slug": "dsa-sorting",
+            "title": "Bubble Sort Implementation",
+            "difficulty": "medium",
+            "description": "Read a space-separated list of integers from stdin. Sort the list in ascending order using bubble sort, and print the sorted numbers separated by space.",
+            "starter_code": "arr = list(map(int, input().split()))\n# Implement bubble sort and print space-separated elements\nn = len(arr)\nfor i in range(n):\n    for j in range(0, n-i-1):\n        if arr[j] > arr[j+1]:\n            arr[j], arr[j+1] = arr[j+1], arr[j]\nprint(\" \".join(map(str, arr)))\n",
+            "test_cases": [
+                {"input": "5 1 4 2 8", "expected_output": "1 2 4 5 8"},
+                {"input": "10 -2 5 0", "expected_output": "-2 0 5 10"}
+            ]
+        },
+        
+        # Web Dev Practice Problems
+        {
+            "topic_slug": "js-essentials",
+            "title": "Count Vowels in String",
+            "difficulty": "easy",
+            "description": "Write a JavaScript snippet that reads a string using the mocked `prompt()` function and prints the total number of vowels (a, e, i, o, u - case insensitive) to the console.",
+            "starter_code": "const str = prompt();\n// Count vowels and output to console.log\nconst count = (str.match(/[aeiou]/gi) || []).length;\nconsole.log(count);\n",
+            "test_cases": [
+                {"input": "Hello World", "expected_output": "3"},
+                {"input": "EduAI Sandbox", "expected_output": "6"},
+                {"input": "xyz", "expected_output": "0"}
+            ]
+        },
+        
+        # System Design Practice Problems
+        {
+            "topic_slug": "scalability",
+            "title": "Cache Hit Ratio",
+            "difficulty": "easy",
+            "description": "Calculate the cache hit ratio given total cache hits and cache misses separated by space on stdin.\nFormula: hit_ratio = hits / (hits + misses)\nOutput format: Round ratio to 2 decimal places.",
+            "starter_code": "# Read hits and misses\nhits, misses = map(int, input().split())\nratio = hits / (hits + misses)\nprint(f\"{ratio:.2f}\")\n",
+            "test_cases": [
+                {"input": "80 20", "expected_output": "0.80"},
+                {"input": "0 10", "expected_output": "0.00"},
+                {"input": "45 15", "expected_output": "0.75"}
+            ]
+        }
+    ]
+    
+    await db.practice_problems.insert_many(practice_data)
+    print("Seeded practice problems.")
+    print("Database seeding completed successfully!")
+    client.close()
+
+if __name__ == "__main__":
+    asyncio.run(seed_database())
