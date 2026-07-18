@@ -52,7 +52,7 @@ An adaptive, GeeksforGeeks/Stack Overflow-style educational platform featuring a
 │   ├── config.py           # Configuration variables loader (.env)
 │   ├── database.py         # Asynchronous MongoDB motor client
 │   ├── models.py           # Pydantic schema request/response types
-│   ├── seed.py             # Database content seeding script
+│   ├── seed.py.DEPRECATED_DO_NOT_RUN  # DEPRECATED - do not run, see Section 4 below
 │   └── main.py             # FastAPI entrypoint, lifespan hooks, and static router
 │
 ├── frontend/
@@ -101,11 +101,8 @@ PORT=8000
 ```
 > **Note**: If `GROQ_API_KEY` is left blank, the AI sidebar will automatically operate in **Demonstration Mode** and serve educational simulated responses.
 
-### 4. Seed Database
-Populate your database with the default domains (Python, Machine Learning, DSA) and GFG content topics:
-```bash
-python -m backend.seed
-```
+### 4. Database Content
+This project's MongoDB database is already populated with live, hand-curated content (domains, topics, practice problems). The old seeding script (`backend/seed.py`) has been deprecated and renamed to `seed.py.DEPRECATED_DO_NOT_RUN` because it destructively wipes and overwrites all content collections with thin, outdated placeholder data. **Do not run it.** If you need to bootstrap a brand-new empty database from scratch, contact a maintainer first.
 
 ### 5. Launch the Server
 Start the development server:
