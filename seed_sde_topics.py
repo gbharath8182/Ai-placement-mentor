@@ -18,8 +18,8 @@ REFERENCES = {
     "os": ("Operating System Concepts, 10th ed. — Silberschatz, Galvin, Gagne", "https://www.os-book.com/OS10/"),
     "dbms": ("Database System Concepts, 7th ed. — Silberschatz, Korth, Sudarshan", "https://www.db-book.com/"),
     "networks": ("Computer Networking: A Top-Down Approach — Kurose & Ross", "https://gaia.cs.umass.edu/kurose_ross/"),
-    "api": ("Web API Design — Brian Mulloy", "https://pages.apigee.com/rs/apigee/images/api-design-ebook-2012-03.pdf"),
-    "testing": ("The Art of Software Testing, 3rd ed. — Myers, Sandler, Badgett", "https://www.wiley.com/en-us/The+Art+of+Software+Testing%2C+3rd+Edition-p-9781118031964"),
+    "api": ("Web API Design — Brian Mulloy", "https://cloud.google.com/files/apigee/apigee-web-api-design-the-missing-link-ebook.pdf"),
+    "testing": ("The Art of Software Testing, 3rd ed. — Myers, Sandler, Badgett", "https://onlinelibrary.wiley.com/doi/book/10.1002/9781119202486"),
     "design": ("Head First Design Patterns, 2nd ed. — Freeman & Robson", "https://www.oreilly.com/library/view/head-first-design/9781492077992/"),
 }
 
