@@ -210,7 +210,7 @@ function renderDomainDetail(d) {
 function renderTopic(topic, index) {
     const resources = [];
     (topic.subtopics || []).forEach(subtopic => (subtopic.content_blocks || []).forEach(block => {
-        if (block.type === "resource_link") resources.push(block);
+        if (block.type === "resource_link" && !resources.some(r => r.url === block.url)) resources.push(block);
     }));
 
     return `
