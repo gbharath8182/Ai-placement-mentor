@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // 1. Populate User Details
     const user = getUser();
     if (user) {
@@ -59,7 +59,7 @@ function renderDomains(domains) {
         let iconHtml = ``;
         if (domain.slug === "python") {
             iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.35));"><path d="M12 10H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2"></path><path d="M12 14h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v2"></path><circle cx="8" cy="8" r="1" fill="currentColor"></circle><circle cx="16" cy="16" r="1" fill="currentColor"></circle></svg>`;
-        } else if (domain.slug === "machine-learning") {
+        } else if (domain.slug === "machine-learning" || domain.slug === "ml") {
             iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(188, 140, 255, 0.35));"><circle cx="4" cy="6" r="2"></circle><circle cx="4" cy="12" r="2"></circle><circle cx="4" cy="18" r="2"></circle><circle cx="12" cy="6" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="18" r="2"></circle><circle cx="20" cy="9" r="2"></circle><circle cx="20" cy="15" r="2"></circle><line x1="6" y1="6" x2="10" y2="6"></line><line x1="6" y1="6" x2="10" y2="12"></line><line x1="6" y1="12" x2="10" y2="6"></line><line x1="6" y1="12" x2="10" y2="12"></line><line x1="6" y1="12" x2="10" y2="18"></line><line x1="6" y1="18" x2="10" y2="12"></line><line x1="6" y1="18" x2="10" y2="18"></line><line x1="14" y1="6" x2="18" y2="9"></line><line x1="14" y1="12" x2="18" y2="9"></line><line x1="14" y1="12" x2="18" y2="15"></line><line x1="14" y1="18" x2="18" y2="15"></line></svg>`;
         } else if (domain.slug === "dsa") {
             iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.35));"><circle cx="12" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="12" r="2.5"></circle><circle cx="6" cy="19" r="2.5"></circle><line x1="10.5" y1="6.5" x2="7.5" y2="10.5"></line><line x1="13.5" y1="6.5" x2="16.5" y2="10.5"></line><line x1="6" y1="14.5" x2="6" y2="16.5"></line></svg>`;
