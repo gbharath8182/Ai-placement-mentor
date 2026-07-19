@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from contextlib import asynccontextmanager
 
 from backend.database import db_client
-from backend.routes import auth, content, ai, practice, progress, activity, analytics
+from backend.routes import auth, content, ai, practice, progress, domain_details, activity, analytics, mock_interview, resume
 from backend.config import settings
 
 @asynccontextmanager
@@ -39,8 +39,15 @@ app.include_router(content.router)
 app.include_router(ai.router)
 app.include_router(practice.router)
 app.include_router(progress.router)
+app.include_router(domain_details.router)
 app.include_router(activity.router)
 app.include_router(analytics.router)
+app.include_router(mock_interview.router)
+app.include_router(resume.router)
+
+@app.get("/mock-interview")
+async def mock_interview_page():
+    return FileResponse("frontend/mock-interview.html")
 
 # Ensure the frontend directory and subdirectories exist
 os.makedirs("frontend/css", exist_ok=True)
@@ -103,6 +110,11 @@ async def read_profile_page():
 async def read_analytics_page():
     return FileResponse("frontend/analytics.html")
 
+@app.get("/resume")
+async def read_resume_page():
+    return FileResponse("frontend/resume.html")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.main:app", host="0.0.0.0", port=settings.PORT, reload=True)
+

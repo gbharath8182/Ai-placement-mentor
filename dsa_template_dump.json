@@ -1,0 +1,474 @@
+{
+  "_id": "6a5b27b4027564d057182cf0",
+  "domain_slug": "dsa",
+  "average_salary": "6-45 LPA in India depending on company tier and experience; 90k-250k USD+ in the US at product companies",
+  "certifications": [
+    "freeCodeCamp Algorithms & Data Structures (Free)",
+    "Coursera Data Structures and Algorithms Specialization - UC San Diego (Paid, financial aid available)",
+    "GeeksforGeeks DSA Self-Paced Course (Paid, budget-friendly)"
+  ],
+  "company_prep": [
+    {
+      "group_name": "Product Companies",
+      "example_companies": [
+        "Google",
+        "Microsoft",
+        "Amazon",
+        "Adobe",
+        "Atlassian"
+      ],
+      "focus_areas": [
+        "DSA depth",
+        "System Design",
+        "OOP",
+        "Operating Systems",
+        "DBMS",
+        "Computer Networks"
+      ]
+    },
+    {
+      "group_name": "Service Companies",
+      "example_companies": [
+        "TCS",
+        "Infosys",
+        "Wipro",
+        "Accenture",
+        "Cognizant"
+      ],
+      "focus_areas": [
+        "Aptitude",
+        "SQL basics",
+        "Programming fundamentals",
+        "Communication",
+        "Basic CS fundamentals"
+      ]
+    }
+  ],
+  "future_scope": "As data volumes grow and real-time systems become the norm, efficient algorithms remain non-negotiable. DSA skills increasingly overlap with distributed systems design, where the same complexity-analysis mindset applies to sharding, load balancing, and caching strategies.",
+  "industries_using": [
+    "Big Tech (FAANG)",
+    "Fintech",
+    "E-commerce",
+    "Gaming",
+    "Search & Recommendation Systems",
+    "Competitive Programming",
+    "Systems & Infrastructure Engineering"
+  ],
+  "interview_prep": {
+    "important_topics": [
+      "Arrays & Strings",
+      "Linked Lists",
+      "Trees & Graphs",
+      "Dynamic Programming",
+      "Sorting & Searching"
+    ],
+    "frequently_asked_questions": [
+      "Explain time and space complexity of your solution",
+      "Can you optimize this further?",
+      "Walk me through your thought process"
+    ],
+    "coding_questions": [
+      "Two Sum",
+      "Reverse Linked List",
+      "Number of Islands",
+      "Longest Common Subsequence",
+      "Merge K Sorted Lists"
+    ],
+    "hr_questions": [
+      "Tell me about a time you solved a difficult technical problem",
+      "Why do you want to join this company?"
+    ],
+    "system_design_questions": [
+      "Design a URL shortener",
+      "Design an LRU cache",
+      "Design a rate limiter"
+    ]
+  },
+  "overview": "Data Structures and Algorithms (DSA) is the study of organizing data efficiently and designing step-by-step procedures to solve computational problems. It forms the theoretical and practical backbone of computer science, determining how fast and how efficiently software can run at scale.",
+  "practice_platforms": [
+    "LeetCode",
+    "GeeksforGeeks",
+    "HackerRank",
+    "Codeforces",
+    "CodeChef"
+  ],
+  "prerequisites": [
+    "Any one programming language (Python, Java, C++)",
+    "Basic math (logarithms, combinatorics)",
+    "Understanding of memory (stack vs heap)"
+  ],
+  "projects": [
+    {
+      "title": "Custom Data Structure Library",
+      "description": "Implement your own Stack, Queue, LinkedList, and BST from scratch without built-in libraries.",
+      "skills_learned": [
+        "Pointer manipulation",
+        "OOP design"
+      ],
+      "technologies_used": [
+        "Python or Java"
+      ],
+      "github_ideas": [
+        "dsa-from-scratch"
+      ],
+      "tier": "beginner"
+    },
+    {
+      "title": "Pathfinding Visualizer",
+      "description": "A web app visualizing BFS, DFS, and Dijkstra's algorithm on a grid.",
+      "skills_learned": [
+        "Graph traversal",
+        "Frontend basics"
+      ],
+      "technologies_used": [
+        "JavaScript",
+        "HTML Canvas"
+      ],
+      "github_ideas": [
+        "pathfinding-visualizer"
+      ],
+      "tier": "intermediate"
+    },
+    {
+      "title": "In-Memory Database Engine",
+      "description": "Build a simplified key-value store with indexing using B-Trees/hashing and an LRU eviction policy.",
+      "skills_learned": [
+        "System design",
+        "Advanced data structures"
+      ],
+      "technologies_used": [
+        "Python/Go",
+        "Sockets"
+      ],
+      "github_ideas": [
+        "mini-db-engine"
+      ],
+      "tier": "advanced"
+    }
+  ],
+  "resume_tips": [
+    "List DSA-heavy projects with GitHub links, not just course completions",
+    "Quantify impact: 'optimized query from O(n^2) to O(n log n), reducing latency by 40%'",
+    "Mention specific data structures/algorithms used per project, not just 'built an app'"
+  ],
+  "roadmap": [
+    {
+      "tier": "beginner",
+      "items": [
+        "Arrays & time/space complexity basics",
+        "Strings & basic string manipulation",
+        "Linked Lists (singly, doubly)",
+        "Stacks & Queues",
+        "Recursion fundamentals"
+      ]
+    },
+    {
+      "tier": "intermediate",
+      "items": [
+        "Hashing & Hash Maps",
+        "Trees & Binary Search Trees",
+        "Heaps & Priority Queues",
+        "Sorting algorithms (merge, quick, heap sort)",
+        "Binary Search & its variants",
+        "Two Pointers & Sliding Window"
+      ]
+    },
+    {
+      "tier": "advanced",
+      "items": [
+        "Graphs (BFS, DFS, shortest path, MST)",
+        "Dynamic Programming",
+        "Backtracking",
+        "Trie & advanced string algorithms",
+        "Union-Find / Disjoint Set Union",
+        "Segment Trees & Fenwick Trees"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "Complexity Analysis",
+      "description": "Ability to determine Big-O time and space complexity of any algorithm.",
+      "importance": "Critical -- interviewers grade on this explicitly.",
+      "level": "beginner",
+      "estimated_hours": 15
+    },
+    {
+      "name": "Recursion & Backtracking",
+      "description": "Solving problems by breaking them into smaller identical subproblems.",
+      "importance": "High",
+      "level": "intermediate",
+      "estimated_hours": 25
+    },
+    {
+      "name": "Graph Algorithms",
+      "description": "BFS, DFS, shortest path, and connectivity algorithms.",
+      "importance": "High for senior/advanced roles",
+      "level": "advanced",
+      "estimated_hours": 40
+    },
+    {
+      "name": "Dynamic Programming",
+      "description": "Optimal substructure and overlapping subproblems technique.",
+      "importance": "Critical for top-tier companies",
+      "level": "advanced",
+      "estimated_hours": 50
+    }
+  ],
+  "skills_required": [
+    "Programming fundamentals (any language)",
+    "Mathematical/logical reasoning",
+    "Pattern recognition",
+    "Time & space complexity analysis",
+    "Recursion & recursive thinking"
+  ],
+  "topics": [
+    {
+      "name": "Arrays",
+      "description": "A contiguous block of memory storing elements of the same type, accessible via an index in constant time.",
+      "importance": "Foundation for nearly every other data structure; the single most common interview topic.",
+      "difficulty": "beginner",
+      "estimated_time": "1 week",
+      "prerequisites": [
+        "Basic programming syntax"
+      ],
+      "resources": {
+        "documentation": "https://docs.python.org/3/tutorial/introduction.html",
+        "youtube_playlist": "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz",
+        "articles": [
+          "https://www.geeksforgeeks.org/array-data-structure/"
+        ],
+        "notes": "Focus on understanding why access is O(1) but insertion/deletion is O(n).",
+        "practice_platform": "LeetCode Arrays tag",
+        "cheat_sheet": "Access O(1), Search O(n), Insert/Delete O(n) worst case"
+      },
+      "practice_questions": [
+        "Two Sum",
+        "Best Time to Buy and Sell Stock",
+        "Maximum Subarray (Kadane's Algorithm)",
+        "Product of Array Except Self",
+        "Merge Intervals"
+      ],
+      "projects": [
+        "Build a simple spreadsheet-like grid data viewer"
+      ],
+      "interview_questions": [
+        "Why is array access O(1)?",
+        "When would you choose an array over a linked list?",
+        "Explain in-place vs out-of-place operations"
+      ]
+    },
+    {
+      "name": "Linked Lists",
+      "description": "A linear data structure where elements (nodes) are linked using pointers rather than stored contiguously.",
+      "importance": "Tests pointer manipulation skills; frequently used in system design (LRU cache) and OS-level structures.",
+      "difficulty": "beginner",
+      "estimated_time": "1 week",
+      "prerequisites": [
+        "Arrays",
+        "Basic understanding of pointers/references"
+      ],
+      "resources": {
+        "documentation": "https://opendatastructures.org/ods-python.pdf",
+        "youtube_playlist": "https://www.youtube.com/playlist?list=PLgUwDviBIf0q7vrFA_HEWcqRqMpCXzYAL",
+        "articles": [
+          "https://www.geeksforgeeks.org/data-structures/linked-list/"
+        ],
+        "notes": "Practice drawing pointer diagrams on paper before coding.",
+        "practice_platform": "LeetCode Linked List tag",
+        "cheat_sheet": "Access O(n), Insert/Delete at head O(1), Search O(n)"
+      },
+      "practice_questions": [
+        "Reverse a Linked List",
+        "Detect Cycle (Floyd's algorithm)",
+        "Merge Two Sorted Lists",
+        "Remove Nth Node From End",
+        "LRU Cache"
+      ],
+      "projects": [
+        "Implement a music playlist with next/previous navigation"
+      ],
+      "interview_questions": [
+        "Singly vs doubly linked list tradeoffs",
+        "How does Floyd's cycle detection work?",
+        "Reverse a linked list iteratively and recursively"
+      ]
+    },
+    {
+      "name": "Stacks & Queues",
+      "description": "Stacks are LIFO (Last-In-First-Out); Queues are FIFO (First-In-First-Out) linear structures used for ordered processing.",
+      "importance": "Core to parsing, backtracking, BFS/DFS traversal, and expression evaluation.",
+      "difficulty": "beginner",
+      "estimated_time": "4-5 days",
+      "prerequisites": [
+        "Arrays",
+        "Linked Lists"
+      ],
+      "resources": {
+        "documentation": "https://docs.python.org/3/library/collections.html#collections.deque",
+        "youtube_playlist": "https://www.youtube.com/playlist?list=PLgUwDviBIf0rMk545JR9M0OE0aWyuf7en",
+        "articles": [
+          "https://www.geeksforgeeks.org/stack-data-structure/"
+        ],
+        "notes": "Monotonic stacks are a recurring interview pattern -- practice them explicitly.",
+        "practice_platform": "LeetCode Stack tag",
+        "cheat_sheet": "Push/Pop/Peek all O(1)"
+      },
+      "practice_questions": [
+        "Valid Parentheses",
+        "Min Stack",
+        "Next Greater Element",
+        "Implement Queue using Stacks",
+        "Daily Temperatures"
+      ],
+      "projects": [
+        "Build a basic calculator supporting operator precedence"
+      ],
+      "interview_questions": [
+        "Implement a queue using two stacks",
+        "What is a monotonic stack and when do you use one?"
+      ]
+    },
+    {
+      "name": "Trees & Binary Search Trees",
+      "description": "Hierarchical structures where each node has child nodes; BSTs maintain sorted-order properties for efficient search.",
+      "importance": "Foundation for databases (B-Trees), file systems, and a very common interview category.",
+      "difficulty": "intermediate",
+      "estimated_time": "1.5 weeks",
+      "prerequisites": [
+        "Recursion",
+        "Linked Lists"
+      ],
+      "resources": {
+        "documentation": "https://www.cs.usfca.edu/~galles/visualization/BST.html",
+        "youtube_playlist": "https://www.youtube.com/playlist?list=PLgUwDviBIf0pMFMWuuvDNMAkoQFi-h0ZF",
+        "articles": [
+          "https://www.geeksforgeeks.org/binary-tree-data-structure/"
+        ],
+        "notes": "Master the three DFS traversal orders (pre/in/post) before moving to BFS.",
+        "practice_platform": "LeetCode Tree tag",
+        "cheat_sheet": "Balanced BST: Search/Insert/Delete O(log n); Unbalanced worst case O(n)"
+      },
+      "practice_questions": [
+        "Validate BST",
+        "Lowest Common Ancestor",
+        "Binary Tree Level Order Traversal",
+        "Serialize and Deserialize Binary Tree",
+        "Kth Smallest in BST"
+      ],
+      "projects": [
+        "Build a file-system explorer using a tree structure"
+      ],
+      "interview_questions": [
+        "Difference between BST and balanced BST (AVL/Red-Black)",
+        "How does in-order traversal of a BST relate to sorting?"
+      ]
+    },
+    {
+      "name": "Hashing",
+      "description": "Maps keys to array indices via a hash function, enabling average O(1) lookups, insertions, and deletions.",
+      "importance": "Used everywhere from caching to database indexing; extremely common in interview optimization questions.",
+      "difficulty": "intermediate",
+      "estimated_time": "1 week",
+      "prerequisites": [
+        "Arrays"
+      ],
+      "resources": {
+        "documentation": "https://docs.python.org/3/library/stdtypes.html#mapping-types-dict",
+        "youtube_playlist": "https://www.youtube.com/playlist?list=PLgUwDviBIf0rGlzIn_7rsaR2FQ5e6ZOL9",
+        "articles": [
+          "https://www.geeksforgeeks.org/hashing-data-structure/"
+        ],
+        "notes": "Understand collision resolution: chaining vs open addressing.",
+        "practice_platform": "LeetCode Hash Table tag",
+        "cheat_sheet": "Average O(1) access/insert/delete; worst case O(n) with poor hash function"
+      },
+      "practice_questions": [
+        "Two Sum",
+        "Group Anagrams",
+        "Longest Consecutive Sequence",
+        "Subarray Sum Equals K",
+        "Design a HashMap"
+      ],
+      "projects": [
+        "Build a simple in-memory key-value cache with expiry"
+      ],
+      "interview_questions": [
+        "How do hash collisions get resolved?",
+        "Why is a good hash function important for performance?"
+      ]
+    },
+    {
+      "name": "Graphs",
+      "description": "A set of nodes (vertices) connected by edges, used to model networks, relationships, and paths.",
+      "importance": "Models real-world systems: social networks, maps, dependency resolution; core to advanced interviews.",
+      "difficulty": "advanced",
+      "estimated_time": "2 weeks",
+      "prerequisites": [
+        "Trees",
+        "Queues",
+        "Recursion"
+      ],
+      "resources": {
+        "documentation": "https://www.cs.usfca.edu/~galles/visualization/BFS.html",
+        "youtube_playlist": "https://www.youtube.com/playlist?list=PLgUwDviBIf0oE3gA41TKO2H5bHpPd7fzn",
+        "articles": [
+          "https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/"
+        ],
+        "notes": "Learn BFS for shortest path in unweighted graphs, Dijkstra for weighted, and Union-Find for connectivity.",
+        "practice_platform": "LeetCode Graph tag",
+        "cheat_sheet": "BFS/DFS O(V+E); Dijkstra O((V+E) log V); MST (Kruskal/Prim) O(E log V)"
+      },
+      "practice_questions": [
+        "Number of Islands",
+        "Course Schedule (Topological Sort)",
+        "Clone Graph",
+        "Network Delay Time (Dijkstra)",
+        "Word Ladder"
+      ],
+      "projects": [
+        "Build a shortest-route finder between cities on a small map dataset"
+      ],
+      "interview_questions": [
+        "BFS vs DFS -- when to use which?",
+        "Explain Dijkstra's algorithm and its limitation with negative weights"
+      ]
+    },
+    {
+      "name": "Dynamic Programming",
+      "description": "An optimization technique that solves complex problems by breaking them into overlapping subproblems and storing results to avoid recomputation.",
+      "importance": "Widely regarded as the hardest and most differentiating interview topic at top companies.",
+      "difficulty": "advanced",
+      "estimated_time": "2-3 weeks",
+      "prerequisites": [
+        "Recursion",
+        "Arrays"
+      ],
+      "resources": {
+        "documentation": "https://cp-algorithms.com/dynamic_programming/intro-to-dp.html",
+        "youtube_playlist": "https://www.youtube.com/playlist?list=PLgUwDviBIf0rGFVvR5x0Pl5Q3vqPjfDT_",
+        "articles": [
+          "https://www.geeksforgeeks.org/dynamic-programming/"
+        ],
+        "notes": "Always start by writing the brute-force recursive solution, then add memoization, then convert to tabulation.",
+        "practice_platform": "LeetCode Dynamic Programming tag",
+        "cheat_sheet": "Time complexity typically O(states x transitions); trade space for time via memoization"
+      },
+      "practice_questions": [
+        "Climbing Stairs",
+        "Longest Common Subsequence",
+        "0/1 Knapsack",
+        "Coin Change",
+        "Longest Increasing Subsequence"
+      ],
+      "projects": [
+        "Build a text-diff tool using edit-distance DP"
+      ],
+      "interview_questions": [
+        "Difference between memoization and tabulation",
+        "How do you identify a DP problem during an interview?"
+      ]
+    }
+  ],
+  "why_important": "DSA is the single most heavily tested skill in technical interviews at product-based companies (Google, Amazon, Microsoft, Adobe) and increasingly at service companies too. Beyond interviews, strong DSA fundamentals directly translate to writing code that scales -- the difference between a feature that works for 100 users and one that works for 100 million."
+}

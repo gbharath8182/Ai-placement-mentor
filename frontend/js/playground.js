@@ -1,4 +1,4 @@
-let pyodideInstance = null;
+﻿let pyodideInstance = null;
 let isPyodideLoading = false;
 let currentLang = "python";
 
@@ -124,8 +124,10 @@ async function runPython(code, input) {
         const pyodide = await ensurePyodide();
         if (!pyodide) return { ok: false, output: "", error: "Runtime loading", type: "runtime" };
         let output = "";
-        pyodide.setStdout({ write: text => { output += text; return text.length; } });
-        pyodide.setStderr({ write: text => { output += text; return text.length; } });
+        const stdoutDecoder = new TextDecoder();
+        const stderrDecoder = new TextDecoder();
+        pyodide.setStdout({ write: buf => { output += stdoutDecoder.decode(buf, { stream: true }); return buf.length; } });
+        pyodide.setStderr({ write: buf => { output += stderrDecoder.decode(buf, { stream: true }); return buf.length; } });
         pyodide.globals.set("__codex_input_lines", input.split(/\r?\n/));
         await pyodide.runPythonAsync(`
 import builtins
@@ -190,3 +192,5 @@ function normalizeOutput(value) {
 function escapeHtml(text) {
     return String(text || "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
 }
+
+

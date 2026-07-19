@@ -51,6 +51,7 @@ class ContentBlock(BaseModel):
 class SubTopic(BaseModel):
     title: str
     content_blocks: List[Dict[str, Any]]
+    difficulty: Optional[str] = None
 
 class TopicResponse(BaseModel):
     id: str
@@ -130,3 +131,75 @@ class StreakData(BaseModel):
 
 class StreakResponse(StreakData):
     pass
+
+
+# ===== Extended Domain Detail Schemas (Roadmap, Prep, Projects) =====
+class SkillItem(BaseModel):
+    name: str
+    description: str
+    importance: str
+    level: str  # beginner, intermediate, advanced
+    estimated_hours: int
+
+class ResourceSet(BaseModel):
+    documentation: Optional[str] = None
+    youtube_playlist: Optional[str] = None
+    articles: List[str] = []
+    notes: Optional[str] = None
+    practice_platform: Optional[str] = None
+    cheat_sheet: Optional[str] = None
+
+class TopicDetail(BaseModel):
+    name: str
+    description: str
+    importance: str
+    difficulty: str
+    estimated_time: str
+    prerequisites: List[str] = []
+    resources: ResourceSet
+    practice_questions: List[str] = []
+    projects: List[str] = []
+    interview_questions: List[str] = []
+
+class ProjectItem(BaseModel):
+    title: str
+    description: str
+    skills_learned: List[str] = []
+    technologies_used: List[str] = []
+    github_ideas: List[str] = []
+    tier: str  # beginner, intermediate, advanced
+
+class CompanyPrepGroup(BaseModel):
+    group_name: str  # "Product Companies", "Service Companies"
+    example_companies: List[str] = []
+    focus_areas: List[str] = []
+
+class InterviewPrep(BaseModel):
+    important_topics: List[str] = []
+    frequently_asked_questions: List[str] = []
+    coding_questions: List[str] = []
+    hr_questions: List[str] = []
+    system_design_questions: List[str] = []
+
+class RoadmapTier(BaseModel):
+    tier: str  # beginner, intermediate, advanced
+    items: List[str] = []
+
+class DomainDetailResponse(BaseModel):
+    domain_slug: str
+    overview: str
+    why_important: str
+    industries_using: List[str] = []
+    future_scope: str
+    average_salary: Optional[str] = None
+    skills_required: List[str] = []
+    prerequisites: List[str] = []
+    roadmap: List[RoadmapTier] = []
+    topics: List[TopicDetail] = []
+    skills: List[SkillItem] = []
+    practice_platforms: List[str] = []
+    projects: List[ProjectItem] = []
+    interview_prep: InterviewPrep
+    resume_tips: List[str] = []
+    certifications: List[str] = []
+    company_prep: List[CompanyPrepGroup] = []

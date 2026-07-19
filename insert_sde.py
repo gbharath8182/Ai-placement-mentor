@@ -487,21 +487,15 @@ async def main():
     client = AsyncIOMotorClient("mongodb://localhost:27017")
     db = client.education_platform
 
-    existing_card = await db.domains.find_one({"slug": "sde"})
-    if existing_card:
-        print("ABORT: domains collection already has slug='sde'. Not overwriting. Inspect manually.")
-        return
+    # Safe to re-run: retain the platform card if it already exists and
+    # refresh the detailed SDE curriculum in place.
+    r1 = await db.domains.update_one({"slug": "sde"}, {"$set": DOMAIN_CARD}, upsert=True)
+    print("Domain card matched/modified:", r1.matched_count, r1.modified_count)
 
-    existing_details = await db.domain_details.find_one({"domain_slug": "sde"})
-    if existing_details:
-        print("ABORT: domain_details already has domain_slug='sde'. Not overwriting. Inspect manually.")
-        return
-
-    r1 = await db.domains.insert_one(DOMAIN_CARD)
-    print("Inserted domains card, _id:", r1.inserted_id)
-
-    r2 = await db.domain_details.insert_one(DOMAIN_DETAILS)
-    print("Inserted domain_details doc, _id:", r2.inserted_id)
+    r2 = await db.domain_details.update_one(
+        {"domain_slug": "sde"}, {"$set": DOMAIN_DETAILS}, upsert=True
+    )
+    print("Detailed curriculum matched/modified:", r2.matched_count, r2.modified_count)
 
     print("Topics count:", len(DOMAIN_DETAILS["topics"]))
     print("SUCCESS")

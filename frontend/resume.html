@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Studio - EduAI Platform</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="dashboard-nav">
+        <a href="/dashboard" class="nav-brand"><span>EduAI Platform</span></a>
+        <div class="nav-user">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+            <a href="/roadmap" class="btn-secondary">Roadmaps</a>
+            <a href="/mock-interview" class="btn-secondary">Mock Interview</a>
+            <a href="/resume" class="btn-secondary nav-link-active">Resume Studio</a>
+            <a href="/dashboard" class="btn-secondary">Dashboard</a>
+        </div>
+    </nav>
+    <main class="resume-shell">
+        <header class="resume-hero">
+            <p class="roadmap-eyebrow">AI Resume Studio</p>
+            <h1>A resume shaped around your real work.</h1>
+            <p>Give your details, skills, education, projects, and links. The first AI model finds your strongest honest angle; the second writes an ATS-friendly resume—without inventing claims.</p>
+        </header>
+        <div class="resume-grid">
+            <form id="resume-form" class="glass-panel resume-form">
+                <h2>Your details</h2>
+                <div class="resume-field-grid">
+                    <label>Full name<input required name="full_name" placeholder="Your full name"></label>
+                    <label>Target role<input required name="target_role" placeholder="e.g., Backend Developer"></label>
+                    <label>Email<input type="email" name="email" placeholder="you@email.com"></label>
+                    <label>Phone<input name="phone" placeholder="+91 ..."></label>
+                    <label>Location<input name="location" placeholder="City, State"></label>
+                    <label>Experience level<select name="experience_level"><option value="fresher">Fresher / student</option><option value="intermediate">Early career</option><option value="experienced">Experienced</option></select></label>
+                    <label>GitHub URL<input type="url" name="github_url" placeholder="https://github.com/..."></label>
+                    <label>LinkedIn URL<input type="url" name="linkedin_url" placeholder="https://linkedin.com/in/..."></label>
+                    <label>Portfolio URL<input type="url" name="portfolio_url" placeholder="https://..."></label>
+                    <label>Style<select name="tone"><option value="concise">One-page concise</option><option value="detailed">Detailed</option></select></label>
+                </div>
+                <label>Skills / stack <span class="resume-help">Separate with commas</span><textarea name="skills" rows="2" placeholder="Python, FastAPI, MongoDB, React, Docker"></textarea></label>
+                <label>Education<textarea name="education" rows="3" placeholder="B.Tech in Computer Science — College name, graduation year, CGPA (optional)"></textarea></label>
+                <label>Achievements / certifications <span class="resume-help">One per line</span><textarea name="achievements" rows="3" placeholder="AWS Certified Cloud Practitioner&#10;Winner, college hackathon"></textarea></label>
+                <label>Target job description (optional)<textarea name="job_description" rows="4" placeholder="Paste role requirements or keywords to tailor your resume."></textarea></label>
+                <div class="resume-project-head"><h2>Projects</h2><button type="button" id="add-project" class="btn-secondary">+ Add project</button></div>
+                <div id="projects"></div>
+                <button class="btn-primary resume-submit" type="submit">Generate unique resume</button>
+            </form>
+            <section class="glass-panel resume-preview">
+                <div class="resume-preview-head"><div><p class="roadmap-eyebrow">Live preview</p><h2>Your resume</h2></div><button class="btn-secondary hidden" id="download-resume" type="button">Download .md</button></div>
+                <div id="resume-status" class="muted-text">Complete the form to create your tailored resume.</div>
+                <article id="resume-output" class="mi-markdown-body hidden"></article>
+            </section>
+        </div>
+    </main>
+    <template id="project-template">
+        <section class="resume-project">
+            <button type="button" class="resume-remove" aria-label="Remove project">×</button>
+            <label>Project name<input data-project="title" placeholder="e.g., AI Placement Mentor"></label>
+            <label>What you built and your contribution<textarea data-project="description" rows="3" placeholder="Explain the problem, solution, and work you personally did."></textarea></label>
+            <label>Technologies <span class="resume-help">Comma-separated</span><input data-project="technologies" placeholder="FastAPI, MongoDB, Groq API"></label>
+            <div class="resume-field-grid"><label>GitHub link<input type="url" data-project="github_url" placeholder="https://github.com/..."></label><label>Live demo<input type="url" data-project="live_url" placeholder="https://..."></label></div>
+        </section>
+    </template>
+    <script src="/static/js/theme.js" defer></script>
+    <script src="/static/js/auth.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
+    <script src="/static/js/resume.js" defer></script>
+</body>
+</html>

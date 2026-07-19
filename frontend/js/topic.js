@@ -300,16 +300,18 @@ def set_mock_stdin(data):
                 let tcOutput = "";
                 let tcError = "";
                 
+                const stdoutDecoder = new TextDecoder();
+                const stderrDecoder = new TextDecoder();
                 pyodideInstance.setStdout({
-                    write: (text) => {
-                        tcOutput += text;
-                        return text.length;
+                    write: (buf) => {
+                        tcOutput += stdoutDecoder.decode(buf, { stream: true });
+                        return buf.length;
                     }
                 });
                 pyodideInstance.setStderr({
-                    write: (text) => {
-                        tcError += text;
-                        return text.length;
+                    write: (buf) => {
+                        tcError += stderrDecoder.decode(buf, { stream: true });
+                        return buf.length;
                     }
                 });
                 
@@ -506,3 +508,4 @@ function escapeHtml(text) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+

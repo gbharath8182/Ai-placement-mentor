@@ -16,3 +16,9 @@ env/
 .idea/
 *.swp
 *.swo
+
+*.bak
+*.log
+__pycache__/
+*.pyc
+.env
