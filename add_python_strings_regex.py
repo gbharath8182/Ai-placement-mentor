@@ -3,9 +3,14 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 TOPIC_SLUG = "python-strings-regex"
 
+import sys
+sys.path.insert(0, r"c:\Users\navaneeth\Ai-placement-mentor")
+from backend.config import settings
+
 async def main():
-    client = AsyncIOMotorClient("mongodb://localhost:27017/education_platform")
-    db = client.education_platform
+    client = AsyncIOMotorClient(settings.MONGO_URI)
+    db_name = settings.MONGO_URI.split("/")[-1].split("?")[0] or "education_platform"
+    db = client[db_name]
 
     # Idempotent: safe to re-run without creating duplicates
     await db.topics.delete_many({"slug": TOPIC_SLUG})

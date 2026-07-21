@@ -40,9 +40,14 @@ NEW_CONTENT = {
     ],
 }
 
+import sys
+sys.path.insert(0, r"c:\Users\navaneeth\Ai-placement-mentor")
+from backend.config import settings
+
 async def main():
-    client = AsyncIOMotorClient("mongodb://localhost:27017/education_platform")
-    db = client.education_platform
+    client = AsyncIOMotorClient(settings.MONGO_URI)
+    db_name = settings.MONGO_URI.split("/")[-1].split("?")[0] or "education_platform"
+    db = client[db_name]
 
     for (topic_slug, sub_title), new_blocks in NEW_CONTENT.items():
         doc = await db.topics.find_one({"slug": topic_slug})

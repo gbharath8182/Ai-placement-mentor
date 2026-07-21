@@ -1391,7 +1391,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Premium Visual Redesign & Micro-Animations Overrides */
 body {
-    background-color: #05070c;
+    background-color: var(--bg-primary);
     background-image: 
         radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
         radial-gradient(at 100% 0%, rgba(188, 140, 255, 0.05) 0px, transparent 50%);

@@ -37,7 +37,7 @@ NEW_CONTENT = {
         ]},
         {"type": "callout", "kind": "important", "title": "Draw It Before You Code It", "value": "The #1 mistake in linked-list interview questions is losing track of a pointer mid-rewire (e.g. overwriting `.next` before saving a reference to the next node). Always draw the before/after pointer diagram on paper first."},
         {"type": "code", "language": "python", "value": "class Node:\n    def __init__(self, val):\n        self.val = val\n        self.next = None\n\nclass LinkedList:\n    def __init__(self):\n        self.head = None\n\n    def insert_at_head(self, val):\n        new_node = Node(val)\n        new_node.next = self.head\n        self.head = new_node\n\n    def reverse(self):\n        prev, curr = None, self.head\n        while curr:\n            nxt = curr.next\n            curr.next = prev\n            prev = curr\n            curr = nxt\n        self.head = prev"},
-        {"type": "resource_link", "label": "\ud83d\udcd6 Visualize linked list operations interactively", "url": "https://visualgo.net/en/list"}
+        {"type": "resource_link", "label": "\U0001F4D6 Visualize linked list operations interactively", "url": "https://visualgo.net/en/list"}
     ],
     ("dsa-trees", "Binary Search Trees (BST) & Properties"): [
         {"type": "heading", "level": 3, "value": "The BST Invariant"},
@@ -49,7 +49,7 @@ NEW_CONTENT = {
         ]},
         {"type": "callout", "kind": "warning", "title": "The Skewed Tree Trap", "value": "Inserting sorted data (`1,2,3,4,5...`) into a plain BST produces a **degenerate tree** -- effectively a linked list with `O(n)` operations. This is exactly why self-balancing variants like **AVL trees** and **Red-Black trees** exist -- they rebalance on every insert/delete to guarantee `O(log n)`."},
         {"type": "code", "language": "python", "value": "class TreeNode:\n    def __init__(self, val):\n        self.val = val\n        self.left = None\n        self.right = None\n\ndef insert(root, val):\n    if root is None:\n        return TreeNode(val)\n    if val < root.val:\n        root.left = insert(root.left, val)\n    else:\n        root.right = insert(root.right, val)\n    return root\n\ndef inorder(root, result):\n    if root:\n        inorder(root.left, result)\n        result.append(root.val)\n        inorder(root.right, result)\n    return result"},
-        {"type": "resource_link", "label": "\ud83d\udcd6 Visualize BST insert/delete interactively", "url": "https://www.cs.usfca.edu/~galles/visualization/BST.html"}
+        {"type": "resource_link", "label": "\U0001F4D6 Visualize BST insert/delete interactively", "url": "https://www.cs.usfca.edu/~galles/visualization/BST.html"}
     ],
     ("dsa-sorting", "Divide & Conquer Sorting"): [
         {"type": "heading", "level": 3, "value": "Merge Sort vs Quick Sort"},
@@ -64,9 +64,14 @@ NEW_CONTENT = {
     ],
 }
 
+import sys
+sys.path.insert(0, r"c:\Users\navaneeth\Ai-placement-mentor")
+from backend.config import settings
+
 async def main():
-    client = AsyncIOMotorClient("mongodb://localhost:27017/education_platform")
-    db = client.education_platform
+    client = AsyncIOMotorClient(settings.MONGO_URI)
+    db_name = settings.MONGO_URI.split("/")[-1].split("?")[0] or "education_platform"
+    db = client[db_name]
 
     for (topic_slug, sub_title), new_blocks in NEW_CONTENT.items():
         doc = await db.topics.find_one({"slug": topic_slug})
