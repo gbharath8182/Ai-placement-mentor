@@ -101,25 +101,29 @@ async function fetchAndShowTopics(domain) {
     try {
         // Fetch topics and user progress concurrently
         const user = getUser();
-        const [topicsRes, progressRes] = await Promise.all([
-            authFetch(`/domains/${domain.slug}/topics`),
-            authFetch(`/progress/${user.id}`)
-        ]);
-        
-        if (topicsRes.ok && progressRes.ok) {
-            const topics = await topicsRes.json();
-            const progressList = await progressRes.json();
-            
-            // Map progress by topic_slug for fast lookup
-            const progressMap = {};
-            progressList.forEach(p => {
-                progressMap[p.topic_slug] = p.status;
-            });
-            
-            renderTopics(topics, progressMap);
-        } else {
+        // Topics are public learning content; progress is an optional personal
+        // enhancement. A stale login must never hide the curriculum itself.
+        const topicsRes = await authFetch(`/domains/${domain.slug}/topics`);
+        if (!topicsRes.ok) {
             listContainer.innerHTML = `<div style="text-align: center; color: var(--accent-red); padding: 20px;">Failed to load topics.</div>`;
+            return;
         }
+        const topics = await topicsRes.json();
+        const progressMap = {};
+        if (user?.id) {
+            try {
+                const progressRes = await authFetch(`/progress/${user.id}`);
+                if (progressRes.ok) {
+                    const progressList = await progressRes.json();
+                    progressList.forEach(p => { progressMap[p.topic_slug] = p.status; });
+                } else {
+                    console.warn("Progress unavailable; showing topics without status.");
+                }
+            } catch (progressError) {
+                console.warn("Progress request failed; showing topics without status.", progressError);
+            }
+        }
+        renderTopics(topics, progressMap);
     } catch (err) {
         console.error("Error loading topics:", err);
         listContainer.innerHTML = `<div style="text-align: center; color: var(--accent-red); padding: 20px;">Connection failed.</div>`;

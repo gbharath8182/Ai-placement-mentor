@@ -183,9 +183,52 @@ function renderContentBlocks(blocks) {
                 <pre style="margin: 0;"><code class="language-${lang}">${escapeHtml(block.value)}</code></pre>
             `;
         }
+        else if (block.type === "diagram") {
+            element.className = "concept-diagram";
+            const title = document.createElement("h3");
+            title.textContent = block.title || "Concept map";
+            const diagram = document.createElement("pre");
+            diagram.className = "mermaid";
+            diagram.textContent = block.value || "";
+            element.append(title, diagram);
+        }
+        else if (block.type === "knowledge_check") {
+            element.className = "knowledge-check";
+            const question = document.createElement("p");
+            question.className = "knowledge-question";
+            question.textContent = block.question || "Quick check";
+            const answers = document.createElement("div");
+            answers.className = "knowledge-options";
+            (block.options || []).forEach((option, index) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "knowledge-option";
+                button.textContent = option;
+                button.addEventListener("click", () => {
+                    answers.querySelectorAll("button").forEach(item => item.disabled = true);
+                    button.classList.add(index === block.correct_index ? "is-correct" : "is-incorrect");
+                    const result = document.createElement("p");
+                    result.className = "knowledge-result";
+                    result.textContent = index === block.correct_index
+                        ? `Correct — ${block.explanation || ""}`
+                        : `Not quite — ${block.explanation || ""}`;
+                    answers.after(result);
+                }, { once: true });
+                answers.appendChild(button);
+            });
+            const label = document.createElement("span");
+            label.className = "knowledge-label";
+            label.textContent = "Active recall checkpoint";
+            element.append(label, question, answers);
+        }
         
         area.appendChild(element);
     });
+
+    if (window.mermaid) {
+        window.mermaid.initialize({ startOnLoad: false, theme: document.documentElement.classList.contains("light-theme") ? "default" : "dark", securityLevel: "strict" });
+        window.mermaid.run({ nodes: area.querySelectorAll(".mermaid") }).catch((error) => console.error("Diagram render error:", error));
+    }
     
     // Render resource links in a grouped section at the bottom
     if (resourceBlocks.length > 0) {

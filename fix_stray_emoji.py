@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
 BAD_CHARS = ["\U0001F5C2", "\U0001F4DD"]  # stray emoji mistakenly used in place of "&"
@@ -15,7 +15,7 @@ def clean(value):
     return value
 
 async def main():
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
+    client = AsyncIOMotorClient("mongodb://localhost:27017/education_platform")
     db = client.education_platform
 
     topic = await db.topics.find_one({"slug": "python-strings-regex"})

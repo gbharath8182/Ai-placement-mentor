@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
 NEW_SUBTOPICS = [
@@ -24,7 +24,7 @@ NEW_SUBTOPICS = [
         "difficulty": "advanced",
         "content_blocks": [
             {"type": "heading", "level": 2, "value": "Guaranteeing O(log n) Even in the Worst Case"},
-            {"type": "text", "value": "A plain BST degrades to `O(n)` if data arrives in sorted order. **Self-balancing trees** fix this by restructuring themselves after every insert/delete, guaranteeing `O(log n)` operations no matter the input order. **AVL trees** are the strictest: they track a **balance factor** (height of left subtree minus height of right subtree) at every node and rebalance the instant it exceeds ±1. **Red-Black trees** are looser (allowing up to 2x height imbalance between subtrees), which means fewer rotations on insert/delete -- this is why most language standard libraries (C++ `map`, Java `TreeMap`) use Red-Black trees rather than AVL."},
+            {"type": "text", "value": "A plain BST degrades to `O(n)` if data arrives in sorted order. **Self-balancing trees** fix this by restructuring themselves after every insert/delete, guaranteeing `O(log n)` operations no matter the input order. **AVL trees** are the strictest: they track a **balance factor** (height of left subtree minus height of right subtree) at every node and rebalance the instant it exceeds �1. **Red-Black trees** are looser (allowing up to 2x height imbalance between subtrees), which means fewer rotations on insert/delete -- this is why most language standard libraries (C++ `map`, Java `TreeMap`) use Red-Black trees rather than AVL."},
             {"type": "list", "ordered": False, "items": [
                 "**AVL balance factor** -- must stay in {-1, 0, 1} at every node; violated -> rotate",
                 "**LL / RR rotation** -- single rotation, fixes a straight-line imbalance",

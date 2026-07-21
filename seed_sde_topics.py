@@ -23,6 +23,21 @@ REFERENCES = {
     "design": ("Head First Design Patterns, 2nd ed. — Freeman & Robson", "https://www.oreilly.com/library/view/head-first-design/9781492077992/"),
 }
 
+# One visual mental model per topic. These are deliberately concise: the
+# lesson explains the details; the diagram gives learners the structure first.
+DIAGRAMS = {
+    "sde-programming-foundations": "flowchart LR\nRequirement --> Decompose\nDecompose --> Implement\nImplement --> Test_edges[Check edge cases]\nTest_edges --> Refactor",
+    "sde-oop-solid": "classDiagram\nclass Client\nclass Service { +execute() }\nclass Repository { +save() }\nClient --> Service\nService --> Repository",
+    "sde-data-structures-complexity": "flowchart LR\nProblem --> Access_pattern\nAccess_pattern --> Hash_table\nAccess_pattern --> Ordered_structure\nAccess_pattern --> Queue_or_heap[Queue or heap]\nHash_table --> Measure",
+    "sde-git-collaboration": "gitGraph\ncommit id: \"main\"\nbranch feature\ncheckout feature\ncommit id: \"small change\"\ncommit id: \"tests\"\ncheckout main\nmerge feature",
+    "sde-operating-systems": "flowchart LR\nRequest --> Thread\nThread --> Scheduler\nScheduler --> CPU\nThread --> IO_wait[I/O wait]\nIO_wait --> Scheduler",
+    "sde-dbms-sql": "erDiagram\nUSER ||--o{ ENROLLMENT : has\nCOURSE ||--o{ ENROLLMENT : contains\nUSER { string id }\nCOURSE { string id }\nENROLLMENT { string user_id }",
+    "sde-computer-networks": "sequenceDiagram\nBrowser->>DNS: resolve name\nDNS-->>Browser: IP address\nBrowser->>Server: TLS + HTTP request\nServer-->>Browser: HTTP response",
+    "sde-rest-api-backend": "flowchart LR\nClient --> Controller\nController --> Service\nService --> Repository\nRepository --> Database\nService --> Metrics",
+    "sde-testing-quality": "flowchart TB\nUnit_tests --> Integration_tests\nIntegration_tests --> End_to_end\nEnd_to_end --> Monitoring\nMonitoring --> Incident_learning",
+    "sde-lld-design-patterns": "flowchart LR\nRequirements --> Domain_model\nDomain_model --> Interfaces\nInterfaces --> Invariants\nInvariants --> Tests\nTests --> Tradeoffs",
+}
+
 
 TOPICS = [
     ("sde-programming-foundations", "Programming Foundations & Code Quality", "beginner", "programming", [
@@ -88,18 +103,34 @@ TOPICS = [
 ]
 
 
-def make_subtopic(title, body, bullets, interview, reference):
+def make_subtopic(title, body, bullets, interview, reference, diagram=None):
     ref_label, ref_url = REFERENCES[reference]
+    blocks = [
+        {"type": "heading", "level": 2, "value": title},
+        {"type": "text", "value": body},
+        {"type": "heading", "level": 3, "value": "What to master"},
+        {"type": "list", "items": bullets, "ordered": False},
+        {"type": "callout", "kind": "important", "title": "Interview lens", "value": interview},
+    ]
+    if diagram:
+        blocks.append({"type": "diagram", "title": "Concept map", "value": diagram})
+    blocks.extend([
+        {
+            "type": "knowledge_check",
+            "question": f"Before applying {title.lower()}, what is the most useful first step?",
+            "options": [
+                "State the inputs, constraints, and success condition.",
+                "Start coding the longest method immediately.",
+                "Copy a solution without checking its assumptions.",
+            ],
+            "correct_index": 0,
+            "explanation": "Strong engineers make the problem and its constraints explicit before choosing an implementation.",
+        },
+        {"type": "resource_link", "label": f"Reference: {ref_label}", "url": ref_url},
+    ])
     return {
         "title": title,
-        "content_blocks": [
-            {"type": "heading", "level": 2, "value": title},
-            {"type": "text", "value": body},
-            {"type": "heading", "level": 3, "value": "What to master"},
-            {"type": "list", "items": bullets, "ordered": False},
-            {"type": "callout", "kind": "important", "title": "Interview lens", "value": interview},
-            {"type": "resource_link", "label": f"Reference: {ref_label}", "url": ref_url},
-        ],
+        "content_blocks": blocks,
     }
 
 
@@ -115,7 +146,10 @@ async def main():
     for slug, title, difficulty, reference, subtopics in TOPICS:
         topic = {
             "domain_slug": "sde", "slug": slug, "title": title, "difficulty": difficulty,
-            "subtopics": [make_subtopic(*subtopic, reference) for subtopic in subtopics],
+            "subtopics": [
+                make_subtopic(*subtopic, reference, DIAGRAMS[slug] if index == 0 else None)
+                for index, subtopic in enumerate(subtopics)
+            ],
         }
         await db.topics.update_one({"slug": slug}, {"$set": topic}, upsert=True)
     print(f"Seeded {len(TOPICS)} SDE topics with {sum(len(item[4]) for item in TOPICS)} subtopics.")

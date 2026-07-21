@@ -454,6 +454,34 @@ const questions = [
     }
 ];
 
+// Original company-style practice sets. These are not claimed as leaked or
+// verbatim past papers; they are newly written drills aligned to the kinds of
+// numerical and reasoning screens commonly used by these employers.
+const extendedCompanyQuestions = [
+    { company: "Accenture", question: "A project has 120 tasks. If 35% are complete and 18 more are completed, what percentage is complete?", options: { A: "45%", B: "50%", C: "55%", D: "60%" }, correct: "B", explanation: "35% of 120 = 42. After 18 more, 60 tasks are complete; 60/120 = 50%." },
+    { company: "Accenture", question: "A and B can finish a task in 12 and 18 days. Working together, how long do they take?", options: { A: "6 days", B: "7.2 days", C: "8 days", D: "9 days" }, correct: "B", explanation: "Combined rate = 1/12 + 1/18 = 5/36. Time = 36/5 = 7.2 days." },
+    { company: "Accenture", question: "Find the next number: 3, 8, 15, 24, 35, ?", options: { A: "44", B: "46", C: "48", D: "50" }, correct: "C", explanation: "The differences are 5, 7, 9, 11; next difference is 13. So 35 + 13 = 48." },
+    { company: "Accenture", question: "If all analysts are graduates and some graduates are programmers, which conclusion is valid?", options: { A: "All programmers are analysts", B: "Some analysts may be programmers", C: "No analyst is a programmer", D: "All graduates are analysts" }, correct: "B", explanation: "The statements allow overlap between analysts and programmers but do not require or exclude it." },
+    { company: "Cognizant", question: "A price rises by 20% and then falls by 20%. Compared with the original, it is:", options: { A: "unchanged", B: "4% lower", C: "4% higher", D: "20% lower" }, correct: "B", explanation: "Start with 100: 20% rise gives 120; 20% fall gives 96, which is 4% lower." },
+    { company: "Cognizant", question: "In a class, the ratio of boys to girls is 3:5. If there are 64 students, how many are girls?", options: { A: "24", B: "32", C: "40", D: "48" }, correct: "C", explanation: "There are 8 equal parts. Each part is 64/8 = 8; girls = 5 × 8 = 40." },
+    { company: "Cognizant", question: "Which word is the odd one out?", options: { A: "Compiler", B: "Interpreter", C: "Assembler", D: "Database" }, correct: "D", explanation: "The first three translate or process programming-language instructions; a database stores and retrieves data." },
+    { company: "Cognizant", question: "A train 180 m long passes a pole in 12 seconds. Its speed is:", options: { A: "12 m/s", B: "15 m/s", C: "18 m/s", D: "21 m/s" }, correct: "B", explanation: "Speed = distance/time = 180/12 = 15 m/s." },
+    { company: "Capgemini", question: "The average of five numbers is 18. If one number is removed, the average of the remaining four is 16. The removed number is:", options: { A: "20", B: "22", C: "24", D: "26" }, correct: "D", explanation: "Total of five = 90. Total of remaining four = 64. Removed number = 26." },
+    { company: "Capgemini", question: "If 'CODE' is written as 'DPEF' by shifting every letter one forward, 'JAVA' becomes:", options: { A: "KBWB", B: "KBVB", C: "KAWA", D: "JAWA" }, correct: "A", explanation: "Shift J→K, A→B, V→W, A→B: KBWB." },
+    { company: "Capgemini", question: "A bag contains 4 red, 3 blue, and 3 green balls. Probability of drawing a blue ball is:", options: { A: "1/2", B: "3/10", C: "1/3", D: "2/5" }, correct: "B", explanation: "There are 10 balls total and 3 are blue, so the probability is 3/10." },
+    { company: "Capgemini", question: "Which data structure follows the last-in, first-out rule?", options: { A: "Queue", B: "Stack", C: "Linked list", D: "Heap" }, correct: "B", explanation: "A stack removes the most recently added item first (LIFO)." },
+    { company: "Deloitte", question: "A sum earns simple interest of ₹600 at 10% per year for 2 years. The principal is:", options: { A: "₹2,000", B: "₹2,500", C: "₹3,000", D: "₹3,500" }, correct: "C", explanation: "SI = PRT/100. So 600 = P × 10 × 2 / 100, giving P = ₹3,000." },
+    { company: "Deloitte", question: "Statements: Some tests are automated. All automated tests are repeatable. Which conclusion follows?", options: { A: "All tests are repeatable", B: "Some tests are repeatable", C: "No test is repeatable", D: "Only automated tests are repeatable" }, correct: "B", explanation: "The automated tests mentioned are a subset of tests and are repeatable, so some tests are repeatable." },
+    { company: "Deloitte", question: "A clock shows 3:30. What is the smaller angle between its hands?", options: { A: "60°", B: "75°", C: "90°", D: "105°" }, correct: "B", explanation: "Minute hand is at 180°. Hour hand is at 3.5 × 30 = 105°. Difference = 75°." },
+    { company: "Deloitte", question: "Which is the best first action when a dashboard metric suddenly doubles?", options: { A: "Immediately delete the data", B: "Verify the definition and data pipeline", C: "Assume customer growth", D: "Change the target" }, correct: "B", explanation: "Validate the metric definition, instrumentation, and pipeline before drawing a business conclusion." },
+    { company: "Amazon", question: "A service processes 240 requests in 8 seconds. At the same rate, how many requests in 1 minute?", options: { A: "1,200", B: "1,440", C: "1,800", D: "2,000" }, correct: "C", explanation: "Rate = 240/8 = 30 requests/sec. In 60 seconds: 30 × 60 = 1,800." },
+    { company: "Amazon", question: "Which cache policy loads data into cache only after a miss from the application?", options: { A: "Write-through", B: "Cache-aside", C: "Write-back", D: "Read-through only" }, correct: "B", explanation: "In cache-aside, the application reads cache first and loads from the data store on a miss." },
+    { company: "Amazon", question: "If a system's availability is 99.9%, approximate allowed downtime in a 30-day month is:", options: { A: "4.3 minutes", B: "43 minutes", C: "4.3 hours", D: "43 hours" }, correct: "B", explanation: "A 30-day month has 43,200 minutes. 0.1% of that is 43.2 minutes." },
+    { company: "Amazon", question: "A sequence is 2, 6, 12, 20, 30. The next term is:", options: { A: "36", B: "40", C: "42", D: "44" }, correct: "C", explanation: "The differences are 4, 6, 8, 10; next difference is 12, giving 42." },
+];
+
+extendedCompanyQuestions.forEach((question, index) => questions.push({ ...question, id: 1000 + index }));
+
 // ============================================================
 //  Quiz State
 // ============================================================
@@ -474,10 +502,18 @@ document.addEventListener("DOMContentLoaded", () => {
         expBadge.textContent = user.profile.experience_level;
         expBadge.className = `experience-tag exp-${user.profile.experience_level}`;
     }
+    populateCompanyFilter();
     renderQuiz();
     document.getElementById("reset-quiz-btn").addEventListener("click", resetQuiz);
     document.getElementById("company-filter").addEventListener("change", handleCompanyFilter);
 });
+
+function populateCompanyFilter() {
+    const filter = document.getElementById("company-filter");
+    const companies = [...new Set(questions.map(question => question.company))].sort();
+    filter.innerHTML = '<option value="all">All Companies</option>' + companies
+        .map(company => `<option value="${company}">${company}</option>`).join("");
+}
 
 // ============================================================
 //  Company Filter
@@ -527,7 +563,7 @@ function renderQuiz() {
         qCard.innerHTML = `
             <div class="aptitude-header">
                 <span style="font-weight: 700; color: var(--accent-secondary);">Question #${idx + 1}</span>
-                <span class="experience-tag ${compTagClass}" style="font-size: 0.7rem;">${q.company}</span>
+                <span class="experience-tag ${compTagClass}" style="font-size: 0.7rem;">${q.company} style</span>
             </div>
             <div class="aptitude-question">${q.question}</div>
             <div class="aptitude-options-list">

@@ -1,8 +1,8 @@
-﻿import asyncio
+import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
 async def main():
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
+    client = AsyncIOMotorClient("mongodb://localhost:27017/education_platform")
     db = client.education_platform
 
     old_desc = "Read two lines from stdin. The first line contains space-separated true values (y_true). The second line contains space-separated predicted values (y_pred), same length as the first. Print the Mean Squared Error, rounded to 2 decimal places.\n\nExample:\nInput:\n3 5 2 7\n2.5 5 4 8\nOutput:\n0.94"

@@ -151,6 +151,32 @@
             color: #fff;
             border-color: var(--accent-primary);
         }
+        .resource-tag {
+            display: inline-block;
+            margin: 0 0 10px;
+            padding: 4px 9px;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            color: var(--accent-primary);
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .evidence-note {
+            margin: 10px 0 16px;
+            color: var(--text-muted);
+            font-size: .86rem;
+            line-height: 1.55;
+        }
+        .study-route {
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            border-left: 3px solid var(--accent-primary);
+            background: rgba(88, 166, 255, .045);
+            border-radius: 0 10px 10px 0;
+        }
+        .study-route h3 { margin: 0 0 8px; color: var(--text-main); font-size: 1rem; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -196,6 +222,8 @@
             <button class="cs-tab-btn" data-target="system">System Design</button>
             <button class="cs-tab-btn" data-target="ml">Machine Learning</button>
             <button class="cs-tab-btn" data-target="books">Textbook Library</button>
+            <button class="cs-tab-btn" data-target="evidence">Evidence Lab</button>
+            <button class="cs-tab-btn" data-target="routes">Study Routes</button>
         </div>
 
         <!-- Python Programming Panel -->
@@ -515,6 +543,87 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
                     </div>
                     <a href="https://www.cs.huji.ac.il/~shais/UnderstandingMachineLearning/understanding-machine-learning-theory-algorithms.pdf" target="_blank" class="book-btn">📖 Open Free PDF</a>
                 </div>
+                <div class="book-card glass-panel">
+                    <div>
+                        <span class="resource-tag">Software engineering</span>
+                        <div class="book-title">Software Engineering: A Practitioner's Approach</div>
+                        <div class="book-author">Roger S. Pressman & Bruce R. Maxim</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">Use this for requirements, architecture, testing, and lifecycle vocabulary that turns coding skills into engineering judgment.</p>
+                    </div>
+                    <a href="https://www.mheducation.com/highered/product/software-engineering-practitioner-s-approach-pressman-maxim.html" target="_blank" rel="noopener" class="book-btn">📚 Publisher reference</a>
+                </div>
+                <div class="book-card glass-panel">
+                    <div>
+                        <span class="resource-tag">Databases</span>
+                        <div class="book-title">Database System Concepts</div>
+                        <div class="book-author">Silberschatz, Korth & Sudarshan</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A reliable reference for relational design, SQL, transactions, indexing, query processing, and recovery.</p>
+                    </div>
+                    <a href="https://www.db-book.com/" target="_blank" rel="noopener" class="book-btn">📚 Book companion</a>
+                </div>
+                <div class="book-card glass-panel">
+                    <div>
+                        <span class="resource-tag">Networks</span>
+                        <div class="book-title">Computer Networking: A Top-Down Approach</div>
+                        <div class="book-author">James Kurose & Keith Ross</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">Builds network understanding from applications down through transport, routing, and link layers—ideal for interview explanations.</p>
+                    </div>
+                    <a href="https://gaia.cs.umass.edu/kurose_ross/" target="_blank" rel="noopener" class="book-btn">📚 Companion site</a>
+                </div>
+                <div class="book-card glass-panel">
+                    <div>
+                        <span class="resource-tag">Distributed systems</span>
+                        <div class="book-title">Designing Data-Intensive Applications</div>
+                        <div class="book-author">Martin Kleppmann</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A practical bridge from databases to replication, partitioning, stream processing, and distributed-system trade-offs.</p>
+                    </div>
+                    <a href="https://dataintensive.net/" target="_blank" rel="noopener" class="book-btn">📚 Book resources</a>
+                </div>
+                <div class="book-card glass-panel">
+                    <div>
+                        <span class="resource-tag">Programming languages</span>
+                        <div class="book-title">Crafting Interpreters</div>
+                        <div class="book-author">Robert Nystrom</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A complete free book for understanding parsers, syntax trees, runtime design, and the machinery underneath programming languages.</p>
+                    </div>
+                    <a href="https://craftinginterpreters.com/" target="_blank" rel="noopener" class="book-btn">📖 Read free online</a>
+                </div>
+                <div class="book-card glass-panel">
+                    <div>
+                        <span class="resource-tag">Machine learning</span>
+                        <div class="book-title">Dive into Deep Learning</div>
+                        <div class="book-author">Aston Zhang, Zachary Lipton, Mu Li & Alex Smola</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">Interactive, code-first deep-learning text that connects mathematics, implementations, and model behavior.</p>
+                    </div>
+                    <a href="https://d2l.ai/" target="_blank" rel="noopener" class="book-btn">📖 Read free online</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evidence Lab Panel -->
+        <div class="cs-panel" id="panel-evidence">
+            <div class="cs-card glass-panel" style="margin-bottom:20px;">
+                <h3>Landmark papers, read with a purpose</h3>
+                <p style="color:var(--text-muted); line-height:1.6;">These are primary sources behind the concepts students see in interviews. Each card says what to extract, so a paper becomes a learning asset rather than a difficult PDF.</p>
+            </div>
+            <div class="library-grid">
+                <div class="book-card glass-panel"><div><span class="resource-tag">Distributed systems</span><div class="book-title">Time, Clocks, and the Ordering of Events</div><div class="book-author">Leslie Lamport, 1978</div><p class="evidence-note"><strong>Read for:</strong> happens-before, logical clocks, and why distributed systems cannot rely on a single global time.</p></div><a class="book-btn" target="_blank" rel="noopener" href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf">Read primary paper</a></div>
+                <div class="book-card glass-panel"><div><span class="resource-tag">Large-scale systems</span><div class="book-title">MapReduce: Simplified Data Processing on Large Clusters</div><div class="book-author">Jeffrey Dean & Sanjay Ghemawat, 2004</div><p class="evidence-note"><strong>Read for:</strong> fault-tolerant batch processing, data locality, and the idea of hiding distributed execution behind a simple model.</p></div><a class="book-btn" target="_blank" rel="noopener" href="https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/">Read paper record</a></div>
+                <div class="book-card glass-panel"><div><span class="resource-tag">Storage systems</span><div class="book-title">The Google File System</div><div class="book-author">Sanjay Ghemawat, Howard Gobioff & Shun-Tak Leung, 2003</div><p class="evidence-note"><strong>Read for:</strong> chunk servers, a single master, replication, and designing around frequent component failure.</p></div><a class="book-btn" target="_blank" rel="noopener" href="https://research.google/pubs/the-google-file-system/">Read paper record</a></div>
+                <div class="book-card glass-panel"><div><span class="resource-tag">Databases</span><div class="book-title">Bigtable: A Distributed Storage System for Structured Data</div><div class="book-author">Fay Chang et al., 2006</div><p class="evidence-note"><strong>Read for:</strong> tablets, sparse distributed tables, and the design choices behind large-scale structured storage.</p></div><a class="book-btn" target="_blank" rel="noopener" href="https://research.google/pubs/bigtable-a-distributed-storage-system-for-structured-data/">Read paper record</a></div>
+                <div class="book-card glass-panel"><div><span class="resource-tag">Machine learning</span><div class="book-title">Attention Is All You Need</div><div class="book-author">Ashish Vaswani et al., 2017</div><p class="evidence-note"><strong>Read for:</strong> self-attention, positional information, parallelization, and the transformer architecture used by modern language models.</p></div><a class="book-btn" target="_blank" rel="noopener" href="https://arxiv.org/abs/1706.03762">Read on arXiv</a></div>
+                <div class="book-card glass-panel"><div><span class="resource-tag">Optimization</span><div class="book-title">Adam: A Method for Stochastic Optimization</div><div class="book-author">Diederik P. Kingma & Jimmy Ba, 2014</div><p class="evidence-note"><strong>Read for:</strong> adaptive learning rates, momentum estimates, bias correction, and why optimizer settings matter.</p></div><a class="book-btn" target="_blank" rel="noopener" href="https://arxiv.org/abs/1412.6980">Read on arXiv</a></div>
+            </div>
+        </div>
+
+        <!-- Study Routes Panel -->
+        <div class="cs-panel" id="panel-routes">
+            <div class="cs-card glass-panel">
+                <h3>Evidence-backed study routes</h3>
+                <p style="color:var(--text-muted); line-height:1.6;">Use a route when you need a defensible learning plan for an interview, project, or hackathon—not just another collection of bookmarks.</p>
+                <div class="study-route"><h3>Build a reliable backend in 14 days</h3><p>Start with REST contracts and SQL modeling, then add auth, tests, structured logging, and a deployment. Read the DBMS reference before optimizing; use the testing topic to decide what to automate.</p></div>
+                <div class="study-route"><h3>Prepare for a system-design interview</h3><p>Learn request flow and caching first, then read Lamport for ordering and MapReduce or GFS for failure-aware design. End by explaining the trade-offs in your own design rather than memorizing a diagram.</p></div>
+                <div class="study-route"><h3>Move from ML user to ML engineer</h3><p>Use the ML cheat sheet for fundamentals, learn optimization through Adam, then trace the transformer from attention math to a small implementation and a clearly documented project.</p></div>
             </div>
         </div>
     </div>

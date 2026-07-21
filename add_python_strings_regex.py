@@ -1,10 +1,10 @@
-﻿import asyncio
+import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
 TOPIC_SLUG = "python-strings-regex"
 
 async def main():
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
+    client = AsyncIOMotorClient("mongodb://localhost:27017/education_platform")
     db = client.education_platform
 
     # Idempotent: safe to re-run without creating duplicates

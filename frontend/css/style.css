@@ -1596,6 +1596,26 @@ body::after {
     width: fit-content;
 }
 
+/* Visual explanations and active-recall checkpoints */
+.concept-diagram,
+.knowledge-check {
+    margin: 22px 0;
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: rgba(88, 166, 255, 0.04);
+}
+.concept-diagram h3 { margin: 0 0 12px; font-family: var(--font-display); color: var(--accent-primary); }
+.concept-diagram .mermaid { display: flex; justify-content: center; overflow-x: auto; }
+.knowledge-label { color: var(--accent-secondary); display: block; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.knowledge-question { color: var(--text-main); font-weight: 600; line-height: 1.55; }
+.knowledge-options { display: grid; gap: 8px; }
+.knowledge-option { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-tertiary); color: var(--text-main); cursor: pointer; text-align: left; font: inherit; }
+.knowledge-option:hover:not(:disabled) { border-color: var(--accent-primary); }
+.knowledge-option.is-correct { border-color: var(--accent-green); background: rgba(63, 185, 80, .12); }
+.knowledge-option.is-incorrect { border-color: var(--accent-red); background: rgba(248, 81, 73, .12); }
+.knowledge-result { color: var(--text-muted); line-height: 1.6; margin: 12px 0 0; }
+
 .roadmap-detail-panel {
     margin-top: 20px;
     padding-top: 20px;

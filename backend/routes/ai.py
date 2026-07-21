@@ -11,6 +11,21 @@ from bson import ObjectId
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
+
+def topic_learning_context(topic: dict) -> str:
+    """Flatten the real lesson material; topics store it under subtopics."""
+    sections = []
+    for subtopic in topic.get("subtopics", []):
+        parts = [f"Subtopic: {subtopic.get('title', '')}"]
+        for block in subtopic.get("content_blocks", []):
+            if block.get("type") in {"text", "heading", "list", "callout"}:
+                value = block.get("value", "")
+                if block.get("type") == "list":
+                    value = "; ".join(block.get("items", []))
+                parts.append(str(value))
+        sections.append("\n".join(parts))
+    return "\n\n".join(sections)[:14000] or json.dumps(topic.get("content_blocks", []))
+
 async def call_groq_json(messages: list) -> str:
     if not settings.GROQ_API_KEY:
         return (
@@ -91,7 +106,7 @@ async def recommend_topics(req: AIRecommendRequest, current_user: dict = Depends
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
         
-    content_blocks_str = json.dumps(topic.get("content_blocks", []))
+    content_blocks_str = topic_learning_context(topic)
     
     system_prompt = (
         f"You are an expert learning consultant. Based on the user's answers and progress for the topic '{topic.get('title')}', "
@@ -118,7 +133,7 @@ async def explain_topic(req: AIExplainRequest, current_user: dict = Depends(get_
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
         
-    content_blocks_str = json.dumps(topic.get("content_blocks", []))
+    content_blocks_str = topic_learning_context(topic)
     
     system_prompt = (
         f"You are a computer science professor explaining the topic '{topic.get('title')}' "
@@ -128,7 +143,8 @@ async def explain_topic(req: AIExplainRequest, current_user: dict = Depends(get_
         "- If 'fresher': Use simple terms, analogies, basic syntax explanations.\n"
         "- If 'intermediate': Focus on typical use cases, intermediate concepts, structures.\n"
         "- If 'experienced': Focus on optimization, memory layout, system implications, and code patterns.\n"
-        "Ground your explanation in the provided content blocks, but enrich it with your knowledge."
+        "Ground your explanation in the provided content blocks, but enrich it with your knowledge. "
+        "Use clear Markdown sections: Mental model, Step-by-step explanation, Worked example, Common pitfalls, and Quick self-check."
     )
     
     messages = [
@@ -146,7 +162,7 @@ async def chat_topic(req: AIChatRequest, current_user: dict = Depends(get_curren
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
         
-    content_blocks_str = json.dumps(topic.get("content_blocks", []))
+    content_blocks_str = topic_learning_context(topic)
     
     # Save chat session history
     chat_sessions_coll = get_collection("chat_sessions")

@@ -1,8 +1,8 @@
-﻿import asyncio
+import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
 async def main():
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
+    client = AsyncIOMotorClient("mongodb://localhost:27017/education_platform")
     db = client.education_platform
     names = await db.list_collection_names()
     print("Collections:", names)
