@@ -1,3 +1,4 @@
+$patchScript = @'
 path = "frontend/roadmap.html"
 with open(path, "r", encoding="utf-8", newline="") as f:
     content = f.read()
@@ -75,3 +76,11 @@ else:
     with open(path, "w", encoding="utf-8", newline="") as f:
         f.write(content)
     print("roadmap.html patched successfully")
+'@
+
+$repoRoot = (Get-Location).Path
+$scriptPath = Join-Path $repoRoot "patch_roadmap_html.py"
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($scriptPath, $patchScript, $utf8NoBom)
+
+python patch_roadmap_html.py

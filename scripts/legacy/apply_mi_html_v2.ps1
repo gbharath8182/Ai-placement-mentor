@@ -32,23 +32,25 @@ $html = @'
         </div>
 
         <div id="mi-domain-select" class="mi-page-panel glass-panel">
-            <h1>Mock Interview</h1>
-            <p>Pick a domain to start a practice interview.</p>
-            <div id="mi-domain-grid" class="mi-domain-grid"></div>
-            <p id="mi-domain-empty" class="hidden" style="color: var(--text-muted);">
-                No domains with interview content yet. Check back soon.
-            </p>
-        </div>
+            <div id="mi-domain-grid-wrap">
+                <h1>Mock Interview</h1>
+                <p>Pick a domain to start a practice interview.</p>
+                <div id="mi-domain-grid" class="mi-domain-grid"></div>
+                <p id="mi-domain-empty" class="hidden" style="color: var(--text-muted);">
+                    No domains with interview content yet. Check back soon.
+                </p>
+            </div>
 
-        <div id="mi-mode-select" class="mi-page-panel glass-panel hidden">
-            <button class="mi-back-btn" id="mi-back-to-domains-1">&larr; Change domain</button>
-            <h2>Start Mock Interview</h2>
-            <p>Choose a mode to begin.</p>
-            <div class="mi-mode-grid">
-                <button class="mi-mode-btn" data-mode="coding">Coding<span class="mi-mode-desc">AI-generated coding questions for this domain</span></button>
-                <button class="mi-mode-btn" data-mode="hr">HR / Behavioral<span class="mi-mode-desc">Soft skills, teamwork, innovation</span></button>
-                <button class="mi-mode-btn" data-mode="technical">Technical Panel<span class="mi-mode-desc">In-depth engineering interview</span></button>
-                <button class="mi-mode-btn" data-mode="mixed">Mixed<span class="mi-mode-desc">A bit of everything</span></button>
+            <div id="mi-mode-grid-wrap" class="hidden">
+                <button class="mi-back-link" id="mi-back-to-domains">&larr; Change domain</button>
+                <h2>Choose a Mode</h2>
+                <p>Select how you want to be interviewed.</p>
+                <div class="mi-mode-grid">
+                    <button class="mi-mode-btn" data-mode="coding">Coding<span class="mi-mode-desc">AI-generated coding questions for this domain</span></button>
+                    <button class="mi-mode-btn" data-mode="hr">HR / Behavioral<span class="mi-mode-desc">Soft skills, teamwork, innovation</span></button>
+                    <button class="mi-mode-btn" data-mode="technical">Technical Panel<span class="mi-mode-desc">In-depth engineering interview</span></button>
+                    <button class="mi-mode-btn" data-mode="mixed">Mixed<span class="mi-mode-desc">A bit of everything</span></button>
+                </div>
             </div>
         </div>
 
@@ -58,6 +60,9 @@ $html = @'
             <h3 id="mi-question-text"></h3>
             <textarea id="mi-answer-input" rows="8" placeholder="Type your answer..."></textarea>
             <button id="mi-submit-btn" class="btn-primary">Submit Answer</button>
+            <div class="mi-end-interview-row">
+                <button id="mi-end-btn">End Interview Now &amp; See Score</button>
+            </div>
         </div>
 
         <div id="mi-feedback-body" class="mi-page-panel glass-panel hidden">
@@ -76,8 +81,10 @@ $html = @'
             <h2>Interview Complete</h2>
             <p>Average score: <span id="mi-avg-score"></span>/10</p>
             <div id="mi-summary-list"></div>
-            <button id="mi-restart-btn" class="btn-secondary">Try Another Mode</button>
-            <button class="mi-back-btn" id="mi-back-to-domains-2">&larr; Change domain</button>
+            <div class="mi-summary-actions">
+                <button id="mi-restart-btn" class="btn-secondary">Try Another Mode (Same Domain)</button>
+                <button id="mi-new-domain-btn" class="btn-secondary">Pick a Different Domain</button>
+            </div>
         </div>
 
     </main>
@@ -92,4 +99,4 @@ $html = @'
 
 $target = Join-Path $repoRoot "frontend\mock-interview.html"
 [System.IO.File]::WriteAllText($target, $html, $utf8NoBom)
-Write-Host "Wrote: frontend\mock-interview.html"
+Write-Host "Rewrote: frontend\mock-interview.html"
