@@ -7,12 +7,12 @@
 | 0 — Investigation | Audited FastAPI, MongoDB schemas, vanilla frontend and deployment assumptions; preserved the original stack and records. | Intended remote verified; production collection counts read only. |
 | 1 — Groq | Replaced duplicated deprecated-model clients with configurable 20b/120b routing, bounded retries, structured schemas and safe SSE errors. | Real account model access, both completions and streaming passed; mocked failures and fallback passed. |
 | 2 — Reliability | Bounded MongoDB operations, verified TLS, reconnectable lifecycle, liveness/readiness and curated content fallback. | Database recovery tests and real Atlas ping passed. |
-| 3 — Design | Public home/catalog, restrained navy/teal design, consistent branding, readable themes, keyboard focus and collapsible mobile tutor. | Fourteen real Edge page/viewport checks passed, including the library, theme and mobile-panel behavior. |
+| 3 — Design | Public home/catalog plus a shared text-led premium workspace sidebar, restrained surfaces, readable themes, keyboard focus and collapsible mobile navigation/tutor. | Thirty real Edge desktop/mobile workspace and authentication checks passed with isolated API fixtures. |
 | 4 — Curriculum | Fifteen original Python lessons, prerequisites, examples, diagrams and thirty server-graded checks; fifteen linked coding tasks. | Strict schema/reference validation passed; final example/reference-solution tests are reported in the final test run. |
 | 5 — Mastery | User-scoped bounded evidence, distinct quiz/coding sources, missed-concept feedback and fourteen-day review. Reading never counts as mastery. | Thirty-six isolated mastery tests; practice and API integration tests. |
 | 6 — AI quality | Selected-lesson grounding, scoped persistent chat, structured interview rubrics, persisted sessions and a twelve-case benchmark. | Mocked tutoring/interview/resume tests; benchmark is deterministic contract testing, not a live-model consistency study. |
 | 7 — Security | Validated JWTs, single-use hashed reset tokens, reset revocation, secure production cookies, origin checks, rate limits, sanitized Markdown and remote-only code execution. | Authentication, isolation, hostile-response and execution-boundary tests. |
-| 8 — Verification | Backend/API/frontend tests, CI, optional live-service diagnostics and real browser smoke tooling. | Final local run: 331 tests and 381 subtests; 35 Node behavior tests. |
+| 8 — Verification | Backend/API/frontend tests, CI, optional live-service diagnostics and real browser smoke tooling. | Final local run: 359 tests and 381 subtests; 38 Node behavior tests; 30 workspace browser checks. |
 | Contributor cleanup | Archived 95 historical root scripts under scripts/legacy; kept their contents for reference and warned against execution. Added contributor, architecture, recovery and deployment guidance. | Diff/secret-pattern checks before commit. |
 
 ## Data safety
@@ -26,14 +26,14 @@ The authored curriculum and practice tasks still support file fallback when thei
 ## External configuration still required
 
 - Local Groq credentials work; set the valid key separately in the existing Render service. Local .env changes are never pushed.
-- Brevo's active API key was confirmed, but API requests returned 401 due to blocked source IPs. Authorize only recognized development and Render outbound addresses. SMTP_FROM_EMAIL must be a verified sender. Delivery to the owner's authorized mailbox has not yet been demonstrated.
-- Free Render requires HTTPS transactional email rather than its blocked SMTP ports. The Brevo/Resend implementation is tested with mocked responses; provider acceptance is not proof of inbox delivery.
+- The owner configured Brevo on Render, verified the sender and authorized the actual Render outbound ranges while keeping API IP blocking enabled. The owner confirmed the subsequent password-reset attempt completed. Local development IPs require separate authorization; do not disable IP protection to make local diagnostics pass.
+- Free Render uses HTTPS transactional email rather than its blocked SMTP ports. Provider acceptance alone is not proof of inbox delivery; the production reset confirmation here was supplied by the owner.
 - Configure a trusted HTTPS PISTON_EXECUTE_URL and any required PISTON_API_KEY. No public endpoint is silently assumed. Until configured, execution returns an explicit unavailable response rather than running code on the app server.
 - Set production APP_URL, RESET_PASSWORD_BASE_URL and ALLOWED_ORIGINS to the real HTTPS deployment origin, or use the Render external URL defaults. Review docs/deployment.md.
 
 ## Honest validation boundaries
 
-Local isolated tests use Python 3.13 with updated dependencies. GitHub CI passed on Python 3.11 for commit 8822630. The original remote confirms that commit on main. Follow-up tooling/documentation changes need their own CI result. Render still served the old revision at the last check (/health/ready returned 404); no successful upgraded deployment or authenticated production workflow is claimed.
+Local isolated tests use Python 3.13 with updated dependencies. GitHub CI passed on Python 3.11 for commit 8822630. Follow-up changes need their own CI result. The owner confirmed Render revision 6d1947b was Live, and public readiness returned 200 with API version 2.0.0. The premium workspace redesign is validated locally; its production deployment requires a separate confirmation.
 
 Rate limiting is per-process and requires a shared store for multi-worker enforcement. Refresh tokens are not backed by a rotating replay-detection session store. Browser access tokens remain susceptible to any future same-origin XSS. Reset mail uses in-process background delivery, not a durable queue. The Motor driver is retained for compatibility; a separately tested migration to PyMongo's async API remains future work.
 
@@ -45,10 +45,18 @@ Replaced commercial publisher/companion cards with actual legal open resources, 
 
 The public README now describes the product rather than internal release status, and includes Mermaid architecture and learning-loop diagrams. Internal progress remains in this checkpoint.
 
+## Premium workspace redesign
+
+The owner requested a high-priority redesign of authenticated pages after reviewing the live site. Replaced repeated horizontal icon-heavy navigation with a shared text-led left sidebar, active page state, account/appearance controls and a mobile drawer with Escape/focus behavior. Removed decorative SVG domain/stat cards rather than merely recoloring them. Added quiet matte/olive workspace surfaces, clearer density/spacing and consistent forms, charts and content panels. The public homepage remains unchanged; the authenticated catalog joins the workspace shell. Login/signup/recovery screens use an editorial split layout without the old logo illustration.
+
+Dashboard cards now use native buttons and textContent; topic entries use encoded native links. Search filters real loaded domains, errors have retry controls, unavailable statistics remain unclaimed and singular streak/lesson labels are correct. Thirty real desktop/mobile page checks passed using isolated API fixtures. Node rendering regressions passed; final suite counts are reported with this release.
+
+The deployed revision 6d1947b was confirmed by the owner in Render and public API readiness returned 200 with version 2.0.0. Brevo's verified sender was confirmed, and the owner authorized the two actual Render outbound ranges while keeping API IP blocking enabled. The owner subsequently confirmed the new reset attempt completed; no credentials or reset links were shared or committed.
+
 ## Resume next session
 
 1. Check git status, recent commits, CI and the existing Render deployment before making changes.
-2. Resolve Brevo authorized IPs, verify sender and send exactly one authorized reset test; never log its link or change the owner's password as part of testing.
+2. Confirm the premium workspace revision is deployed on Render; repeat reset delivery only if needed and explicitly authorized, never logging its link or changing the owner's password as part of testing.
 3. Configure and live-test the trusted remote sandbox using the authored reference tasks.
 4. Validate the production homepage, public curriculum, readiness and authenticated tutoring after deployment; inspect Render logs through an authorized connection.
 5. Run a live interview grading benchmark with explicitly approved cost; expand other domains after reviewing the flagship curriculum.

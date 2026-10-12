@@ -1,189 +1,145 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    // 1. Populate User Details
+let dashboardDomains = [];
+let activeTopicRequest = 0;
+
+document.addEventListener('DOMContentLoaded', async () => {
     const user = getUser();
     if (user) {
-        document.getElementById("user-name").textContent = user.name;
-        document.getElementById("hero-user-name").textContent = user.name;
-        
-        const expBadge = document.getElementById("user-exp-badge");
-        expBadge.textContent = user.profile.experience_level;
-        expBadge.className = `experience-tag exp-${user.profile.experience_level}`;
+        document.getElementById('user-name').textContent = user.name;
+        document.getElementById('hero-user-name').textContent = user.name;
+        document.getElementById('user-exp-badge').textContent = user.profile?.experience_level || 'fresher';
     }
-    
-    // 2. Fetch and render Domains
-    try {
-        const res = await authFetch("/domains");
-        if (res.ok) {
-            const domains = await res.json();
-            renderDomains(domains);
-        } else {
-            console.error("Failed to fetch domains");
-        }
-    } catch (err) {
-        console.error("Error fetching domains:", err);
-    }
-    
-    // 3. Fetch progress for stats widget
-    try {
-        if (user) {
-            const progressRes = await authFetch(`/progress/${user.id}`);
-            if (progressRes.ok) {
-                const progressList = await progressRes.json();
-                const completedCount = progressList.filter(p => p.status === 'completed').length;
-                document.getElementById("stats-completed").textContent = `${completedCount} Completed`;
-                const streakResponse = await authFetch("/activity/streak");
-                if (streakResponse.ok) {
-                    const streak = await streakResponse.json();
-                    document.getElementById("stats-streak").textContent = `${streak.current_streak || 0} Days`;
-                }
-            }
-        }
-    } catch (err) {
-        console.error("Error loading progress stats:", err);
-    }
-    
-    // Setup close button for topics drawer
-    document.getElementById("close-drawer-btn").addEventListener("click", () => {
-        document.getElementById("topics-drawer").style.display = "none";
+    document.getElementById('domain-search')?.addEventListener('input', event => {
+        const query = event.target.value.trim().toLowerCase();
+        renderDomains(dashboardDomains.filter(domain => `${domain.title} ${domain.description}`.toLowerCase().includes(query)));
     });
+    document.getElementById('close-drawer-btn').addEventListener('click', () => {
+        activeTopicRequest += 1;
+        document.getElementById('topics-drawer').style.display = 'none';
+        document.querySelectorAll('.domain-card').forEach(card => card.setAttribute('aria-expanded', 'false'));
+        document.querySelector('.domain-card')?.focus();
+    });
+    await Promise.allSettled([loadDashboardDomains(), loadDashboardStats(user)]);
 });
 
+function dashboardElement(tag, className, text) {
+    const result = document.createElement(tag);
+    if (className) result.className = className;
+    if (text !== undefined) result.textContent = text;
+    return result;
+}
+
+async function loadDashboardDomains() {
+    const grid = document.getElementById('domain-grid');
+    try {
+        const response = await authFetch('/domains');
+        if (!response.ok) throw new Error('unavailable');
+        dashboardDomains = await response.json();
+        renderDomains(dashboardDomains);
+    } catch {
+        const notice = dashboardElement('div', 'workspace-empty', 'Learning paths could not be loaded. Your saved progress is unchanged. ');
+        const retry = dashboardElement('button', 'btn-secondary', 'Retry');
+        retry.type = 'button';
+        retry.addEventListener('click', loadDashboardDomains);
+        notice.appendChild(retry);
+        grid.replaceChildren(notice);
+    }
+}
+
+async function loadDashboardStats(user) {
+    if (!user?.id) return;
+    try {
+        const responses = await Promise.all([authFetch(`/progress/${encodeURIComponent(user.id)}`), authFetch('/activity/streak')]);
+        if (responses[0].ok) {
+            const progress = await responses[0].json();
+            document.getElementById('stats-completed').textContent = String(progress.filter(item => item.status === 'completed').length);
+        }
+        if (responses[1].ok) {
+            const streak = await responses[1].json();
+            const days = Number(streak.current_streak) || 0;
+            document.getElementById('stats-streak').textContent = `${days} ${days === 1 ? 'day' : 'days'}`;
+        }
+    } catch { }
+}
+
 function renderDomains(domains) {
-    const grid = document.getElementById("domain-grid");
-    grid.innerHTML = "";
-    
-    if (domains.length === 0) {
-        grid.innerHTML = `<p>No curriculum is available yet. Please contact the platform administrator.</p>`;
+    const grid = document.getElementById('domain-grid');
+    grid.replaceChildren();
+    if (!domains.length) {
+        grid.appendChild(dashboardElement('p', 'workspace-empty', dashboardDomains.length ? 'No paths match your search. Try a different subject.' : 'No curriculum is available yet. Please check back later.'));
         return;
     }
-    
     domains.forEach(domain => {
-        let iconHtml = ``;
-        if (domain.slug === "python") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.35));"><path d="M12 10H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2"></path><path d="M12 14h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v2"></path><circle cx="8" cy="8" r="1" fill="currentColor"></circle><circle cx="16" cy="16" r="1" fill="currentColor"></circle></svg>`;
-        } else if (domain.slug === "machine-learning" || domain.slug === "ml") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(188, 140, 255, 0.35));"><circle cx="4" cy="6" r="2"></circle><circle cx="4" cy="12" r="2"></circle><circle cx="4" cy="18" r="2"></circle><circle cx="12" cy="6" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="18" r="2"></circle><circle cx="20" cy="9" r="2"></circle><circle cx="20" cy="15" r="2"></circle><line x1="6" y1="6" x2="10" y2="6"></line><line x1="6" y1="6" x2="10" y2="12"></line><line x1="6" y1="12" x2="10" y2="6"></line><line x1="6" y1="12" x2="10" y2="12"></line><line x1="6" y1="12" x2="10" y2="18"></line><line x1="6" y1="18" x2="10" y2="12"></line><line x1="6" y1="18" x2="10" y2="18"></line><line x1="14" y1="6" x2="18" y2="9"></line><line x1="14" y1="12" x2="18" y2="9"></line><line x1="14" y1="12" x2="18" y2="15"></line><line x1="14" y1="18" x2="18" y2="15"></line></svg>`;
-        } else if (domain.slug === "dsa") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.35));"><circle cx="12" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="12" r="2.5"></circle><circle cx="6" cy="19" r="2.5"></circle><line x1="10.5" y1="6.5" x2="7.5" y2="10.5"></line><line x1="13.5" y1="6.5" x2="16.5" y2="10.5"></line><line x1="6" y1="14.5" x2="6" y2="16.5"></line></svg>`;
-        } else if (domain.slug === "web-dev") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(210, 153, 34, 0.35));"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline><line x1="12" y1="2" x2="12" y2="22"></line></svg>`;
-        } else if (domain.slug === "system-design") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(188, 140, 255, 0.35));"><rect x="2" y="2" width="20" height="5" rx="1"></rect><rect x="2" y="9" width="20" height="5" rx="1"></rect><rect x="2" y="16" width="20" height="5" rx="1"></rect><path d="M6 4.5h.01M6 11.5h.01M6 18.5h.01"></path></svg>`;
-        } else if (domain.slug === "sde") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.35));"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9l3 3-3 3M13 15h4"></path></svg>`;
-        } else if (domain.slug === "cloud-devops") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.35));"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path><path d="M12 12v5M9 14l3-3 3 3"></path></svg>`;
-        } else if (domain.slug === "cybersecurity") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.35));"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 8v4M12 16h.01"></path></svg>`;
-        } else if (domain.slug === "data-analytics") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.35));"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line><path d="M3 20h18"></path><path d="M4 11l5-5 4 4 6-6"></path></svg>`;
-        } else if (domain.slug === "mobile-development") {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.35));"><rect x="6" y="2" width="12" height="20" rx="3" ry="3"></rect><line x1="11" y1="18" x2="13" y2="18"></line><path d="M9 6h6M9 10h4"></path></svg>`;
-        } else {
-            iconHtml = `<svg class="domain-icon-svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
-        }
-        
-        const card = document.createElement("div");
-        card.className = "domain-card glass-panel";
-        card.innerHTML = `
-            <div class="domain-icon" style="margin-bottom: 15px;">${iconHtml}</div>
-            <h3 class="domain-name">${domain.title}</h3>
-            <p class="domain-desc">${domain.description}</p>
-            <div class="domain-action">View Topics &rarr;</div>
-        `;
-        
-        card.addEventListener("click", () => {
+        const card = dashboardElement('button', 'domain-card glass-panel');
+        card.type = 'button';
+        card.setAttribute('aria-controls', 'topics-drawer');
+        card.setAttribute('aria-expanded', 'false');
+        card.append(dashboardElement('span', 'domain-card-kicker', 'Learning path'), dashboardElement('span', 'domain-name', domain.title), dashboardElement('span', 'domain-desc', domain.description));
+        const footer = dashboardElement('span', 'domain-card-foot');
+        const count = Array.isArray(domain.topics) ? domain.topics.length : 0;
+        footer.append(dashboardElement('span', '', count ? `${count} ${count === 1 ? 'lesson' : 'lessons'}` : 'Explore the curriculum'), dashboardElement('strong', '', 'View path →'));
+        card.appendChild(footer);
+        card.addEventListener('click', () => {
+            grid.querySelectorAll('.domain-card').forEach(item => item.setAttribute('aria-expanded', 'false'));
+            card.setAttribute('aria-expanded', 'true');
             fetchAndShowTopics(domain);
         });
-        
         grid.appendChild(card);
     });
 }
 
 async function fetchAndShowTopics(domain) {
-    const drawer = document.getElementById("topics-drawer");
-    const listContainer = document.getElementById("topic-list");
-    const drawerTitle = document.getElementById("drawer-domain-title");
-    
-    drawerTitle.textContent = `${domain.title} Topics`;
-    listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">Loading topics...</div>`;
-    drawer.style.display = "block";
-    drawer.scrollIntoView({ behavior: "smooth" });
-    
+    const request = ++activeTopicRequest;
+    const drawer = document.getElementById('topics-drawer');
+    const list = document.getElementById('topic-list');
+    const title = document.getElementById('drawer-domain-title');
+    title.textContent = domain.title;
+    title.setAttribute('tabindex', '-1');
+    drawer.style.display = 'block';
+    list.replaceChildren(dashboardElement('p', 'workspace-empty', 'Loading lessons…'));
+    drawer.scrollIntoView({ behavior: 'auto', block: 'start' });
+    title.focus({ preventScroll: true });
     try {
-        // Fetch topics and user progress concurrently
-        const user = getUser();
-        // Topics are public learning content; progress is an optional personal
-        // enhancement. A stale login must never hide the curriculum itself.
-        const topicsRes = await authFetch(`/domains/${domain.slug}/topics`);
-        if (!topicsRes.ok) {
-            listContainer.innerHTML = `<div style="text-align: center; color: var(--accent-red); padding: 20px;">Failed to load topics.</div>`;
-            return;
-        }
-        const topics = await topicsRes.json();
+        const response = await authFetch(`/domains/${encodeURIComponent(domain.slug)}/topics`);
+        if (!response.ok) throw new Error('unavailable');
+        const topics = await response.json();
         const progressMap = {};
+        const user = getUser();
         if (user?.id) {
             try {
-                const progressRes = await authFetch(`/progress/${user.id}`);
-                if (progressRes.ok) {
-                    const progressList = await progressRes.json();
-                    progressList.forEach(p => { progressMap[p.topic_slug] = p.status; });
-                } else {
-                    console.warn("Progress unavailable; showing topics without status.");
-                }
-            } catch (progressError) {
-                console.warn("Progress request failed; showing topics without status.", progressError);
-            }
+                const progressResponse = await authFetch(`/progress/${encodeURIComponent(user.id)}`);
+                if (progressResponse.ok) (await progressResponse.json()).forEach(progress => { progressMap[progress.topic_slug] = progress.status; });
+            } catch { }
         }
-        renderTopics(topics, progressMap);
-    } catch (err) {
-        console.error("Error loading topics:", err);
-        listContainer.innerHTML = `<div style="text-align: center; color: var(--accent-red); padding: 20px;">Connection failed.</div>`;
+        if (request === activeTopicRequest) renderTopics(topics, progressMap);
+    } catch {
+        if (request !== activeTopicRequest) return;
+        const notice = dashboardElement('div', 'workspace-empty', 'These lessons are temporarily unavailable. ');
+        const retry = dashboardElement('button', 'btn-secondary', 'Retry');
+        retry.type = 'button';
+        retry.addEventListener('click', () => fetchAndShowTopics(domain));
+        notice.appendChild(retry);
+        list.replaceChildren(notice);
     }
 }
 
 function renderTopics(topics, progressMap) {
-    const listContainer = document.getElementById("topic-list");
-    listContainer.innerHTML = "";
-    
-    if (topics.length === 0) {
-        listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">No topics under this domain yet. Check back soon!</div>`;
-        return;
-    }
-    
+    const list = document.getElementById('topic-list');
+    list.replaceChildren();
+    if (!topics.length) { list.appendChild(dashboardElement('p', 'workspace-empty', 'This path has no published lessons yet.')); return; }
     topics.forEach(topic => {
-        const status = progressMap[topic.slug] || "not_started";
-        
-        // Map status to readable label and CSS class
-        let statusLabel = "Not Started";
-        let statusClass = "status-not-started";
-        if (status === "completed") {
-            statusLabel = "Completed";
-            statusClass = "status-completed";
-        } else if (status === "in_progress") {
-            statusLabel = "In Progress";
-            statusClass = "status-in-progress";
-        }
-        
-        const item = document.createElement("div");
-        item.className = "topic-item";
-        item.innerHTML = `
-            <div class="topic-info">
-                <span class="topic-title">${topic.title}</span>
-                <div class="topic-meta">
-                    <span class="problem-difficulty diff-${topic.difficulty}">${topic.difficulty}</span>
-                    <span>Status: <span class="status-badge ${statusClass}">${statusLabel}</span></span>
-                </div>
-            </div>
-            <div class="btn-chip" style="background: var(--bg-tertiary);">Open Topic &rarr;</div>
-        `;
-        
-        item.addEventListener("click", () => {
-            // Redirect to clean topic URL
-            window.location.href = `/topic/${topic.slug}`;
-        });
-        
-        listContainer.appendChild(item);
+        const status = progressMap[topic.slug] || 'not_started';
+        const item = dashboardElement('a', 'topic-item');
+        item.href = `/topic/${encodeURIComponent(topic.slug)}`;
+        const information = dashboardElement('div', 'topic-info');
+        information.appendChild(dashboardElement('span', 'topic-title', topic.title));
+        const metadata = dashboardElement('div', 'topic-meta');
+        const difficulty = ['beginner', 'intermediate', 'advanced'].includes(topic.difficulty) ? topic.difficulty : 'beginner';
+        const statusClass = status === 'completed' ? 'status-completed' : status === 'in_progress' ? 'status-in-progress' : 'status-not-started';
+        const label = status === 'completed' ? 'Completed' : status === 'in_progress' ? 'In progress' : 'Not started';
+        metadata.append(dashboardElement('span', `problem-difficulty diff-${difficulty}`, difficulty), dashboardElement('span', `status-badge ${statusClass}`, label));
+        information.appendChild(metadata);
+        item.append(information, dashboardElement('span', 'domain-action', 'Study lesson →'));
+        list.appendChild(item);
     });
 }
 

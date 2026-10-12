@@ -42,7 +42,7 @@ function renderCards(data) {
 
 function renderDomainTime(payload) {
     const labels = payload.data.map(row => row.date);
-    const colors = ["#58a6ff", "#3fb950", "#bc8cff", "#d29922", "#f85149", "#2dd4bf"];
+    const colors = ["#536f49", "#809276", "#9fab93", "#747d68", "#bcc4ac", "#3e5740"];
     new Chart(document.getElementById("domain-time-chart"), {
         type: "bar",
         data: { labels, datasets: payload.series.map((name, i) => ({ label: name, data: payload.data.map(row => row[name] || 0), backgroundColor: colors[i % colors.length] })) },
@@ -53,7 +53,7 @@ function renderDomainTime(payload) {
 function renderSolved(rows) {
     new Chart(document.getElementById("solved-chart"), {
         type: "line",
-        data: { labels: rows.map(row => row.date), datasets: [{ label: "Solved", data: rows.map(row => row.count), borderColor: "#3fb950", backgroundColor: "rgba(63,185,80,.16)", fill: true, tension: .3 }] },
+        data: { labels: rows.map(row => row.date), datasets: [{ label: "Solved", data: rows.map(row => row.count), borderColor: "#809276", backgroundColor: "rgba(128,146,118,.12)", fill: true, tension: .3 }] },
         options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
     });
 }
@@ -61,7 +61,7 @@ function renderSolved(rows) {
 function renderCoverage(rows) {
     new Chart(document.getElementById("coverage-chart"), {
         type: "radar",
-        data: { labels: rows.map(row => row.domain), datasets: [{ label: "Coverage %", data: rows.map(row => row.coverage), borderColor: "#bc8cff", backgroundColor: "rgba(188,140,255,.18)" }] },
+        data: { labels: rows.map(row => row.domain), datasets: [{ label: "Coverage %", data: rows.map(row => row.coverage), borderColor: "#809276", backgroundColor: "rgba(128,146,118,.12)" }] },
         options: { responsive: true, scales: { r: { suggestedMin: 0, suggestedMax: 100 } } }
     });
 }

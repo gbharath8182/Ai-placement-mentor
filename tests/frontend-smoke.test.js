@@ -43,6 +43,7 @@ class FakeElement {
         }
     }
     appendChild(child) { child.parentElement = this; this.children.push(child); return child; }
+    append(...children) { children.forEach(child => this.appendChild(child)); }
     replaceChildren(...children) { this.text = ''; this.html = ''; this.children = []; children.forEach(child => this.appendChild(child)); }
     remove() { this.parentElement.children = this.parentElement.children.filter(child => child !== this); }
     querySelector(selector) { return this.selectors.get(selector) || null; }
@@ -158,6 +159,46 @@ test('lesson checks use explicit identity or exact legacy coordinates, not repea
     assert.equal(resolve({question: 'Repeated question'}, 1, 3).block_id, 'second');
     assert.equal(resolve({question: 'Repeated question'}, 2, 3), undefined);
     assert.equal(resolve({id: 'missing'}, 1, 3), undefined);
+});
+
+test('dashboard renders keyboard-native domain cards without icons or unsafe HTML', () => {
+    const harness = browser({ pathname: '/dashboard' });
+    const grid = harness.element('domain-grid');
+    harness.load('dashboard.js');
+    harness.context.renderDomains([{ slug: 'python', title: '<img src=x onerror=alert(1)>', description: 'Learn <script>without injection</script>', topics: ['intro'] }]);
+    assert.equal(grid.children.length, 1);
+    const card = grid.children[0];
+    assert.equal(card.tagName, 'button');
+    assert.equal(card.type, 'button');
+    assert.equal(card.getAttribute('aria-controls'), 'topics-drawer');
+    assert.equal(card.getAttribute('aria-expanded'), 'false');
+    assert.equal(card.innerHTML, '');
+    assert.ok(card.textContent.includes('<img src=x onerror=alert(1)>'));
+    assert.ok(card.textContent.includes('1 lesson'));
+    assert.ok(!card.children.some(child => child.tagName === 'svg'));
+});
+
+test('dashboard topic links encode slugs and use bounded visual states', () => {
+    const harness = browser({ pathname: '/dashboard' });
+    const list = harness.element('topic-list');
+    harness.load('dashboard.js');
+    harness.context.renderTopics([{ slug: 'unsafe?next=/private', title: '<script>Lesson title</script>', difficulty: 'bad-class injection' }], {});
+    const link = list.children[0];
+    assert.equal(link.tagName, 'a');
+    assert.equal(link.href, '/topic/unsafe%3Fnext%3D%2Fprivate');
+    assert.equal(link.innerHTML, '');
+    assert.ok(link.textContent.includes('<script>Lesson title</script>'));
+    assert.ok(link.textContent.includes('beginner'));
+    assert.ok(link.textContent.includes('Not started'));
+});
+
+test('dashboard provides a genuine empty state instead of placeholder cards', () => {
+    const harness = browser({ pathname: '/dashboard' });
+    const grid = harness.element('domain-grid');
+    harness.load('dashboard.js');
+    harness.context.renderDomains([]);
+    assert.equal(grid.children.length, 1);
+    assert.ok(grid.children[0].textContent.includes('No curriculum'));
 });
 
 function streamResponse(chunks, readOverride) {

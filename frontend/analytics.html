@@ -5,24 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics | AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+    <script src="/static/js/app-shell.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script>(function(){try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light-theme');}catch{}})();</script>
 </head>
 <body>
-    <nav class="dashboard-nav">
-        <a href="/dashboard" class="nav-brand"><span>AI Placement Mentor</span></a>
-        <div class="nav-user">
-            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
-            <a href="/roadmap" class="btn-secondary">Roadmaps</a>
-            <a href="/profile" class="btn-secondary">Profile</a>
-            <a href="/analytics" class="btn-secondary nav-link-active">Analytics</a>
-            <a href="/playground" class="btn-secondary">Playground</a>
-            <a href="/dashboard" class="btn-secondary">Dashboard</a>
-            <div class="user-badge"><span id="user-name">Learner</span><span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span></div>
-        </div>
+    <nav class="app-fallback-nav" aria-label="Primary">
+        <a href="/dashboard">AI Placement Mentor</a>
+        <a href="/learn">Curriculum</a>
+        <a href="/profile">Profile</a>
     </nav>
     <main class="dashboard-container">
-        <header class="dashboard-hero"><h1 class="dashboard-title">Learning Analytics</h1><p class="dashboard-subtitle">Time, consistency, solved topics, and skill coverage in one scan-friendly view.</p></header>
+        <header class="dashboard-hero"><h1 class="dashboard-title">Learning analytics</h1><p class="dashboard-subtitle">A clear view of your study time, consistency and learning progress.</p></header>
         <section class="analytics-cards" id="analytics-cards"></section>
         <section class="analytics-grid">
             <div class="glass-panel profile-panel"><h2>Time by Domain</h2><canvas id="domain-time-chart" height="240"></canvas></div>

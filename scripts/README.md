@@ -48,6 +48,12 @@ Applying requires the reviewed `--expected-target`, `--apply` and `--exclusive-w
 
 `python scripts/check_secrets.py --staged` scans indexed contents of staged additions/modifications before a commit. `python scripts/check_secrets.py` scans all tracked working-tree files and is the CI command after checkout. Neither default scanning nor an empty staged scan validates untracked new files. Findings report filenames rather than credential values; this is a basic guard, not a replacement for a dedicated scanner or key rotation. Any intentional fixture allowance must be narrow and reviewed.
 
+## Workspace browser verification
+
+`node scripts/workspace_smoke.cjs PATH_TO_PLAYWRIGHT LOCAL_APP_URL` checks eleven authenticated workspace pages and four authentication/recovery pages at desktop/mobile sizes. It uses isolated browser contexts, a fake account and intercepted API fixtures; it never writes to a real account. Microsoft Edge and Playwright must be available locally. Screenshots stay in ignored artifacts/workspace/. Checks cover the left navigation, mobile opening/Escape/focus behavior, theme switching, safe domain-card navigation, search, preserved forms and horizontal overflow.
+
+Node unit tests also cover safe domain-card and topic-link rendering; pytest checks shared-shell inclusion, fallback navigation, preserved dashboard control IDs and an unchanged public homepage. Browser fixtures are not a live AI, email or sandbox execution test.
+
 ## Historical archive
 
 [`legacy/README.md`](legacy/README.md) explains the archived file families and their risks. **Do NOT run archived scripts against production.** They are reference material, not supported imports, migrations, smoke checks, or a reproducible setup pipeline. Their old relative paths, absolute paths, and database assumptions have intentionally not been repaired.

@@ -10,11 +10,13 @@
         var btn = document.getElementById('theme-toggle');
         if (!btn) return;
         var isLight = document.documentElement.classList.contains('light-theme');
-        btn.innerHTML = getIcon(isLight);
+        const workspace = document.body?.classList.contains('app-page') || document.body?.classList.contains('auth-premium');
+        if (workspace) btn.textContent = isLight ? 'Dark appearance' : 'Light appearance';
+        else btn.innerHTML = getIcon(isLight);
         btn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
         btn.setAttribute('aria-pressed', String(isLight));
         btn.title = btn.getAttribute('aria-label');
-        btn.querySelector('svg').setAttribute('aria-hidden', 'true');
+        btn.querySelector('svg')?.setAttribute('aria-hidden', 'true');
     }
 
     function toggleTheme() {
@@ -24,6 +26,7 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         } catch {}
         applyIcon();
+        window.dispatchEvent(new CustomEvent('appearancechange'));
     }
 
     function restoreTheme() {
@@ -48,7 +51,7 @@
         const toggle = document.getElementById('ai-panel-toggle');
         const panel = document.getElementById('ai-panel');
         if (!toggle || !panel) return;
-        const mobile = window.matchMedia('(max-width: 1120px)');
+        const mobile = window.matchMedia(document.body.classList.contains('app-page') ? '(max-width: 1350px)' : '(max-width: 1120px)');
         let expanded = false;
 
         function updatePanel() {

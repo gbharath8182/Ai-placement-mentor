@@ -59,7 +59,7 @@ function renderStudyChart(rows) {
         type: "line",
         data: {
             labels: rows.map(row => row.label),
-            datasets: [{ label: "Minutes", data: rows.map(row => row.minutes_spent), borderColor: "#58a6ff", backgroundColor: "rgba(88,166,255,.16)", fill: true, tension: .35 }]
+            datasets: [{ label: "Minutes", data: rows.map(row => row.minutes_spent), borderColor: "#809276", backgroundColor: "rgba(128,146,118,.12)", fill: true, tension: .35 }]
         },
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });

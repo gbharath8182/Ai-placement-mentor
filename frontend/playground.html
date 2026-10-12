@@ -5,32 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Playground | AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+    <script src="/static/js/app-shell.js" defer></script>
     <script>
 (function(){try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light-theme');}catch{}})();
 </script>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="dashboard-nav">
-        <a href="/dashboard" class="nav-brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#navGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><defs><linearGradient id="navGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#69d9c8"/><stop offset="100%" stop-color="#eab68c"/></linearGradient></defs><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline></svg><span>AI Placement Mentor</span></a>
-        <div class="nav-user">
-            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-            <a href="/roadmap" class="btn-secondary" style="text-decoration: none; margin-right: 8px;">Roadmaps</a>
-            <a href="/profile" class="btn-secondary" style="text-decoration: none; margin-right: 8px;">Profile</a>
-            <a href="/analytics" class="btn-secondary" style="text-decoration: none; margin-right: 8px;">Analytics</a>
-            <a href="/cheatsheets" class="btn-secondary" style="text-decoration: none; border-color: var(--accent-green); color: var(--accent-green); margin-right: 8px;">Cheat Sheets</a>
-            <a href="/dashboard" class="btn-secondary" style="text-decoration: none; margin-right: 8px;">&larr; Back to Dashboard</a>
-            <div class="user-badge" id="user-badge-container">
-                <span id="user-name">Learner</span>
-                <span id="user-exp-badge" class="experience-tag exp-fresher">Fresher</span>
-            </div>
-        </div>
+    <nav class="app-fallback-nav" aria-label="Primary">
+        <a href="/dashboard">AI Placement Mentor</a>
+        <a href="/learn">Curriculum</a>
+        <a href="/profile">Profile</a>
     </nav>
 
     <!-- Main Workspace -->
     <main class="dashboard-container" style="max-width: 1300px; margin-top: 30px;">
         <header class="dashboard-hero" style="margin-bottom: 25px;">
-            <h1 class="dashboard-title"><span class="glow-text">Interactive Code Playground</span></h1>
+            <h1 class="dashboard-title">Code workspace</h1>
             <p class="dashboard-subtitle">Code runs in a remote isolated sandbox. Execution requires configured service. Write Python or JavaScript, define test cases, and review the results.</p>
         </header>
 

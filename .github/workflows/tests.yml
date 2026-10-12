@@ -50,3 +50,4 @@ jobs:
             node --check "$file"
           done < <(find frontend/js -type f -name '*.js' -print0)
           node --check tests/frontend-smoke.test.js
+          node --check scripts/workspace_smoke.cjs
