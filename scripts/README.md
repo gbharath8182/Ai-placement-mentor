@@ -30,6 +30,14 @@ Use `python -m scripts.live_smoke --database`, `--ai`, or `--deployment https://
 
 Add new supported utilities directly here with clear usage and safety documentation. Keep secrets and private exports out of the repository. Scripts must not execute database writes merely on import or while displaying help.
 
+## Resource and email verification
+
+`python -m scripts.check_resources` makes bounded, read-only HTTPS requests to the twelve free-library destinations. It checks status, readable content type, PDF signatures and chapter anchors without storing books. A passing result is a point-in-time check, not a guarantee that an external host will never change.
+
+`python -m scripts.live_smoke --email-config` checks Brevo account and verified-sender access without sending mail. If it reports `ip_not_authorized`, authorize only recognized source IPs in Brevo before retrying.
+
+`python -m scripts.test_reset_delivery --to YOUR_CONTROLLED_MAILBOX --confirm-send --base-url YOUR_TRUSTED_APP_ORIGIN` is an explicitly mutating test: it requests exactly one real reset email for an existing account and stores that account's reset digest. First set the private `RESET_TEST_RECIPIENT` environment variable to the same explicitly authorized mailbox. Without that match and confirmation it fails closed. It does not reset the password, disclose the link or prove inbox delivery; check the mailbox yourself after provider acceptance. Never put a personal mailbox in source code or run the helper against another user's account.
+
 ## Secret-pattern checks
 
 `python scripts/check_secrets.py --staged` scans indexed contents of staged additions/modifications before a commit. `python scripts/check_secrets.py` scans all tracked working-tree files and is the CI command after checkout. Neither default scanning nor an empty staged scan validates untracked new files. Findings report filenames rather than credential values; this is a basic guard, not a replacement for a dedicated scanner or key rotation. Any intentional fixture allowance must be narrow and reviewed.

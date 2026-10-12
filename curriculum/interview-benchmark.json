@@ -1,0 +1,394 @@
+{
+  "version": 1,
+  "purpose": "Curated grading anchors for offline mocked schema/rubric regression tests. These are not evidence of live model grading quality and must never be used as production fallback answers or grades.",
+  "rubric_weights": {
+    "coding": {
+      "correctness": 0.5,
+      "reasoning": 0.25,
+      "edge_cases": 0.15,
+      "clarity": 0.1
+    },
+    "technical": {
+      "correctness": 0.4,
+      "reasoning": 0.3,
+      "edge_cases": 0.2,
+      "clarity": 0.1
+    },
+    "hr": {
+      "relevance": 0.25,
+      "evidence": 0.35,
+      "reflection": 0.2,
+      "clarity": 0.2
+    }
+  },
+  "cases": [
+    {
+      "id": "coding-strong",
+      "category": "coding",
+      "question": "Given an unsorted integer array, return whether it contains duplicates. Explain correctness and time/space complexity, including empty input.",
+      "answer": "Scan with an initially empty set. If an element is already in the set, return true; otherwise add it. Return false after the scan. The set contains exactly the preceding elements, so an existing element proves duplication. Empty/singleton arrays return false. Expected O(n) time, O(n) space; a poor hash function can worsen time.",
+      "expected": {
+        "score_range": [
+          9,
+          10
+        ],
+        "grade": {
+          "assessment": "strong",
+          "rubric_scores": {
+            "correctness": 10,
+            "reasoning": 9,
+            "edge_cases": 9,
+            "clarity": 10
+          },
+          "strengths": [
+            "Correct set invariant and early exit",
+            "Covers empty input and expected complexity"
+          ],
+          "weaknesses": [],
+          "model_answer_hint": "Use a seen set and state expected hashing complexity.",
+          "misconception": "",
+          "next_practice": "Implement the set approach and test negative numbers and repeated zeros.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "coding-partial",
+      "category": "coding",
+      "question": "Given an unsorted integer array, return whether it contains duplicates. Explain correctness and time/space complexity, including empty input.",
+      "answer": "Compare each value with the ones after it using two loops. Return true when a pair matches and false otherwise. It takes O(n) time and no extra space.",
+      "expected": {
+        "score_range": [
+          5,
+          7
+        ],
+        "grade": {
+          "assessment": "partial",
+          "rubric_scores": {
+            "correctness": 7,
+            "reasoning": 3,
+            "edge_cases": 4,
+            "clarity": 7
+          },
+          "strengths": [
+            "Pair comparison can correctly detect duplicates"
+          ],
+          "weaknesses": [
+            "Nested loops are quadratic, not linear",
+            "Empty input behavior is not explained"
+          ],
+          "model_answer_hint": "Pair comparison uses O(n squared) time and O(1) auxiliary space; a set trades space for expected linear time.",
+          "misconception": "Two loops comparing all pairs perform n(n-1)/2 comparisons.",
+          "next_practice": "Count comparisons for arrays of lengths 4 and 8, then implement a set-based version.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "coding-incorrect",
+      "category": "coding",
+      "question": "Given an unsorted integer array, return whether it contains duplicates. Explain correctness and time/space complexity, including empty input.",
+      "answer": "If the first and last values are equal return true, otherwise return false. Every duplicate has to occur at both ends. This is always O(1).",
+      "expected": {
+        "score_range": [
+          0,
+          2
+        ],
+        "grade": {
+          "assessment": "incorrect",
+          "rubric_scores": {
+            "correctness": 0,
+            "reasoning": 0,
+            "edge_cases": 0,
+            "clarity": 5
+          },
+          "strengths": [],
+          "weaknesses": [
+            "Misses duplicates away from the endpoints",
+            "Accessing endpoints fails on empty input"
+          ],
+          "model_answer_hint": "Check every element against a seen set, not only the endpoints.",
+          "misconception": "Duplicates can occur at any two positions; [1,2,2,3] is a counterexample.",
+          "next_practice": "Trace your rule on [1,2,2,3], [] and [7].",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "coding-ambiguous",
+      "category": "coding",
+      "question": "Given an unsorted integer array, return whether it contains duplicates. Explain correctness and time/space complexity, including empty input.",
+      "answer": "Use a map to check the numbers and return when found.",
+      "expected": {
+        "score_range": [
+          2,
+          5
+        ],
+        "grade": {
+          "assessment": "ambiguous",
+          "rubric_scores": {
+            "correctness": 4,
+            "reasoning": 2,
+            "edge_cases": 0,
+            "clarity": 3
+          },
+          "strengths": [
+            "A map could support a correct seen-values approach"
+          ],
+          "weaknesses": [
+            "The map contents and lookup-before-insert order are unspecified"
+          ],
+          "model_answer_hint": "Store prior values and check membership before insertion; explain empty input and hashing costs.",
+          "misconception": "The answer does not establish whether 'found' means already seen rather than just inserted.",
+          "next_practice": "Write pseudocode with explicit map initialization and lookup order.",
+          "clarification_question": "What does the map store, and do you check membership before or after insertion?"
+        }
+      }
+    },
+    {
+      "id": "technical-strong",
+      "category": "system_design",
+      "question": "Two users concurrently reserve the last seat. How would you prevent overselling, and what trade-offs does your solution introduce?",
+      "answer": "Use a conditional atomic database update that decrements remaining seats only when remaining > 0. Only one request can modify the last seat. Use a unique booking id/idempotency key so retries do not decrement again. Return sold out when no row matches. A transaction is needed if the booking record and inventory must commit together. This serializes contention on hot inventory; caching alone cannot enforce the invariant.",
+      "expected": {
+        "score_range": [
+          9,
+          10
+        ],
+        "grade": {
+          "assessment": "strong",
+          "rubric_scores": {
+            "correctness": 10,
+            "reasoning": 9,
+            "edge_cases": 9,
+            "clarity": 9
+          },
+          "strengths": [
+            "Defines an atomic inventory invariant",
+            "Handles retries and multi-record consistency"
+          ],
+          "weaknesses": [],
+          "model_answer_hint": "Use a conditional atomic write and idempotent booking records; state contention and transaction trade-offs.",
+          "misconception": "",
+          "next_practice": "Sketch failure handling when a client times out after a successful commit.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "technical-partial",
+      "category": "system_design",
+      "question": "Two users concurrently reserve the last seat. How would you prevent overselling, and what trade-offs does your solution introduce?",
+      "answer": "Put a mutex around the availability check and decrement in the server. The second user will wait, so only the first can book.",
+      "expected": {
+        "score_range": [
+          3,
+          6
+        ],
+        "grade": {
+          "assessment": "partial",
+          "rubric_scores": {
+            "correctness": 5,
+            "reasoning": 4,
+            "edge_cases": 2,
+            "clarity": 8
+          },
+          "strengths": [
+            "Recognizes the need to serialize the check and decrement"
+          ],
+          "weaknesses": [
+            "A local mutex does not protect multiple workers or hosts",
+            "Does not cover retry idempotency"
+          ],
+          "model_answer_hint": "Enforce the invariant atomically in shared storage, not just one server process.",
+          "misconception": "A process-local mutex is not a distributed concurrency boundary.",
+          "next_practice": "Show a race involving two server workers, then replace the local lock with a database conditional update.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "technical-incorrect",
+      "category": "system_design",
+      "question": "Two users concurrently reserve the last seat. How would you prevent overselling, and what trade-offs does your solution introduce?",
+      "answer": "Cache the seat count in Redis and let each browser subtract one locally. Eventual consistency means both reservations will become valid when the cache refreshes.",
+      "expected": {
+        "score_range": [
+          0,
+          2
+        ],
+        "grade": {
+          "assessment": "incorrect",
+          "rubric_scores": {
+            "correctness": 0,
+            "reasoning": 1,
+            "edge_cases": 0,
+            "clarity": 5
+          },
+          "strengths": [],
+          "weaknesses": [
+            "Both clients can observe one remaining seat and each accept a booking"
+          ],
+          "model_answer_hint": "Reservation acceptance requires one authoritative atomic check-and-update.",
+          "misconception": "Eventual reconciliation cannot make two valid reservations fit into one seat.",
+          "next_practice": "Trace two clients reading a seat count of one before either writes.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "technical-ambiguous",
+      "category": "system_design",
+      "question": "Two users concurrently reserve the last seat. How would you prevent overselling, and what trade-offs does your solution introduce?",
+      "answer": "Use a lock on the seat and retry errors.",
+      "expected": {
+        "score_range": [
+          2,
+          5
+        ],
+        "grade": {
+          "assessment": "ambiguous",
+          "rubric_scores": {
+            "correctness": 4,
+            "reasoning": 3,
+            "edge_cases": 1,
+            "clarity": 4
+          },
+          "strengths": [
+            "Identifies a possible serialization mechanism"
+          ],
+          "weaknesses": [
+            "The lock scope, lifetime and authoritative inventory store are unclear"
+          ],
+          "model_answer_hint": "A shared transaction or conditional atomic update can enforce inventory; retries also need idempotency.",
+          "misconception": "The answer does not say whether the lock is local or shared across writers.",
+          "next_practice": "Describe lock ownership, failure recovery and a retry-safe booking id.",
+          "clarification_question": "Is this a database row lock, a distributed lock, or a process-local lock, and how is inventory updated?"
+        }
+      }
+    },
+    {
+      "id": "hr-strong",
+      "category": "hr",
+      "question": "Tell me about a disagreement in a team project. What did you personally do, and what was the outcome?",
+      "answer": "In a class project, two teammates disagreed about adding features versus fixing reliability before our demo. I asked each to list the risks, proposed prioritizing the two failures blocking the demo, and split tasks so one optional feature could still be explored. I owned the regression tests and facilitated a short check-in. We delivered a working demo; afterwards I learned to agree on acceptance criteria earlier.",
+      "expected": {
+        "score_range": [
+          8,
+          10
+        ],
+        "grade": {
+          "assessment": "strong",
+          "rubric_scores": {
+            "relevance": 9,
+            "evidence": 9,
+            "reflection": 9,
+            "clarity": 9
+          },
+          "strengths": [
+            "Provides specific context, personal action and outcome",
+            "Reflects on an actionable improvement"
+          ],
+          "weaknesses": [],
+          "model_answer_hint": "Describe situation, task, personal action, outcome and what you learned.",
+          "misconception": "",
+          "next_practice": "Prepare a second example where your initial approach did not work.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "hr-partial",
+      "category": "hr",
+      "question": "Tell me about a disagreement in a team project. What did you personally do, and what was the outcome?",
+      "answer": "We disagreed about priorities. I listened to everyone and we finished the project. Teamwork is important.",
+      "expected": {
+        "score_range": [
+          3,
+          6
+        ],
+        "grade": {
+          "assessment": "partial",
+          "rubric_scores": {
+            "relevance": 7,
+            "evidence": 3,
+            "reflection": 2,
+            "clarity": 7
+          },
+          "strengths": [
+            "Relevant disagreement and listening behavior"
+          ],
+          "weaknesses": [
+            "No concrete decision or individual contribution",
+            "Reflection is generic"
+          ],
+          "model_answer_hint": "Describe the specific conflict, what you personally changed, and an observed outcome without inventing metrics.",
+          "misconception": "General teamwork statements do not demonstrate how the conflict was resolved.",
+          "next_practice": "Rewrite with one concrete decision you influenced and the result you observed.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "hr-incorrect",
+      "category": "hr",
+      "question": "Tell me about a disagreement in a team project. What did you personally do, and what was the outcome?",
+      "answer": "There was no need to discuss anything. I deleted my teammate's work to force my preference. I would do the same next time because I am always right.",
+      "expected": {
+        "score_range": [
+          0,
+          3
+        ],
+        "grade": {
+          "assessment": "incorrect",
+          "rubric_scores": {
+            "relevance": 3,
+            "evidence": 2,
+            "reflection": 0,
+            "clarity": 5
+          },
+          "strengths": [
+            "Gives a concrete account of personal action"
+          ],
+          "weaknesses": [
+            "Unilateral deletion undermines collaboration",
+            "No self-awareness or learning from the disagreement"
+          ],
+          "model_answer_hint": "Show respectful evidence-based discussion, shared decisions and reflection; do not invent a better outcome.",
+          "misconception": "Forcing agreement by deleting another person's work is not effective conflict resolution.",
+          "next_practice": "Explain how you would repair trust and agree on decision criteria with the team.",
+          "clarification_question": ""
+        }
+      }
+    },
+    {
+      "id": "hr-ambiguous",
+      "category": "hr",
+      "question": "Tell me about a disagreement in a team project. What did you personally do, and what was the outcome?",
+      "answer": "We sorted it out and it went well.",
+      "expected": {
+        "score_range": [
+          0,
+          3
+        ],
+        "grade": {
+          "assessment": "ambiguous",
+          "rubric_scores": {
+            "relevance": 3,
+            "evidence": 1,
+            "reflection": 0,
+            "clarity": 3
+          },
+          "strengths": [],
+          "weaknesses": [
+            "No personal action or observable outcome is provided"
+          ],
+          "model_answer_hint": "Clarify the disagreement and your personal role before drawing conclusions about collaboration.",
+          "misconception": "The answer does not distinguish the candidate's actions from the team's actions.",
+          "next_practice": "Write three factual sentences describing context, your action and the outcome.",
+          "clarification_question": "What was the disagreement, what did you personally do, and what specific outcome did you observe?"
+        }
+      }
+    }
+  ]
+}

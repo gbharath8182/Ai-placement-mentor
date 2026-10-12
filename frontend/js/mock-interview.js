@@ -54,6 +54,7 @@ async function miStartInterview(mode) {
 }
 
 function miRenderQuestion(data) {
+    miState.questionNumber = data.question_number;
     miEl("mi-progress-text").textContent = `Question ${data.question_number} of ${data.total_questions}`;
     miEl("mi-category-badge").textContent = `${data.category} · ${data.difficulty || "intermediate"}`;
     miEl("mi-question-text").textContent = data.question;
@@ -75,7 +76,8 @@ async function miSubmitAnswer() {
             method: "POST",
             body: {
                 session_id: miState.sessionId,
-                answer: answer
+                answer: answer,
+                question_number: miState.questionNumber
             }
         });
         if (!res.ok) {
@@ -148,9 +150,8 @@ async function miExplainMore() {
         }
         const data = await res.json();
         const out = miEl("mi-explain-more-output");
-        out.innerHTML = (typeof marked !== "undefined")
-            ? marked.parse(data.explanation)
-            : data.explanation;
+        if (window.marked && window.DOMPurify) out.innerHTML = DOMPurify.sanitize(marked.parse(data.explanation));
+        else out.textContent = data.explanation;
         out.classList.add("mi-markdown-body");
         out.classList.remove("hidden");
     } catch (e) {
@@ -175,19 +176,17 @@ function miRenderSummary(summary) {
         miShowPanel("mi-mode-select");
         return;
     }
-    miEl("mi-avg-score").textContent = summary.average_score;
+    miEl("mi-avg-score").textContent = summary.average_score ?? "Not assessed";
     const list = miEl("mi-summary-list");
     list.innerHTML = "";
     (summary.per_question || []).forEach((item, i) => {
         const div = document.createElement("div");
         div.className = "mi-summary-item";
-        div.innerHTML = `
-            <div class="mi-summary-item-head">
-                <span>Q${i + 1} - ${item.category} · ${item.difficulty || "intermediate"}</span>
-                <strong>${item.score}/10</strong>
-            </div>
-            <p style="font-size:0.85rem; color: var(--text-muted);">${item.question}</p>
-        `;
+        const heading = document.createElement("strong");
+        heading.textContent = `Q${i + 1} · ${item.category} · ${item.difficulty || "intermediate"} · ${item.score}/10`;
+        const question = document.createElement("p");
+        question.textContent = item.question;
+        div.append(heading, question);
         list.appendChild(div);
     });
     miShowPanel("mi-summary-body");

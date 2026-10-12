@@ -35,7 +35,13 @@ async def get_user_progress(user_id: str, current_user: dict = Depends(get_curre
 
 @router.post("/update")
 async def update_progress(req: ProgressUpdate, current_user: dict = Depends(get_current_user)):
+    if req.status == "completed":
+        raise HTTPException(status_code=409, detail="Completion requires a verified practice submission or mastery assessment.")
     progress_coll = get_collection("user_progress")
+    if req.status == "in_progress":
+        existing = await progress_coll.find_one({"user_id": ObjectId(current_user["id"]), "topic_slug": req.topic_slug})
+        if existing and existing.get("status") == "completed":
+            return {"message": "Completed progress preserved", "topic_slug": req.topic_slug, "status": "completed"}
     
     update_data = {
         "status": req.status,

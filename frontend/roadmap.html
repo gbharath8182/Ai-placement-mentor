@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roadmaps | AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <script>(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();</script>
+    <script>(function(){try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light-theme');}catch{}})();</script>
 </head>
 <body>
     <nav class="dashboard-nav">
-        <a href="/dashboard" class="nav-brand"><span>EduAI Platform</span></a>
+        <a href="/dashboard" class="nav-brand"><span>AI Placement Mentor</span></a>
         <div class="nav-user">
             <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
             <a href="/roadmap" class="btn-secondary nav-link-active">Roadmaps</a>
@@ -53,12 +53,13 @@
             </div>
 
             <div id="mi-interview-body" class="hidden">
-                <div class="mi-progress"><span id="mi-progress-text"></span></div>
+                <div class="mi-progress"><span id="mi-progress-text" role="status" aria-live="polite"></span></div>
                 <div class="mi-question-box">
                     <span id="mi-category-badge" class="detail-chip"></span>
                     <p id="mi-question-text"></p>
                 </div>
-                <textarea id="mi-answer-input" placeholder="Type your answer here..."></textarea>
+                <label for="mi-answer-input" class="form-label">Your answer</label>
+            <textarea aria-label="Interview answer" id="mi-answer-input" placeholder="Type your answer here..."></textarea>
                 <button id="mi-submit-btn" class="btn-primary">Submit Answer</button>
             </div>
 
@@ -72,8 +73,8 @@
                     <h4>Areas to improve</h4>
                     <ul id="mi-weaknesses-list"></ul>
                 </div>
-                <p id="mi-hint-text" class="mi-hint"></p>
-                <div id="mi-explain-more-output" class="mi-explain-more-output hidden"></div>
+                <p id="mi-hint-text" role="status" aria-live="polite" class="mi-hint"></p>
+                <div id="mi-explain-more-output" role="status" aria-live="polite" class="mi-explain-more-output hidden"></div>
                 <div class="mi-btn-row">
                     <button id="mi-explain-more-btn" class="btn-secondary">Explain More</button>
                     <button id="mi-next-btn" class="btn-primary">Next Question</button>
@@ -87,7 +88,7 @@
                 <button id="mi-restart-btn" class="btn-primary">Start New Interview</button>
             </div>
 
-            <div id="mi-loading" class="mi-loading-box hidden">
+            <div id="mi-loading" role="status" aria-live="polite" class="mi-loading-box hidden">
                 <div class="mi-spinner"></div>
                 <p>Thinking...</p>
             </div>
@@ -97,6 +98,7 @@
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/roadmap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
     <script src="/static/js/mock-interview.js"></script>
 </body>

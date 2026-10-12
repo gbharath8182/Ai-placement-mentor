@@ -1,22 +1,36 @@
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field, EmailStr, field_validator
+from typing import List, Optional, Dict, Any, Annotated, Literal
 from datetime import datetime
+import json
+
+Password = Annotated[str, Field(min_length=6, max_length=72)]
+ShortText = Annotated[str, Field(min_length=1, max_length=64)]
+TopicSlug = Annotated[str, Field(min_length=1, max_length=128, pattern=r"\S")]
+
+
+class PasswordInput(BaseModel):
+    @field_validator("password", check_fields=False)
+    @classmethod
+    def bound_password_bytes(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("Password cannot exceed 72 UTF-8 bytes")
+        return value
 
 # Auth Schemas
 class UserProfile(BaseModel):
     experience_level: str = "fresher"  # fresher, intermediate, experienced
-    interests: List[str] = []
+    interests: List[str] = Field(default_factory=list)
 
-class UserCreate(BaseModel):
-    name: str
+class UserCreate(PasswordInput):
+    name: str = Field(min_length=1, max_length=100, pattern=r"\S")
     email: EmailStr
-    password: str
-    experience_level: str = "fresher"
-    interests: List[str] = []
+    password: Password
+    experience_level: ShortText = "fresher"
+    interests: List[ShortText] = Field(default_factory=list, max_length=20)
 
-class UserLogin(BaseModel):
+class UserLogin(PasswordInput):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=1, max_length=72)
 
 class UserResponse(BaseModel):
     id: str
@@ -36,9 +50,9 @@ class TokenResponse(BaseModel):
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
-class ResetPasswordRequest(BaseModel):
-    token: str
-    password: str
+class ResetPasswordRequest(PasswordInput):
+    token: str = Field(min_length=1, max_length=8192)
+    password: Password
 
 # Content Schemas
 class ContentBlock(BaseModel):
@@ -61,6 +75,10 @@ class TopicResponse(BaseModel):
     content_blocks: Optional[List[Dict[str, Any]]] = []
     difficulty: str
     subtopics: Optional[List[SubTopic]] = []
+    schema_version: Optional[int] = None
+    objectives: List[str] = Field(default_factory=list)
+    prerequisites: List[str] = Field(default_factory=list)
+    order: Optional[int] = None
 
 class DomainResponse(BaseModel):
     id: str
@@ -71,16 +89,24 @@ class DomainResponse(BaseModel):
 
 # AI Schemas
 class AIRecommendRequest(BaseModel):
-    topic_slug: str
-    answers: Dict[str, Any]
+    topic_slug: TopicSlug
+    answers: Dict[str, Any] = Field(max_length=50)
+
+    @field_validator("answers")
+    @classmethod
+    def bound_answers(cls, value: Dict[str, Any]) -> Dict[str, Any]:
+        if len(json.dumps(value, ensure_ascii=False).encode("utf-8")) > 16384:
+            raise ValueError("Answers cannot exceed 16 KiB")
+        return value
 
 class AIChatRequest(BaseModel):
-    topic_slug: str
-    message: str
+    topic_slug: TopicSlug
+    message: str = Field(min_length=1, max_length=8000)
+    subtopic_title: Optional[str] = Field(default=None, max_length=200)
 
 class AIExplainRequest(BaseModel):
-    topic_slug: str
-    level: str  # fresher, intermediate, experienced
+    topic_slug: TopicSlug
+    level: Literal["fresher", "intermediate", "experienced"]
 
 # Practice Schemas
 class TestCase(BaseModel):
@@ -98,14 +124,21 @@ class PracticeProblemResponse(BaseModel):
     test_cases: List[TestCase]
 
 class CodeSubmitRequest(BaseModel):
-    language: str
-    code: str
+    language: Literal["python", "javascript", "cpp", "c", "java"]
+    code: str = Field(min_length=1, max_length=65536, pattern=r"\S")
+
+    @field_validator("code")
+    @classmethod
+    def bound_code_bytes(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > 65536:
+            raise ValueError("Code cannot exceed 64 KiB")
+        return value
 
 # Progress Schemas
 class ProgressUpdate(BaseModel):
-    topic_slug: str
-    status: str  # not_started, in_progress, completed
-    ai_notes: Optional[str] = None
+    topic_slug: TopicSlug
+    status: Literal["not_started", "in_progress", "completed"]
+    ai_notes: Optional[str] = Field(default=None, max_length=8000)
 
 # Activity Log & Streak Schemas
 class ActivityLog(BaseModel):
@@ -114,7 +147,9 @@ class ActivityLog(BaseModel):
     topic_slug: Optional[str] = None
 
 class ActivityLogCreate(ActivityLog):
-    pass
+    minutes_spent: int = Field(ge=0, le=1440, strict=True)
+    activity_type: ShortText
+    topic_slug: Optional[TopicSlug] = None
 
 class ActivityLogResponse(BaseModel):
     id: str

@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "practice_problems": [
+    {
+      "id": "44ef04c0e109b79f7ddd4d55", "topic_slug": "python-foundations-values-and-types",
+      "title": "Trace a Working List and Its Snapshot Alias", "difficulty": "beginner", "language": "python",
+      "description": "Read one JSON object from stdin with values (an integer list) and operations (a list). Initially working and snapshot refer to the same list. Operations are ['append', integer], ['rebind', integer_list], or ['copy']. append mutates working; rebind replaces only working; copy replaces working with a shallow copy of itself. Output a JSON object with snapshot and working at the end. Do not update snapshot when working is rebound. Inputs obey this contract, with at most 1000 operations. This exercise distinguishes an alias from a frozen copy and checks that mutation after rebinding reaches only the new object. Print exactly one compact JSON line using separators=(',', ':') and sort_keys=True as in the starter; output comparison is exact, not JSON-semantic.",
+      "starter_code": "import json\nimport sys\n\ndef solve(payload):\n    raise NotImplementedError\n\ndef main():\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n\nif __name__ == '__main__':\n    main()\n",
+      "test_cases": [
+        {"input": "{\"values\":[1,2],\"operations\":[[\"append\",3],[\"rebind\",[9]],[\"append\",10]]}\n", "expected_output": "{\"snapshot\":[1,2,3],\"working\":[9,10]}\n"},
+        {"input": "{\"values\":[],\"operations\":[]}\n", "expected_output": "{\"snapshot\":[],\"working\":[]}\n"},
+        {"input": "{\"values\":[5],\"operations\":[[\"copy\"],[\"append\",6]]}\n", "expected_output": "{\"snapshot\":[5],\"working\":[5,6]}\n"},
+        {"input": "{\"values\":[0],\"operations\":[[\"append\",1],[\"rebind\",[]],[\"rebind\",[7]],[\"append\",8]]}\n", "expected_output": "{\"snapshot\":[0,1],\"working\":[7,8]}\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(payload):\n    working = payload['values']\n    snapshot = working\n    for operation in payload['operations']:\n        if operation[0] == 'append':\n            working.append(operation[1])\n        elif operation[0] == 'rebind':\n            working = operation[1]\n        else:\n            working = working.copy()\n    return {'snapshot': snapshot, 'working': working}\n\ndef main():\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n\nif __name__ == '__main__':\n    main()\n"
+    },
+    {
+      "id": "733c50464a3b5c9f35b1a00c", "topic_slug": "python-foundations-numeric-reasoning",
+      "title": "Exact Buckets for Positive and Negative Offsets", "difficulty": "beginner", "language": "python",
+      "description": "Read JSON with amounts (up to 1000 signed integers) and size (a positive integer). For each amount, return [quotient, remainder] satisfying amount = quotient * size + remainder and 0 <= remainder < size. Output the list of pairs in input order. Flooring, not truncation toward zero, is required for negative amounts. Some integers exceed floating-point exact precision; do not divide through float or use int(amount / size). Empty amounts produce []. The intended implementation uses integer floor division and remainder, or divmod, so correctness does not depend on magnitude. Output one compact JSON line with no explanatory text.",
+      "starter_code": "import json\nimport sys\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n",
+      "test_cases": [
+        {"input": "{\"amounts\":[17,-7,0],\"size\":3}\n", "expected_output": "[[5,2],[-3,2],[0,0]]\n"},
+        {"input": "{\"amounts\":[],\"size\":5}\n", "expected_output": "[]\n"},
+        {"input": "{\"amounts\":[-9,-8,9],\"size\":3}\n", "expected_output": "[[-3,0],[-3,1],[3,0]]\n"},
+        {"input": "{\"amounts\":[100000000000000000001,-100000000000000000001],\"size\":10}\n", "expected_output": "[[10000000000000000000,1],[-10000000000000000001,9]]\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(payload):\n    return [list(divmod(amount, payload['size'])) for amount in payload['amounts']]\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n"
+    },
+    {
+      "id": "c3a9a63a1b21df4948d6c93a", "topic_slug": "python-foundations-text-and-unicode",
+      "title": "Unicode Label Keys Without Losing Display Text", "difficulty": "beginner", "language": "python",
+      "description": "Read JSON with labels, a list of at most 1000 Unicode strings. Strip surrounding whitespace from each label; ignore resulting empty labels. Derive a comparison key using casefold, deduplicate by that key, and retain the first stripped display text for each distinct key. Do not perform additional Unicode normalization. Return records {bytes: UTF-8 byte length of the key, key: normalized key, text: first display text}, in first-occurrence order. The byte length is not len(key) for all Unicode inputs. Print one JSON line using ensure_ascii=False and compact separators. Preserve internal spaces and avoid overwriting the first spelling when a later equivalent spelling appears.",
+      "starter_code": "import json\nimport sys\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), ensure_ascii=False, separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "{\"labels\":[\"  Café \",\"CAFÉ\",\" Ada\"]}\n", "expected_output": "[{\"bytes\":5,\"key\":\"café\",\"text\":\"Café\"},{\"bytes\":3,\"key\":\"ada\",\"text\":\"Ada\"}]\n"},
+        {"input": "{\"labels\":[\"\",\"   \"]}\n", "expected_output": "[]\n"},
+        {"input": "{\"labels\":[\"Straße\",\"STRASSE\",\"x y\"]}\n", "expected_output": "[{\"bytes\":7,\"key\":\"strasse\",\"text\":\"Straße\"},{\"bytes\":3,\"key\":\"x y\",\"text\":\"x y\"}]\n"},
+        {"input": "{\"labels\":[\"界\",\"a\",\"界\"]}\n", "expected_output": "[{\"bytes\":3,\"key\":\"界\",\"text\":\"界\"},{\"bytes\":1,\"key\":\"a\",\"text\":\"a\"}]\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(payload):\n    seen = set()\n    result = []\n    for label in payload['labels']:\n        text = label.strip()\n        key = text.casefold()\n        if text and key not in seen:\n            seen.add(key)\n            result.append({'bytes': len(key.encode('utf-8')), 'key': key, 'text': text})\n    return result\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), ensure_ascii=False, separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "d7db3712267fa09bc25e6cf6", "topic_slug": "python-foundations-conditions-and-truth",
+      "title": "Configuration Defaults That Preserve Zero and False", "difficulty": "beginner", "language": "python",
+      "description": "Read a JSON list of configuration records. Each record may have timeout and enabled; missing keys or null mean default timeout=30 and enabled=true. Preserve an explicit zero or false. A valid timeout is exactly an integer from 0 to 120, excluding booleans; enabled must be exactly a Boolean after defaulting. Emit one status string per record: invalid if either type/range rule fails; otherwise disabled if enabled is false; otherwise poll if timeout is zero; otherwise wait. Invalid takes precedence even for disabled records. Ignore unrelated keys. At most 1000 records are supplied. Output the status list as one compact JSON line. This requires explicit absence tests and ordered branches rather than broad truthiness defaults.",
+      "starter_code": "import json\nimport sys\n\ndef solve(records):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n",
+      "test_cases": [
+        {"input": "[{},{\"timeout\":0},{\"enabled\":false},{\"timeout\":null,\"enabled\":null}]\n", "expected_output": "[\"wait\",\"poll\",\"disabled\",\"wait\"]\n"},
+        {"input": "[]\n", "expected_output": "[]\n"},
+        {"input": "[{\"timeout\":-1,\"enabled\":false},{\"timeout\":true},{\"enabled\":0},{\"timeout\":\"0\"}]\n", "expected_output": "[\"invalid\",\"invalid\",\"invalid\",\"invalid\"]\n"},
+        {"input": "[{\"timeout\":120},{\"timeout\":121},{\"timeout\":0,\"enabled\":false}]\n", "expected_output": "[\"wait\",\"invalid\",\"disabled\"]\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(records):\n    result = []\n    for record in records:\n        timeout = record.get('timeout')\n        enabled = record.get('enabled')\n        if timeout is None:\n            timeout = 30\n        if enabled is None:\n            enabled = True\n        if type(timeout) is not int or not 0 <= timeout <= 120 or type(enabled) is not bool:\n            status = 'invalid'\n        elif not enabled:\n            status = 'disabled'\n        elif timeout == 0:\n            status = 'poll'\n        else:\n            status = 'wait'\n        result.append(status)\n    return result\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n"
+    },
+    {
+      "id": "87855d1266bb338d8e160823", "topic_slug": "python-foundations-loops-and-invariants",
+      "title": "First Jump and the Safe Prefix Total", "difficulty": "beginner", "language": "python",
+      "description": "Read JSON with readings (up to 1000 signed integers) and threshold (a nonnegative integer). Find the first index greater than zero whose reading differs from the preceding reading by more than threshold in absolute value. Output {index: that index, prefix_total: sum of readings strictly before that index}. If no breach exists, index is -1 and prefix_total is the sum of all readings. Empty input has index=-1 and prefix_total=0. Equality to the threshold is safe, and the first reading is always safe because it has no predecessor. Stop when the first breach appears; maintain the invariant that the accumulated total is precisely the inspected safe prefix. Print one compact sorted-key JSON line.",
+      "starter_code": "import json\nimport sys\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "{\"readings\":[4,7,-2,8],\"threshold\":5}\n", "expected_output": "{\"index\":2,\"prefix_total\":11}\n"},
+        {"input": "{\"readings\":[],\"threshold\":0}\n", "expected_output": "{\"index\":-1,\"prefix_total\":0}\n"},
+        {"input": "{\"readings\":[-5,-2,1],\"threshold\":3}\n", "expected_output": "{\"index\":-1,\"prefix_total\":-6}\n"},
+        {"input": "{\"readings\":[0,1,100],\"threshold\":0}\n", "expected_output": "{\"index\":1,\"prefix_total\":0}\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(payload):\n    total = 0\n    previous = None\n    for position, reading in enumerate(payload['readings']):\n        if previous is not None and abs(reading - previous) > payload['threshold']:\n            break\n        total += reading\n        previous = reading\n    else:\n        position = -1\n    return {'index': position, 'prefix_total': total}\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "38b46a591f0a8648e330866f", "topic_slug": "python-foundations-functions-and-contracts",
+      "title": "Independent Batch Extensions With a Pure Contract", "difficulty": "beginner", "language": "python",
+      "description": "Read JSON with base (an integer list) and batches (a list of integer lists or null). Implement combine(base, extras=None) that returns a fresh list containing base followed by extras; omitted or null extras add nothing. It must mutate neither argument and must not share a default accumulator across calls. For every batch, call combine with the same original base, not the preceding result. Output {base: unchanged original, results: all independent combined lists}. At most 1000 total input integers are supplied. Include empty lists and repeated null batches. Print one compact sorted-key JSON line. Separate the combination function from stdin parsing so its mutation and return-value contract can be tested independently.",
+      "starter_code": "import json\nimport sys\n\ndef combine(base, extras=None):\n    raise NotImplementedError\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "{\"base\":[1],\"batches\":[[2],[3],null]}\n", "expected_output": "{\"base\":[1],\"results\":[[1,2],[1,3],[1]]}\n"},
+        {"input": "{\"base\":[],\"batches\":[null,[],[4],null]}\n", "expected_output": "{\"base\":[],\"results\":[[],[],[4],[]]}\n"},
+        {"input": "{\"base\":[5,5],\"batches\":[]}\n", "expected_output": "{\"base\":[5,5],\"results\":[]}\n"},
+        {"input": "{\"base\":[-1,0],\"batches\":[[],[0,-1]]}\n", "expected_output": "{\"base\":[-1,0],\"results\":[[-1,0],[-1,0,0,-1]]}\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef combine(base, extras=None):\n    result = base.copy()\n    if extras is not None:\n        result.extend(extras)\n    return result\n\ndef solve(payload):\n    return {'base': payload['base'], 'results': [combine(payload['base'], batch) for batch in payload['batches']]}\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "8ee0d0cfd782421332e0093e", "topic_slug": "python-foundations-scope-and-closures",
+      "title": "Independent Counter Closures", "difficulty": "intermediate", "language": "python",
+      "description": "Read JSON with starts (integer initial counter values) and commands (pairs [counter_index, signed_step]). Implement make_counter(start), returning an advance(step) closure that adds step to its private count and returns the new count. Construct one independent closure per start. Dispatch commands in order and output the list of returned counts. Indexes are valid, values are integers, and there are at most 1000 commands. An empty command list returns []. Do not use one shared global count or lambdas that late-bind a common loop variable. Zero and negative steps are legitimate. Print one compact JSON line. Keep factory state private to each invocation and use nonlocal only where enclosing rebinding is required.",
+      "starter_code": "import json\nimport sys\n\ndef make_counter(start):\n    raise NotImplementedError\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n",
+      "test_cases": [
+        {"input": "{\"starts\":[10,10],\"commands\":[[0,1],[0,1],[1,1],[0,-5]]}\n", "expected_output": "[11,12,11,7]\n"},
+        {"input": "{\"starts\":[],\"commands\":[]}\n", "expected_output": "[]\n"},
+        {"input": "{\"starts\":[0,5,-2],\"commands\":[[2,0],[1,-5],[0,3],[2,4],[0,-3]]}\n", "expected_output": "[-2,0,3,2,0]\n"},
+        {"input": "{\"starts\":[7],\"commands\":[[0,0],[0,0],[0,-10]]}\n", "expected_output": "[7,7,-3]\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef make_counter(start):\n    count = start\n    def advance(step):\n        nonlocal count\n        count += step\n        return count\n    return advance\n\ndef solve(payload):\n    counters = [make_counter(start) for start in payload['starts']]\n    return [counters[position](step) for position, step in payload['commands']]\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n"
+    },
+    {
+      "id": "a139ad62f3f7f3e28fa69986", "topic_slug": "python-foundations-sequences-and-copying",
+      "title": "Edit a Matrix Without Editing Its Source", "difficulty": "intermediate", "language": "python",
+      "description": "Read JSON with matrix (a rectangular list of integer rows) and edits (triples [row, column, replacement_integer]). Return {edited: the matrix after edits in order, original: unchanged input matrix}. Repeated edits to a cell use the last value. Every index is valid. Empty matrices or zero-width rows are allowed only when there are no edits. At most 1000 cells and edits are supplied. Build independent inner rows; copying only the outer list fails the contract. Avoid a repeated-row construction that aliases rows. Print one compact sorted-key JSON line. The cells are integers, so a two-level list copy is sufficient; the exercise does not request an arbitrary deep-copy engine.",
+      "starter_code": "import json\nimport sys\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "{\"matrix\":[[1,2],[3,4]],\"edits\":[[0,0,9]]}\n", "expected_output": "{\"edited\":[[9,2],[3,4]],\"original\":[[1,2],[3,4]]}\n"},
+        {"input": "{\"matrix\":[],\"edits\":[]}\n", "expected_output": "{\"edited\":[],\"original\":[]}\n"},
+        {"input": "{\"matrix\":[[0],[0]],\"edits\":[[0,0,1],[0,0,2],[1,0,-1]]}\n", "expected_output": "{\"edited\":[[2],[-1]],\"original\":[[0],[0]]}\n"},
+        {"input": "{\"matrix\":[[],[]],\"edits\":[]}\n", "expected_output": "{\"edited\":[[],[]],\"original\":[[],[]]}\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(payload):\n    original = payload['matrix']\n    edited = [row.copy() for row in original]\n    for row_index, column_index, value in payload['edits']:\n        edited[row_index][column_index] = value\n    return {'edited': edited, 'original': original}\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "22e13a7f4a920c7ab45a75b6", "topic_slug": "python-foundations-mappings-and-sets",
+      "title": "Frequency Report in First-Seen Order", "difficulty": "intermediate", "language": "python",
+      "description": "Read a JSON list of up to 1000 string labels. Labels are case-sensitive and must not be stripped or normalized; even an empty string is a legitimate key. Count occurrences and output records {count: occurrence_count, label: original_label}, in order of first appearance. Updating a count must not move its record. Empty input returns []. Do not use alphabetical sorting or set iteration as a substitute for insertion order. Prefer a mapping for counts rather than repeatedly scanning the full input. Print one JSON line with ensure_ascii=False, compact separators, and sorted record keys. This contract intentionally differs from normalized-label lookup: respect the caller's chosen identity policy.",
+      "starter_code": "import json\nimport sys\n\ndef solve(labels):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), ensure_ascii=False, separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "[\"red\",\"blue\",\"red\",\"green\",\"blue\"]\n", "expected_output": "[{\"count\":2,\"label\":\"red\"},{\"count\":2,\"label\":\"blue\"},{\"count\":1,\"label\":\"green\"}]\n"},
+        {"input": "[]\n", "expected_output": "[]\n"},
+        {"input": "[\"\",\"A\",\"a\",\"\",\"A\"]\n", "expected_output": "[{\"count\":2,\"label\":\"\"},{\"count\":2,\"label\":\"A\"},{\"count\":1,\"label\":\"a\"}]\n"},
+        {"input": "[\"界\",\"x\",\"界\"]\n", "expected_output": "[{\"count\":2,\"label\":\"界\"},{\"count\":1,\"label\":\"x\"}]\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(labels):\n    counts = {}\n    for label in labels:\n        counts[label] = counts.get(label, 0) + 1\n    return [{'count': count, 'label': label} for label, count in counts.items()]\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), ensure_ascii=False, separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "66ae8b4d247d77e490c0b197", "topic_slug": "python-foundations-comprehensions-and-sorting",
+      "title": "Stable Mixed-Direction Candidate Ranking", "difficulty": "intermediate", "language": "python",
+      "description": "Read JSON with records (objects containing name, a nonblank string, and score, an integer) and minimum (an integer). Keep records with score >= minimum. Rank by score descending, then name.casefold() ascending; if both keys match, preserve original input order. Return only the original names, without stripping or changing display spelling. Up to 1000 records are supplied and all satisfy the field contract. Empty or fully filtered input returns []. Do not apply reverse=True to an ascending tuple key because that also reverses the name criterion. Print one JSON line using ensure_ascii=False and compact separators. Filtering must precede ranking, and ranking must not mutate the caller's records.",
+      "starter_code": "import json\nimport sys\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), ensure_ascii=False, separators=(',', ':')))\n",
+      "test_cases": [
+        {"input": "{\"records\":[{\"name\":\"Mira\",\"score\":90},{\"name\":\"Ada\",\"score\":90},{\"name\":\"Lin\",\"score\":75}],\"minimum\":80}\n", "expected_output": "[\"Ada\",\"Mira\"]\n"},
+        {"input": "{\"records\":[],\"minimum\":0}\n", "expected_output": "[]\n"},
+        {"input": "{\"records\":[{\"name\":\"ada\",\"score\":90},{\"name\":\"ADA\",\"score\":90},{\"name\":\"Zed\",\"score\":100}],\"minimum\":90}\n", "expected_output": "[\"Zed\",\"ada\",\"ADA\"]\n"},
+        {"input": "{\"records\":[{\"name\":\"Zero\",\"score\":0},{\"name\":\"Low\",\"score\":-1}],\"minimum\":1}\n", "expected_output": "[]\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(payload):\n    accepted = [record for record in payload['records'] if record['score'] >= payload['minimum']]\n    ranked = sorted(accepted, key=lambda record: (-record['score'], record['name'].casefold()))\n    return [record['name'] for record in ranked]\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), ensure_ascii=False, separators=(',', ':')))\n"
+    },
+    {
+      "id": "97b817b0a9dd9d58ffec068b", "topic_slug": "python-foundations-iterators-and-generators",
+      "title": "Take a Prefix of Lazy Positive Running Totals", "difficulty": "intermediate", "language": "python",
+      "description": "Read JSON with values (a list of signed integers) and take (a nonnegative integer). Implement positive_totals(values) as a generator: ignore values <= 0, add each accepted positive value to a running total, and yield the new total immediately. Consume at most take yielded totals and output that prefix. If fewer values are yielded, return all of them. take=0 returns [] without requesting a generator item. Up to 1000 input values are supplied. The generator must accept any iterable and must not first build all intermediate totals; the stdin adapter may hold the input JSON list. Print one compact JSON line. State consumption limits in terms of accepted yields, not original input positions.",
+      "starter_code": "import json\nimport sys\nfrom itertools import islice\n\ndef positive_totals(values):\n    raise NotImplementedError\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n",
+      "test_cases": [
+        {"input": "{\"values\":[1,-1,3,5],\"take\":2}\n", "expected_output": "[1,4]\n"},
+        {"input": "{\"values\":[1,2],\"take\":0}\n", "expected_output": "[]\n"},
+        {"input": "{\"values\":[-3,0,-1],\"take\":4}\n", "expected_output": "[]\n"},
+        {"input": "{\"values\":[2,0,4,1],\"take\":9}\n", "expected_output": "[2,6,7]\n"}
+      ],
+      "reference_solution": "import json\nimport sys\nfrom itertools import islice\n\ndef positive_totals(values):\n    total = 0\n    for value in values:\n        if value > 0:\n            total += value\n            yield total\n\ndef solve(payload):\n    return list(islice(positive_totals(iter(payload['values'])), payload['take']))\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':')))\n"
+    },
+    {
+      "id": "6ca3900ed05b6375e994ef9e", "topic_slug": "python-foundations-exceptions-and-boundaries",
+      "title": "Strict and Tolerant Count Ingestion", "difficulty": "intermediate", "language": "python",
+      "description": "Read JSON with values (up to 1000 candidate values) and mode ('strict' or 'tolerant'). A valid count is a string that, after strip(), consists of an optional ASCII + or - followed by one or more ASCII digits, and converts to a nonnegative integer. Thus '-0' is valid, but decimals, underscores, nonstrings, and negative counts are rejected. Strict mode stops at the first rejected value and returns only {error_index: zero_based_index}; if all pass, return {accepted: counts}. Tolerant mode returns {accepted: valid_counts, rejected: rejected_indexes} in input order. Catch expected validation failures, not arbitrary defects. Print one compact sorted-key JSON line. Strict failure must not expose a partial accepted batch.",
+      "starter_code": "import json\nimport sys\n\ndef parse_count(value):\n    raise NotImplementedError\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "{\"values\":[\"4\",\"oops\",\"-1\",\" 8 \",\"-0\"],\"mode\":\"tolerant\"}\n", "expected_output": "{\"accepted\":[4,8,0],\"rejected\":[1,2]}\n"},
+        {"input": "{\"values\":[\"2\",\"3.5\",\"9\"],\"mode\":\"strict\"}\n", "expected_output": "{\"error_index\":1}\n"},
+        {"input": "{\"values\":[],\"mode\":\"strict\"}\n", "expected_output": "{\"accepted\":[]}\n"},
+        {"input": "{\"values\":[\"+3\",\"1_0\",true,\"٣\",\"\"],\"mode\":\"tolerant\"}\n", "expected_output": "{\"accepted\":[3],\"rejected\":[1,2,3,4]}\n"}
+      ],
+      "reference_solution": "import json\nimport re\nimport sys\n\ndef parse_count(value):\n    if not isinstance(value, str) or re.fullmatch(r'[+-]?[0-9]+', value.strip()) is None:\n        raise ValueError('invalid integer text')\n    count = int(value.strip())\n    if count < 0:\n        raise ValueError('negative count')\n    return count\n\ndef solve(payload):\n    accepted = []\n    rejected = []\n    for position, value in enumerate(payload['values']):\n        try:\n            count = parse_count(value)\n        except ValueError:\n            if payload['mode'] == 'strict':\n                return {'error_index': position}\n            rejected.append(position)\n        else:\n            accepted.append(count)\n    if payload['mode'] == 'strict':\n        return {'accepted': accepted}\n    return {'accepted': accepted, 'rejected': rejected}\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "55d28b20ef73c74b775271ce", "topic_slug": "python-foundations-files-and-json",
+      "title": "JSON Syntax and Schema Are Separate Gates", "difficulty": "intermediate", "language": "python",
+      "description": "Read all stdin as a JSON document. Reject malformed JSON or any duplicate object key with exactly INVALID_JSON on its own line. Otherwise require a top-level list of records, each with exactly name and score keys. name must be a nonblank string; score must be exactly an integer from 0 to 100, excluding booleans. Reject any wrong shape or field with exactly INVALID_SCHEMA, and emit no partial summary. For a valid list, output compact JSON {count: number_of_records, total: sum_of_scores} with sorted keys. Empty lists are valid. Inputs contain at most 1000 records and no nonstandard numeric constants. Do not use eval. Parsing must finish before validation and output, as it would for a structured UTF-8 file ingestion boundary.",
+      "starter_code": "import json\nimport sys\n\ndef solve(text):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    result = solve(sys.stdin.read())\n    print(result if isinstance(result, str) else json.dumps(result, separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "[{\"name\":\"Ada\",\"score\":80},{\"name\":\"Lin\",\"score\":100}]\n", "expected_output": "{\"count\":2,\"total\":180}\n"},
+        {"input": "[]\n", "expected_output": "{\"count\":0,\"total\":0}\n"},
+        {"input": "[{\"name\":\"Ada\",\"score\":true}]\n", "expected_output": "INVALID_SCHEMA\n"},
+        {"input": "[{\"name\":\"Ada\",\"score\":80,\"score\":90}]\n", "expected_output": "INVALID_JSON\n"},
+        {"input": "{broken\n", "expected_output": "INVALID_JSON\n"},
+        {"input": "[{\"name\":\"Ada\",\"score\":0},{\"name\":\" \",\"score\":50}]\n", "expected_output": "INVALID_SCHEMA\n"},
+        {"input": "{\"name\":\"Ada\",\"score\":80}\n", "expected_output": "INVALID_SCHEMA\n"},
+        {"input": "[{\"name\":\"Ada\",\"score\":101,\"extra\":1}]\n", "expected_output": "INVALID_SCHEMA\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef unique_keys(pairs):\n    result = {}\n    for key, value in pairs:\n        if key in result:\n            raise ValueError('duplicate key')\n        result[key] = value\n    return result\n\ndef solve(text):\n    try:\n        records = json.loads(text, object_pairs_hook=unique_keys)\n    except ValueError:\n        return 'INVALID_JSON'\n    if not isinstance(records, list):\n        return 'INVALID_SCHEMA'\n    total = 0\n    for record in records:\n        if not isinstance(record, dict) or set(record) != {'name', 'score'}:\n            return 'INVALID_SCHEMA'\n        if not isinstance(record['name'], str) or not record['name'].strip():\n            return 'INVALID_SCHEMA'\n        score = record['score']\n        if type(score) is not int or not 0 <= score <= 100:\n            return 'INVALID_SCHEMA'\n        total += score\n    return {'count': len(records), 'total': total}\n\nif __name__ == '__main__':\n    result = solve(sys.stdin.read())\n    print(result if isinstance(result, str) else json.dumps(result, separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "f57c204320c48247f1d22fd3", "topic_slug": "python-foundations-classes-and-state",
+      "title": "Independent Ledgers With Rejected-Operation Invariants", "difficulty": "intermediate", "language": "python",
+      "description": "Read JSON with owners (distinct strings) and commands (triples [owner, action, amount]); every owner is known. Create one Ledger per owner with balance=0 and a fresh history list. deposit and withdraw require an amount that is exactly a positive integer, excluding booleans; withdraw also requires sufficient balance. Unknown actions are rejected. Valid deposits append positive amounts to history and withdrawals append negative amounts. Rejections must alter neither balance nor history. Output {balances: owner_to_balance, histories: owner_to_history, rejected: zero_based_command_indexes}. At most 1000 commands are supplied. Empty owners with no commands are valid. Print one compact sorted-key JSON line. Implement the invariant inside Ledger methods, not as ad hoc updates in the CLI dispatcher.",
+      "starter_code": "import json\nimport sys\n\nclass Ledger:\n    def __init__(self):\n        self.balance = 0\n        self.history = []\n\n    def apply(self, action, amount):\n        raise NotImplementedError\n\ndef solve(payload):\n    raise NotImplementedError\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n",
+      "test_cases": [
+        {"input": "{\"owners\":[\"Ada\",\"Lin\"],\"commands\":[[\"Ada\",\"deposit\",5],[\"Ada\",\"withdraw\",2],[\"Lin\",\"withdraw\",1]]}\n", "expected_output": "{\"balances\":{\"Ada\":3,\"Lin\":0},\"histories\":{\"Ada\":[5,-2],\"Lin\":[]},\"rejected\":[2]}\n"},
+        {"input": "{\"owners\":[],\"commands\":[]}\n", "expected_output": "{\"balances\":{},\"histories\":{},\"rejected\":[]}\n"},
+        {"input": "{\"owners\":[\"A\"],\"commands\":[[\"A\",\"deposit\",0],[\"A\",\"deposit\",true],[\"A\",\"bonus\",5],[\"A\",\"deposit\",3],[\"A\",\"withdraw\",3]]}\n", "expected_output": "{\"balances\":{\"A\":0},\"histories\":{\"A\":[3,-3]},\"rejected\":[0,1,2]}\n"},
+        {"input": "{\"owners\":[\"A\",\"B\"],\"commands\":[[\"A\",\"deposit\",2],[\"B\",\"deposit\",7],[\"A\",\"withdraw\",3],[\"B\",\"withdraw\",-1]]}\n", "expected_output": "{\"balances\":{\"A\":2,\"B\":7},\"histories\":{\"A\":[2],\"B\":[7]},\"rejected\":[2,3]}\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\nclass Ledger:\n    def __init__(self):\n        self.balance = 0\n        self.history = []\n\n    def apply(self, action, amount):\n        if type(amount) is not int or amount <= 0 or action not in {'deposit', 'withdraw'}:\n            raise ValueError('invalid operation')\n        if action == 'withdraw' and amount > self.balance:\n            raise ValueError('insufficient balance')\n        change = amount if action == 'deposit' else -amount\n        self.balance += change\n        self.history.append(change)\n\ndef solve(payload):\n    ledgers = {owner: Ledger() for owner in payload['owners']}\n    rejected = []\n    for position, (owner, action, amount) in enumerate(payload['commands']):\n        try:\n            ledgers[owner].apply(action, amount)\n        except ValueError:\n            rejected.append(position)\n    return {'balances': {owner: ledger.balance for owner, ledger in ledgers.items()}, 'histories': {owner: ledger.history for owner, ledger in ledgers.items()}, 'rejected': rejected}\n\nif __name__ == '__main__':\n    print(json.dumps(solve(json.load(sys.stdin)), separators=(',', ':'), sort_keys=True))\n"
+    },
+    {
+      "id": "b679d395591a234fe638ec63", "topic_slug": "python-foundations-modules-and-testing",
+      "title": "Validated Report Capstone With Normalized Groups", "difficulty": "intermediate", "language": "python",
+      "description": "Read JSON with exactly one top-level key records, a list of records with exactly name and score. name is a nonblank string; score is exactly an integer 0..100, excluding booleans. Any syntax or schema failure returns only {error: 'invalid'}, never a partial report. For valid input, strip each name and group by its casefolded key. Retain the first stripped display spelling. For each group compute attempts and total score. Rank groups by total descending, then normalized key ascending, and output records {attempts, name, total}. Empty records return []. At most 1000 records are supplied; duplicate JSON keys and nonstandard constants are outside this input contract. Keep validation, aggregation, ranking, and CLI formatting separate enough to test. Print one compact sorted-key JSON line with ensure_ascii=False.",
+      "starter_code": "import json\nimport sys\n\ndef solve(payload):\n    raise NotImplementedError\n\ndef main():\n    try:\n        payload = json.load(sys.stdin)\n    except ValueError:\n        result = {'error': 'invalid'}\n    else:\n        result = solve(payload)\n    print(json.dumps(result, ensure_ascii=False, separators=(',', ':'), sort_keys=True))\n\nif __name__ == '__main__':\n    main()\n",
+      "test_cases": [
+        {"input": "{\"records\":[{\"name\":\" Ada \",\"score\":80},{\"name\":\"ADA\",\"score\":90},{\"name\":\"Lin\",\"score\":100}]}\n", "expected_output": "[{\"attempts\":2,\"name\":\"Ada\",\"total\":170},{\"attempts\":1,\"name\":\"Lin\",\"total\":100}]\n"},
+        {"input": "{\"records\":[]}\n", "expected_output": "[]\n"},
+        {"input": "{\"records\":[{\"name\":\"Zed\",\"score\":90},{\"name\":\"ada\",\"score\":90},{\"name\":\"Bob\",\"score\":0}]}\n", "expected_output": "[{\"attempts\":1,\"name\":\"ada\",\"total\":90},{\"attempts\":1,\"name\":\"Zed\",\"total\":90},{\"attempts\":1,\"name\":\"Bob\",\"total\":0}]\n"},
+        {"input": "{\"records\":[{\"name\":\"Ada\",\"score\":80},{\"name\":\"Lin\",\"score\":true}]}\n", "expected_output": "{\"error\":\"invalid\"}\n"},
+        {"input": "{\"records\":[{\"name\":\" \",\"score\":0}]}\n", "expected_output": "{\"error\":\"invalid\"}\n"},
+        {"input": "[1,2]\n", "expected_output": "{\"error\":\"invalid\"}\n"},
+        {"input": "not json\n", "expected_output": "{\"error\":\"invalid\"}\n"},
+        {"input": "{\"records\":[{\"name\":\"Ada\",\"score\":101}]}\n", "expected_output": "{\"error\":\"invalid\"}\n"}
+      ],
+      "reference_solution": "import json\nimport sys\n\ndef solve(payload):\n    if not isinstance(payload, dict) or set(payload) != {'records'} or not isinstance(payload['records'], list):\n        return {'error': 'invalid'}\n    for record in payload['records']:\n        if not isinstance(record, dict) or set(record) != {'name', 'score'}:\n            return {'error': 'invalid'}\n        if not isinstance(record['name'], str) or not record['name'].strip():\n            return {'error': 'invalid'}\n        if type(record['score']) is not int or not 0 <= record['score'] <= 100:\n            return {'error': 'invalid'}\n    groups = {}\n    for record in payload['records']:\n        name = record['name'].strip()\n        key = name.casefold()\n        if key not in groups:\n            groups[key] = {'name': name, 'attempts': 0, 'total': 0}\n        groups[key]['attempts'] += 1\n        groups[key]['total'] += record['score']\n    ordered_keys = sorted(groups, key=lambda key: (-groups[key]['total'], key))\n    return [groups[key] for key in ordered_keys]\n\ndef main():\n    try:\n        payload = json.load(sys.stdin)\n    except ValueError:\n        result = {'error': 'invalid'}\n    else:\n        result = solve(payload)\n    print(json.dumps(result, ensure_ascii=False, separators=(',', ':'), sort_keys=True))\n\nif __name__ == '__main__':\n    main()\n"
+    }
+  ]
+}

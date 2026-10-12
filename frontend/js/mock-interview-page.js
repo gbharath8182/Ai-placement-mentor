@@ -20,12 +20,14 @@ async function miPageLoadDomains() {
         empty.classList.add("hidden");
 
         domains.forEach((domain) => {
-            const card = document.createElement("div");
+            const card = document.createElement("button");
+            card.type = "button";
             card.className = "mi-domain-card";
-            card.innerHTML = `
-                <h3>${domain.title || domain.slug}</h3>
-                <p>${domain.description || ""}</p>
-            `;
+            const title = document.createElement("h3");
+            title.textContent = domain.title || domain.slug;
+            const description = document.createElement("p");
+            description.textContent = domain.description || "";
+            card.append(title, description);
             card.addEventListener("click", () => {
                 miState.domainSlug = domain.slug;
                 miPageShowModeStep();

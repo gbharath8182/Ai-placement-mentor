@@ -1,32 +1,67 @@
+let aiBusy = false;
+let activeAIRequest = null;
+
+async function restoreTutorHistory() {
+    if (!getAccessToken() || !currentTopicSlug) return;
+    setAIBusy(true);
+    try {
+        const response = await authFetch(`/ai/history/${encodeURIComponent(currentTopicSlug)}`);
+        if (!response.ok) throw new Error("history_unavailable");
+        const payload = await response.json();
+        const messages = (Array.isArray(payload.messages) ? payload.messages : []).filter(message =>
+            ["user", "assistant"].includes(message.role) && typeof message.content === "string"
+        ).slice(-20);
+        if (messages.length) {
+            document.getElementById("ai-chat-logs").replaceChildren();
+            messages.forEach(message => {
+                if (message.role === "user") appendUserBubble(message.content);
+                else window.appendAssistantMessage(message.content);
+            });
+        }
+    } catch {
+        const notice = document.createElement("p");
+        notice.className = "ai-error";
+        notice.textContent = "Saved conversation could not be loaded. You can still ask a new question.";
+        document.getElementById("ai-chat-logs").appendChild(notice);
+    } finally {
+        setAIBusy(false);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("ai-chat-form");
-    
-    // Bind chat submission
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    if (!form) return;
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
         const input = document.getElementById("chat-input");
-        const msg = input.value.trim();
-        if (!msg) return;
-        
+        const message = input.value.trim();
+        if (!message || aiBusy) return;
         input.value = "";
-        await sendUserMessage(msg);
+        await sendUserMessage(message);
     });
-    
-    // Bind action chips
-    document.getElementById("chip-explain-simply").addEventListener("click", () => {
-        runExplainEndpoint("fresher", "Explain Simply");
-    });
-    
-    document.getElementById("chip-deep-dive").addEventListener("click", () => {
-        runExplainEndpoint("experienced", "Deeper Dive");
-    });
-    
-    document.getElementById("chip-quiz").addEventListener("click", () => {
-        sendUserMessage("Generate a multiple-choice practice question for me on this topic.");
-    });
+    document.getElementById("chip-explain-simply")?.addEventListener("click", () => runExplainEndpoint("fresher", "Explain Simply"));
+    document.getElementById("chip-deep-dive")?.addEventListener("click", () => runExplainEndpoint("experienced", "Deeper Dive"));
+    document.getElementById("chip-quiz")?.addEventListener("click", () => sendUserMessage("Quiz me on the selected lesson section. Ask one question and wait for my answer."));
+    const stop = document.createElement("button");
+    stop.type = "button";
+    stop.className = "btn-chip";
+    stop.id = "ai-stop-btn";
+    stop.textContent = "Stop reply";
+    stop.hidden = true;
+    stop.addEventListener("click", () => activeAIRequest?.abort());
+    form.parentElement.appendChild(stop);
+    window.addEventListener("pagehide", () => activeAIRequest?.abort());
 });
 
-// Appends a user message to the logs
+function setAIBusy(busy) {
+    aiBusy = busy;
+    document.querySelectorAll(".ai-actions-bar button, #chat-send-btn").forEach(button => { button.disabled = busy; });
+    const status = document.getElementById("ai-status-text");
+    if (status) status.textContent = busy ? "Thinking…" : "Lesson companion";
+    const stop = document.getElementById("ai-stop-btn");
+    if (stop) stop.hidden = !busy;
+}
+
 function appendUserBubble(text) {
     const logs = document.getElementById("ai-chat-logs");
     const bubble = document.createElement("div");
@@ -36,187 +71,132 @@ function appendUserBubble(text) {
     logs.scrollTop = logs.scrollHeight;
 }
 
-// Appends an empty assistant bubble and returns a function to add content to it
+function formatTutorText(text) {
+    let escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    escaped = escaped.replace(/```[\w+-]*\n([\s\S]*?)```/g, (_, code) => `<pre><code>${code.trim()}</code></pre>`);
+    return escaped.replace(/`([^`\n]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
+}
+
 function createAssistantPlaceholder() {
     const logs = document.getElementById("ai-chat-logs");
     const bubble = document.createElement("div");
     bubble.className = "chat-bubble bubble-assistant";
-    
-    // Typing indicator
-    bubble.innerHTML = `
-        <div class="typing-indicator">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-        </div>
-    `;
+    bubble.textContent = "Thinking…";
+    bubble.setAttribute("aria-busy", "true");
     logs.appendChild(bubble);
-    logs.scrollTop = logs.scrollHeight;
-    
-    let textContent = "";
-    
+    let content = "";
     return {
-        update: (newText) => {
-            textContent += newText;
-            
-            // Format simple markdown-like code blocks and lists in real-time
-            let formatted = textContent
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;");
-                
-            // Format fenced code blocks: ```python ... ```
-            formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-                return `<pre><code>${code.trim()}</code></pre>`;
-            });
-            
-            // Format inline code: `code`
-            formatted = formatted.replace(/`(.*?)`/g, "<code>$1</code>");
-            
-            // Format line breaks
-            formatted = formatted.replace(/\n/g, "<br>");
-            
-            bubble.innerHTML = formatted;
+        update(text) {
+            content += text;
+            bubble.innerHTML = formatTutorText(content);
             logs.scrollTop = logs.scrollHeight;
         },
-        finish: () => {
-            // Remove typing indicator if empty
-            if (bubble.querySelector(".typing-indicator")) {
-                bubble.innerHTML = "No response could be generated.";
+        fail(message, retry) {
+            const notice = document.createElement("p");
+            notice.className = "ai-error";
+            notice.textContent = message;
+            if (!content) bubble.replaceChildren();
+            bubble.appendChild(notice);
+            if (retry) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "btn-chip";
+                button.textContent = "Retry";
+                button.addEventListener("click", () => { if (!aiBusy) { button.remove(); retry(); } });
+                bubble.appendChild(button);
             }
+        },
+        finish() {
+            bubble.setAttribute("aria-busy", "false");
         }
     };
 }
 
+function safeAIError(payload) {
+    const allowed = new Set(["authentication", "model_unavailable", "rate_limit", "service", "timeout", "network", "invalid_request", "invalid_response", "not_configured", "database"]);
+    const error = payload?.error;
+    if (error && allowed.has(error.code) && typeof error.message === "string") return error;
+    return { message: "The assistant is temporarily unavailable. Please retry shortly.", retryable: true };
+}
+
 async function sendUserMessage(messageText) {
+    if (aiBusy) return;
     appendUserBubble(messageText);
-    
     const placeholder = createAssistantPlaceholder();
-    
+    activeAIRequest = new AbortController();
+    setAIBusy(true);
+    let reader;
+    let completed = false;
+    let failed = false;
     try {
         const response = await authFetch("/ai/chat", {
-            method: "POST",
-            body: {
-                topic_slug: currentTopicSlug,
-                message: messageText
-            }
+            method: "POST", signal: activeAIRequest.signal,
+            body: { topic_slug: currentTopicSlug, message: messageText, subtopic_title: document.getElementById("subtopic-title-badge")?.textContent || null }
         });
-        
         if (!response.ok) {
-            placeholder.update("⚠️ Error: Failed to retrieve completions from the server.");
-            placeholder.finish();
+            const error = safeAIError(await response.json().catch(() => ({})));
+            placeholder.fail(error.message, error.retryable ? () => sendUserMessage(messageText) : null);
             return;
         }
-        
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
+        reader = response.body.getReader();
+        const decoder = new TextDecoder();
         let buffer = "";
-        
         while (true) {
             const { value, done } = await reader.read();
-            if (done) break;
-            
-            buffer += decoder.decode(value, { stream: true });
+            buffer += done ? decoder.decode() : decoder.decode(value, { stream: true });
             const lines = buffer.split("\n");
-            
-            // Retain the last unfinished line in buffer
-            buffer = lines.pop();
-            
+            buffer = done ? "" : lines.pop();
             for (const line of lines) {
-                const cleanedLine = line.trim();
-                if (cleanedLine.startsWith("data: ")) {
-                    const dataStr = cleanedLine.slice(6).trim();
-                    if (dataStr === "[DONE]") {
-                        continue;
-                    }
-                    try {
-                        const json = JSON.parse(dataStr);
-                        if (json.error) {
-                            placeholder.update(`\n⚠️ ${json.error}`);
-                        } else {
-                            const content = json.choices[0]?.delta?.content || "";
-                            // Replace typing indicator with real text on first token
-                            const indicators = document.querySelector(".typing-indicator");
-                            if (indicators) {
-                                // Clear typing animation
-                                placeholder.update(""); 
-                            }
-                            placeholder.update(content);
-                        }
-                    } catch (e) {
-                        // Not JSON or partial chunk
-                    }
+                if (!line.startsWith("data:")) continue;
+                const data = line.slice(5).trim();
+                if (data === "[DONE]") { completed = true; continue; }
+                const event = JSON.parse(data);
+                if (event.error) {
+                    const error = safeAIError(event);
+                    placeholder.fail(error.message, error.retryable ? () => sendUserMessage(messageText) : null);
+                    failed = true;
+                } else {
+                    placeholder.update(event.choices?.[0]?.delta?.content || "");
                 }
             }
+            if (done || completed || failed) break;
         }
-        
-    } catch (err) {
-        console.error("AI connection error:", err);
-        placeholder.update("⚠️ Connection timed out or failed. Please verify GROQ_API_KEY.");
+        if (!completed && !failed) placeholder.fail("The reply was interrupted. Please retry.", () => sendUserMessage(messageText));
+    } catch (error) {
+        placeholder.fail(error.name === "AbortError" ? "Reply stopped." : "The connection was interrupted. Please retry.", () => sendUserMessage(messageText));
+    } finally {
+        if (reader) { await reader.cancel().catch(() => {}); reader.releaseLock(); }
         placeholder.finish();
+        setAIBusy(false);
+        activeAIRequest = null;
     }
 }
 
-// Handler for the Explain endpoints (simplified or deep dive)
 async function runExplainEndpoint(level, actionName) {
+    if (aiBusy) return;
     appendUserBubble(`${actionName} requested.`);
     const placeholder = createAssistantPlaceholder();
-    
+    activeAIRequest = new AbortController();
+    setAIBusy(true);
     try {
-        const res = await authFetch("/ai/explain", {
-            method: "POST",
-            body: {
-                topic_slug: currentTopicSlug,
-                level: level
-            }
-        });
-        
-        if (res.ok) {
-            const data = await res.json();
-            // Clear typing indicator and insert response
-            const indicators = document.querySelector(".typing-indicator");
-            if (indicators) {
-                placeholder.update("");
-            }
-            
-            // Slowly animate/stream text printing for premium feeling
-            animatePrint(data.explanation, placeholder);
-        } else {
-            const err = await res.json();
-            placeholder.update(`⚠️ Failed: ${err.detail || "Server error"}`);
-            placeholder.finish();
+        const response = await authFetch("/ai/explain", { method: "POST", signal: activeAIRequest.signal, body: { topic_slug: currentTopicSlug, level } });
+        const data = await response.json();
+        if (response.ok) placeholder.update(data.explanation);
+        else {
+            const error = safeAIError(data);
+            placeholder.fail(error.message, error.retryable ? () => runExplainEndpoint(level, actionName) : null);
         }
-    } catch (err) {
-        console.error("Error calling explain:", err);
-        placeholder.update("⚠️ Error connecting to server.");
+    } catch (error) {
+        placeholder.fail(error.name === "AbortError" ? "Reply stopped." : "The connection was interrupted. Please retry.", () => runExplainEndpoint(level, actionName));
+    } finally {
         placeholder.finish();
+        setAIBusy(false);
+        activeAIRequest = null;
     }
 }
 
-function animatePrint(text, placeholder) {
-    const words = text.split(" ");
-    let i = 0;
-    
-    // Clean placeholder first
-    placeholder.update("");
-    
-    function printNextWord() {
-        if (i < words.length) {
-            placeholder.update(words[i] + " ");
-            i++;
-            setTimeout(printNextWord, 20); // 20ms word delay
-        }
-    }
-    
-    printNextWord();
-}
-
-// Expose a helper to write standard text directly from topic completion events
-window.appendAssistantMessage = (messageText) => {
-    const logs = document.getElementById("ai-chat-logs");
-    const bubble = document.createElement("div");
-    bubble.className = "chat-bubble bubble-assistant";
-    bubble.innerHTML = messageText;
-    logs.appendChild(bubble);
-    logs.scrollTop = logs.scrollHeight;
+window.appendAssistantMessage = message => {
+    const placeholder = createAssistantPlaceholder();
+    placeholder.update(message);
+    placeholder.finish();
 };

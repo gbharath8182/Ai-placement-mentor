@@ -31,8 +31,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const progressList = await progressRes.json();
                 const completedCount = progressList.filter(p => p.status === 'completed').length;
                 document.getElementById("stats-completed").textContent = `${completedCount} Completed`;
-                if (completedCount > 0) {
-                    document.getElementById("stats-streak").textContent = `${completedCount + 2} Days`;
+                const streakResponse = await authFetch("/activity/streak");
+                if (streakResponse.ok) {
+                    const streak = await streakResponse.json();
+                    document.getElementById("stats-streak").textContent = `${streak.current_streak || 0} Days`;
                 }
             }
         }
@@ -51,7 +53,7 @@ function renderDomains(domains) {
     grid.innerHTML = "";
     
     if (domains.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">No domains found. Run the seed script!</div>`;
+        grid.innerHTML = `<p>No curriculum is available yet. Please contact the platform administrator.</p>`;
         return;
     }
     

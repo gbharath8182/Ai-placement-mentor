@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from backend.database import get_collection
 from backend.models import DomainDetailResponse
+from backend.routes.content import builtin_curriculum, serialize_doc
 
 router = APIRouter(prefix="/domains", tags=["domain-details"])
 
@@ -12,14 +13,18 @@ async def list_domains_with_details():
     practice: newly-added domains can still receive AI-generated questions.
     """
     details_coll = get_collection("domain_details")
-    slugs = [doc["domain_slug"] async for doc in details_coll.find({}, {"domain_slug": 1})]
+    slugs = {doc["domain_slug"] async for doc in details_coll.find({}, {"domain_slug": 1}).limit(1000).max_time_ms(5000)}
     domains_coll = get_collection("domains")
-    cursor = domains_coll.find()
+    cursor = domains_coll.find().limit(100).max_time_ms(5000)
     result = []
     async for doc in cursor:
-        doc.pop("_id", None)
+        doc = serialize_doc(doc)
         doc["has_detailed_content"] = doc.get("slug") in slugs
         result.append(doc)
+    existing = {doc["slug"] for doc in result}
+    for domain in builtin_curriculum()["domains"]:
+        if domain["slug"] not in existing:
+            result.append({**serialize_doc(domain), "has_detailed_content": domain["slug"] in slugs})
     return result
 
 @router.get("/{slug}/details", response_model=DomainDetailResponse)

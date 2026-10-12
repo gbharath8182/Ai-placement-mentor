@@ -11,20 +11,73 @@
         if (!btn) return;
         var isLight = document.documentElement.classList.contains('light-theme');
         btn.innerHTML = getIcon(isLight);
+        btn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+        btn.setAttribute('aria-pressed', String(isLight));
+        btn.title = btn.getAttribute('aria-label');
+        btn.querySelector('svg').setAttribute('aria-hidden', 'true');
     }
 
     function toggleTheme() {
         document.documentElement.classList.toggle('light-theme');
         var isLight = document.documentElement.classList.contains('light-theme');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        try {
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        } catch {}
         applyIcon();
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    function restoreTheme() {
+        try {
+            document.documentElement.classList.toggle('light-theme', localStorage.getItem('theme') === 'light');
+        } catch {}
+        applyIcon();
+    }
+
+    restoreTheme();
+    window.addEventListener('storage', function (event) {
+        if (event.key === 'theme' || event.key === null) restoreTheme();
+    });
+
+    function initialize() {
+        restoreTheme();
         applyIcon();
         var btn = document.getElementById('theme-toggle');
         if (btn) {
             btn.addEventListener('click', toggleTheme);
         }
-    });
+        const toggle = document.getElementById('ai-panel-toggle');
+        const panel = document.getElementById('ai-panel');
+        if (!toggle || !panel) return;
+        const mobile = window.matchMedia('(max-width: 1120px)');
+        let expanded = false;
+
+        function updatePanel() {
+            const visible = !mobile.matches || expanded;
+            if (!visible && panel.contains(document.activeElement)) toggle.focus();
+            panel.hidden = !visible;
+            panel.classList.toggle('is-open', visible);
+            toggle.setAttribute('aria-expanded', String(visible));
+            toggle.textContent = visible ? 'Close AI tutor' : 'Open AI tutor';
+        }
+
+        toggle.addEventListener('click', function () {
+            expanded = !expanded;
+            updatePanel();
+            if (expanded && mobile.matches) panel.scrollIntoView({ behavior: 'auto', block: 'start' });
+        });
+        panel.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && mobile.matches) {
+                expanded = false;
+                updatePanel();
+                toggle.focus();
+            }
+        });
+        mobile.addEventListener('change', function () {
+            expanded = false;
+            updatePanel();
+        });
+        updatePanel();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize);
+    else initialize();
 })();

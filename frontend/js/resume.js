@@ -42,7 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await response.json();
             if (!response.ok) throw new Error(result.detail || "Could not generate your resume.");
             const markdown = result.resume_markdown;
-            output.innerHTML = window.marked ? marked.parse(markdown) : markdown.replace(/\n/g, "<br>");
+            if (window.marked && window.DOMPurify) output.innerHTML = DOMPurify.sanitize(marked.parse(markdown));
+            else output.textContent = markdown;
             output.classList.remove("hidden");
             status.textContent = "Generated with the resume planning + writing AI pipeline.";
             const download = document.getElementById("download-resume");

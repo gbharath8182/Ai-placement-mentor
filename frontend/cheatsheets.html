@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cheat Sheets & Textbook Hub | AI-Assisted Learning Platform</title>
+    <title>Cheat Sheets & Textbook Hub | AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <script>
-        (function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();
+        (function(){try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light-theme');}catch{}})();
     </script>
     <style>
         .cs-container {
@@ -45,19 +45,18 @@
         }
         .cs-panel {
             display: none;
-            animation: fadeIn 0.3s ease;
         }
         .cs-panel.active {
             display: block;
         }
         .cs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
             gap: 20px;
         }
         .cs-card {
             padding: 24px;
-            border-radius: 16px;
+            border-radius: 10px;
             height: 100%;
         }
         .cs-card h3 {
@@ -88,22 +87,22 @@
         }
         .code-snippet {
             margin: 10px 0;
-            background: #0d1117;
+            background: var(--bg-primary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px;
             font-family: var(--font-code);
             font-size: 0.85rem;
             overflow-x: auto;
-            color: #e6edf3;
+            color: var(--text-main);
         }
         .light-theme .code-snippet {
-            background: #f1f5f9;
-            color: #0f172a;
+            background: var(--bg-tertiary);
+            color: var(--text-main);
         }
         .library-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
             gap: 20px;
         }
         .book-card {
@@ -117,7 +116,6 @@
             transition: var(--transition-smooth);
         }
         .book-card:hover {
-            transform: translateY(-3px);
             border-color: var(--accent-primary);
         }
         .book-title {
@@ -148,7 +146,7 @@
         }
         .book-btn:hover {
             background: var(--accent-primary);
-            color: #fff;
+            color: var(--on-accent);
             border-color: var(--accent-primary);
         }
         .resource-tag {
@@ -190,15 +188,15 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#navGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
                 <defs>
                     <linearGradient id="navGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#38bdf8"/>
-                        <stop offset="100%" stop-color="#c084fc"/>
+                        <stop offset="0%" stop-color="#69d9c8"/>
+                        <stop offset="100%" stop-color="#eab68c"/>
                     </linearGradient>
                 </defs>
                 <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
                 <line x1="12" y1="22" x2="12" y2="15.5"></line>
                 <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
             </svg>
-            <span>EduAI Platform</span>
+            <span>AI Placement Mentor</span>
         </a>
         <div class="nav-user">
             <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
@@ -489,6 +487,7 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
 
         <!-- Textbook Library Panel -->
         <div class="cs-panel" id="panel-books">
+            <p class="evidence-note">Free, legal reading from authors, universities and open-textbook projects. Buttons open the text or free chapter index, not a store. External sites may also offer optional printed editions.</p>
             <div class="library-grid">
                 <div class="book-card glass-panel">
                     <div>
@@ -496,7 +495,7 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
                         <div class="book-author">Allen B. Downey</div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A clean, standardized guide to programming principles, functions, variables, and logic using Python.</p>
                     </div>
-                    <a href="https://greenteapress.com/thinkpython2/thinkpython2.pdf" target="_blank" class="book-btn">📖 Open Free PDF</a>
+                    <a href="https://greenteapress.com/thinkpython2/thinkpython2.pdf" target="_blank" rel="noopener noreferrer" class="book-btn">Open free PDF</a>
                 </div>
 
                 <div class="book-card glass-panel">
@@ -505,7 +504,7 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
                         <div class="book-author">Jeff Erickson</div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">One of the most famous university textbooks on algorithms, recursion, graphs, dynamic programming, and complexity.</p>
                     </div>
-                    <a href="https://jeffe.cs.illinois.edu/teaching/algorithms/book/Algorithms-JeffErickson.pdf" target="_blank" class="book-btn">📖 Open Free PDF</a>
+                    <a href="https://jeffe.cs.illinois.edu/teaching/algorithms/book/Algorithms-JeffE.pdf" target="_blank" rel="noopener noreferrer" class="book-btn">Open free PDF</a>
                 </div>
 
                 <div class="book-card glass-panel">
@@ -514,7 +513,7 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
                         <div class="book-author">Pat Morin</div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">An open-source reference guide with full implementations in Python and Java covering lists, hashing, and trees.</p>
                     </div>
-                    <a href="https://opendatastructures.org/ods-python.pdf" target="_blank" class="book-btn">📖 Open Free PDF</a>
+                    <a href="https://opendatastructures.org/ods-python.pdf" target="_blank" rel="noopener noreferrer" class="book-btn">Open free PDF</a>
                 </div>
 
                 <div class="book-card glass-panel">
@@ -523,61 +522,61 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
                         <div class="book-author">Remzi & Andrea Arpaci-Dusseau</div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">World-class textbook breaking down virtualization, concurrency, and persistence in operating systems.</p>
                     </div>
-                    <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" class="book-btn">📖 View Free Book</a>
+                    <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/#book-chapters" target="_blank" rel="noopener noreferrer" class="book-btn">Open free chapter index</a>
                 </div>
 
                 <div class="book-card glass-panel">
                     <div>
-                        <div class="book-title">Eloquent JavaScript (3rd Edition)</div>
+                        <div class="book-title">Eloquent JavaScript (4th Edition)</div>
                         <div class="book-author">Marijn Haverbeke</div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A premium handbook on JavaScript syntax, scopes, async operations, DOM node manipulation, and Node.js.</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A freely readable guide to JavaScript, functions, asynchronous programming, the browser and Node.js, with interactive examples.</p>
                     </div>
-                    <a href="https://eloquentjavascript.net/Eloquent_JavaScript.pdf" target="_blank" class="book-btn">📖 Open Free PDF</a>
+                    <a href="https://eloquentjavascript.net/00_intro.html" target="_blank" rel="noopener noreferrer" class="book-btn">Start reading online</a>
                 </div>
 
                 <div class="book-card glass-panel">
                     <div>
-                        <div class="book-title">Understanding Machine Learning</div>
-                        <div class="book-author">Shai Shalev-Shwartz & Shai Ben-David</div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A comprehensive textbook analyzing ML theory, classification models, generalization bounds, and SGD.</p>
+                        <div class="book-title">An Introduction to Statistical Learning — Python</div>
+                        <div class="book-author">Gareth James, Daniela Witten, Trevor Hastie, Robert Tibshirani & Jonathan Taylor</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A statistical-learning text with Python labs covering regression, classification, resampling, regularization, trees and unsupervised learning.</p>
                     </div>
-                    <a href="https://www.cs.huji.ac.il/~shais/UnderstandingMachineLearning/understanding-machine-learning-theory-algorithms.pdf" target="_blank" class="book-btn">📖 Open Free PDF</a>
+                    <a href="https://drive.google.com/file/d/1ajFkHO6zjrdGNqhqW1jKBZdiNGh_8YQ1/view" target="_blank" rel="noopener noreferrer" class="book-btn">Read free book</a>
                 </div>
                 <div class="book-card glass-panel">
                     <div>
                         <span class="resource-tag">Software engineering</span>
-                        <div class="book-title">Software Engineering: A Practitioner's Approach</div>
-                        <div class="book-author">Roger S. Pressman & Bruce R. Maxim</div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">Use this for requirements, architecture, testing, and lifecycle vocabulary that turns coding skills into engineering judgment.</p>
+                        <div class="book-title">Software Design by Example — Python</div>
+                        <div class="book-author">Greg Wilson</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">Build small interpreters, test runners and developer tools to study software design. Assumes you can already write small Python programs.</p>
                     </div>
-                    <a href="https://www.mheducation.com/highered/product/software-engineering-practitioner-s-approach-pressman-maxim.html" target="_blank" rel="noopener" class="book-btn">📚 Publisher reference</a>
+                    <a href="https://third-bit.com/sdxpy/" target="_blank" rel="noopener noreferrer" class="book-btn">Open free chapters</a>
                 </div>
                 <div class="book-card glass-panel">
                     <div>
                         <span class="resource-tag">Databases</span>
-                        <div class="book-title">Database System Concepts</div>
-                        <div class="book-author">Silberschatz, Korth & Sudarshan</div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A reliable reference for relational design, SQL, transactions, indexing, query processing, and recovery.</p>
+                        <div class="book-title">Database Design — 2nd Edition</div>
+                        <div class="book-author">Adrienne Watt & Nelson Eng</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">An open textbook on relational modelling, entity relationships, normalization and SQL. Read chapters directly without buying a commercial textbook.</p>
                     </div>
-                    <a href="https://www.db-book.com/" target="_blank" rel="noopener" class="book-btn">📚 Book companion</a>
+                    <a href="https://opentextbc.ca/dbdesign01/" target="_blank" rel="noopener noreferrer" class="book-btn">Open free chapters</a>
                 </div>
                 <div class="book-card glass-panel">
                     <div>
                         <span class="resource-tag">Networks</span>
-                        <div class="book-title">Computer Networking: A Top-Down Approach</div>
-                        <div class="book-author">James Kurose & Keith Ross</div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">Builds network understanding from applications down through transport, routing, and link layers—ideal for interview explanations.</p>
+                        <div class="book-title">Computer Networks: A Systems Approach</div>
+                        <div class="book-author">Larry Peterson & Bruce Davie</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">An openly readable systems-oriented text covering links, routing, end-to-end protocols, congestion control and network applications.</p>
                     </div>
-                    <a href="https://gaia.cs.umass.edu/kurose_ross/" target="_blank" rel="noopener" class="book-btn">📚 Companion site</a>
+                    <a href="https://book.systemsapproach.org/index.html" target="_blank" rel="noopener noreferrer" class="book-btn">Open free chapters</a>
                 </div>
                 <div class="book-card glass-panel">
                     <div>
                         <span class="resource-tag">Distributed systems</span>
-                        <div class="book-title">Designing Data-Intensive Applications</div>
+                        <div class="book-title">Distributed Systems — Lecture Notes</div>
                         <div class="book-author">Martin Kleppmann</div>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A practical bridge from databases to replication, partitioning, stream processing, and distributed-system trade-offs.</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">University of Cambridge notes on distributed models, replication, clocks and consensus. These are free lecture notes, not the paid DDIA book.</p>
                     </div>
-                    <a href="https://dataintensive.net/" target="_blank" rel="noopener" class="book-btn">📚 Book resources</a>
+                    <a href="https://www.cl.cam.ac.uk/teaching/2122/ConcDisSys/dist-sys-notes.pdf" target="_blank" rel="noopener noreferrer" class="book-btn">Open free lecture PDF</a>
                 </div>
                 <div class="book-card glass-panel">
                     <div>
@@ -586,7 +585,7 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
                         <div class="book-author">Robert Nystrom</div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">A complete free book for understanding parsers, syntax trees, runtime design, and the machinery underneath programming languages.</p>
                     </div>
-                    <a href="https://craftinginterpreters.com/" target="_blank" rel="noopener" class="book-btn">📖 Read free online</a>
+                    <a href="https://craftinginterpreters.com/contents.html" target="_blank" rel="noopener noreferrer" class="book-btn">Open free chapters</a>
                 </div>
                 <div class="book-card glass-panel">
                     <div>
@@ -595,7 +594,7 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
                         <div class="book-author">Aston Zhang, Zachary Lipton, Mu Li & Alex Smola</div>
                         <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px;">Interactive, code-first deep-learning text that connects mathematics, implementations, and model behavior.</p>
                     </div>
-                    <a href="https://d2l.ai/" target="_blank" rel="noopener" class="book-btn">📖 Read free online</a>
+                    <a href="https://d2l.ai/" target="_blank" rel="noopener noreferrer" class="book-btn">Open free chapters</a>
                 </div>
             </div>
         </div>
@@ -649,7 +648,7 @@ LEFT JOIN orders o ON u.id = o.user_id;</div>
             }
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
     <script src="/static/js/theme.js"></script>
 </body>
 </html>

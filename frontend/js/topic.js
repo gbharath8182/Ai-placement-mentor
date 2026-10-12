@@ -1,554 +1,318 @@
 let currentTopicSlug = "";
 let currentProblemId = "";
 let starterCodeCache = "";
-let currentProblemTestCases = [];
-let pyodideInstance = null;
-let isPyodideLoading = false;
+let lessonChecks = [];
+let currentTopic = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // 1. Set user info in navbar
+    currentTopicSlug = decodeURIComponent(window.location.pathname.split("/").pop());
     const user = getUser();
     if (user) {
         document.getElementById("user-name").textContent = user.name;
-        const expBadge = document.getElementById("user-exp-badge");
-        expBadge.textContent = user.profile.experience_level;
-        expBadge.className = `experience-tag exp-${user.profile.experience_level}`;
+        const badge = document.getElementById("user-exp-badge");
+        badge.textContent = user.profile?.experience_level || "fresher";
     }
-
-    // 2. Extract slug from URL pathname (/topic/{slug})
-    const pathParts = window.location.pathname.split("/");
-    currentTopicSlug = pathParts[pathParts.length - 1];
-    
-    if (!currentTopicSlug || currentTopicSlug === "topic") {
-        console.error("Invalid topic slug in URL");
-        document.getElementById("topic-title").textContent = "Topic Not Found";
-        return;
+    if (!getAccessToken()) {
+        document.querySelectorAll(".ai-actions-bar button, #chat-send-btn, #chat-input").forEach(element => { element.disabled = true; });
+        const logs = document.getElementById("ai-chat-logs");
+        const note = document.createElement("p");
+        note.textContent = "Sign in to ask your tutor questions, save assessments and track mastery.";
+        const link = document.createElement("a");
+        link.href = "/login";
+        link.textContent = "Sign in";
+        logs.replaceChildren(note, link);
     }
-    
-    // 3. Load topic contents & problems
     await loadTopicData();
-    await loadPracticeProblem();
-    
-    // Set up practice handlers
-    document.getElementById("reset-code-btn").addEventListener("click", () => {
-        if (confirm("Are you sure you want to reset your editor to the default starter code?")) {
-            document.getElementById("editor").value = starterCodeCache;
-        }
+    if (getAccessToken()) await Promise.allSettled([loadPracticeProblem(), restoreTutorHistory()]);
+    document.getElementById("reset-code-btn")?.addEventListener("click", () => {
+        if (confirm("Reset the editor to starter code?")) document.getElementById("editor").value = starterCodeCache;
     });
-    
-    document.getElementById("run-code-btn").addEventListener("click", runCodeSubmission);
+    document.getElementById("run-code-btn")?.addEventListener("click", runCodeSubmission);
 });
 
 async function loadTopicData() {
+    const area = document.getElementById("content-blocks-area");
     try {
-        const res = await authFetch(`/topics/${currentTopicSlug}`);
-        if (res.ok) {
-            const topic = await res.json();
-            
-            // Set basic details
-            document.getElementById("topic-title").textContent = topic.title;
-            
-            const diffBadge = document.getElementById("topic-difficulty-badge");
-            diffBadge.textContent = topic.difficulty;
-            diffBadge.className = `status-badge status-${topic.difficulty === "beginner" ? "not-started" : (topic.difficulty === "intermediate" ? "in-progress" : "completed")}`;
-            
-            // Render subtopics list in sidebar
-            const sidebar = document.getElementById("subtopics-list-container");
-            sidebar.innerHTML = "";
-            
-            if (topic.subtopics && topic.subtopics.length > 0) {
-                topic.subtopics.forEach((sub, idx) => {
-                    const item = document.createElement("div");
-                    item.className = "topic-item glass-panel";
-                    item.style.cssText = "padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 0.88rem; transition: var(--transition-smooth); display: flex; align-items: center; border: 1px solid var(--border-color); color: var(--text-muted); margin-bottom: 2px;";
-                    item.innerHTML = `<span style="font-weight: 500; font-family: var(--font-display); margin-right: 6px; color: var(--accent-primary);">${idx + 1}.</span> <span style="text-align: left;">${escapeHtml(sub.title)}</span>`;
-                    
-                    item.addEventListener("click", () => {
-                        // Highlight active subtopic
-                        document.querySelectorAll("#subtopics-list-container .topic-item").forEach(el => {
-                            el.style.borderColor = "var(--border-color)";
-                            el.style.background = "transparent";
-                            el.style.color = "var(--text-muted)";
-                        });
-                        item.style.borderColor = "var(--accent-primary)";
-                        item.style.background = "rgba(37, 99, 235, 0.05)";
-                        item.style.color = "var(--text-main)";
-                        
-                        // Update subtopic badge & content
-                        document.getElementById("subtopic-title-badge").textContent = sub.title;
-                        renderContentBlocks(sub.content_blocks);
-                        
-                        // Trigger MathJax typeset to render any LaTeX math expressions
-                        if (window.MathJax && window.MathJax.typeset) {
-                            window.MathJax.typeset();
-                        }
-                    });
-                    
-                    sidebar.appendChild(item);
-                });
-                
-                // Select the first subtopic by default
-                sidebar.firstChild.click();
-            } else {
-                sidebar.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">No subtopics found.</div>`;
-                document.getElementById("subtopic-title-badge").textContent = "General";
-                renderContentBlocks(topic.content_blocks);
+        const response = await fetch(`/topics/${encodeURIComponent(currentTopicSlug)}`);
+        if (!response.ok) throw new Error(response.status === 404 ? "This lesson could not be found." : "Lesson content is temporarily unavailable.");
+        currentTopic = await response.json();
+        document.title = `${currentTopic.title} | AI Placement Mentor`;
+        document.getElementById("topic-title").textContent = currentTopic.title;
+        document.getElementById("topic-difficulty-badge").textContent = currentTopic.difficulty;
+        if (getAccessToken()) {
+            const response = await authFetch(`/learning/${encodeURIComponent(currentTopicSlug)}/checks`);
+            if (response.ok) {
+                const payload = await response.json();
+                lessonChecks = Array.isArray(payload) ? payload : payload.checks || [];
             }
-            
-            // Mark topic progress as "in_progress" in background
-            updateTopicProgress("in_progress");
-            trackActivity("lesson", 2, currentTopicSlug);
-        } else {
-            document.getElementById("topic-title").textContent = "Error Loading Content";
-            document.getElementById("content-blocks-area").innerHTML = `<p style="color: var(--accent-red)">Topic details could not be retrieved from the server.</p>`;
         }
-    } catch (err) {
-        console.error("Error loading topic:", err);
-        document.getElementById("topic-title").textContent = "Connection Failure";
+        renderLessonOverview(currentTopic);
+        const sidebar = document.getElementById("subtopics-list-container");
+        sidebar.replaceChildren();
+        const sections = currentTopic.subtopics?.length ? currentTopic.subtopics : [{ title: "Lesson", content_blocks: currentTopic.content_blocks || [] }];
+        sections.forEach((section, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "lesson-section-link topic-item";
+            button.textContent = `${index + 1}. ${section.title}`;
+            button.addEventListener("click", () => {
+                sidebar.querySelectorAll("button").forEach(item => { item.classList.remove("active"); item.removeAttribute("aria-current"); });
+                button.classList.add("active");
+                button.setAttribute("aria-current", "true");
+                document.getElementById("subtopic-title-badge").textContent = section.title;
+                renderContentBlocks(section.content_blocks, currentTopic.subtopics?.length ? index : null);
+            });
+            sidebar.appendChild(button);
+        });
+        sidebar.firstChild?.click();
+        await Promise.allSettled([loadLessonNavigation(currentTopic), refreshMastery(), updateTopicProgress("in_progress")]);
+    } catch (error) {
+        document.getElementById("topic-title").textContent = "Lesson unavailable";
+        const message = document.createElement("p");
+        message.textContent = error.message;
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "btn-secondary";
+        retry.textContent = "Retry loading lesson";
+        retry.addEventListener("click", loadTopicData);
+        area.replaceChildren(message, retry);
     }
 }
 
-function renderContentBlocks(blocks) {
-    const area = document.getElementById("content-blocks-area");
-    area.innerHTML = "";
-    
-    if (!blocks || blocks.length === 0) {
-        area.innerHTML = `<p style="color: var(--text-muted)">This topic does not have any content blocks yet.</p>`;
-        return;
+function renderLessonOverview(topic) {
+    const overview = document.getElementById("lesson-overview");
+    if (!overview) return;
+    overview.replaceChildren();
+    if (topic.objectives?.length) {
+        const heading = document.createElement("h2");
+        heading.textContent = "What you’ll learn";
+        const list = document.createElement("ul");
+        topic.objectives.forEach(objective => { const item = document.createElement("li"); item.textContent = objective; list.appendChild(item); });
+        overview.append(heading, list);
     }
-    
-    // Separate resource_links to render at the bottom
-    const contentBlocks = [];
-    const resourceBlocks = [];
-    blocks.forEach(block => {
-        if (block.type === "resource_link") {
-            resourceBlocks.push(block);
-        } else {
-            contentBlocks.push(block);
-        }
+    if (topic.prerequisites?.length) {
+        const label = document.createElement("p");
+        label.textContent = "Before you start: ";
+        topic.prerequisites.forEach((slug, index) => {
+            const link = document.createElement("a");
+            link.href = `/topic/${encodeURIComponent(slug)}`;
+            link.textContent = slug.replace(/^python-foundations-/, "").replace(/-/g, " ");
+            if (index) label.append(", ");
+            label.appendChild(link);
+        });
+        overview.appendChild(label);
+    }
+}
+
+async function loadLessonNavigation(topic) {
+    const navigation = document.getElementById("lesson-navigation");
+    if (!navigation) return;
+    const response = await fetch(`/domains/${encodeURIComponent(topic.domain_slug)}/topics`);
+    if (!response.ok) return;
+    const lessons = await response.json();
+    lessons.sort((first, second) => (first.order ?? 999) - (second.order ?? 999));
+    const index = lessons.findIndex(lesson => lesson.slug === currentTopicSlug);
+    navigation.replaceChildren();
+    [[lessons[index - 1], "← Previous lesson"], [lessons[index + 1], "Next lesson →"]].forEach(([lesson, label]) => {
+        if (!lesson) return;
+        const link = document.createElement("a");
+        link.className = "btn-secondary";
+        link.href = `/topic/${encodeURIComponent(lesson.slug)}`;
+        link.textContent = `${label}: ${lesson.title}`;
+        navigation.appendChild(link);
     });
-    
-    contentBlocks.forEach(block => {
-        const element = document.createElement("div");
-        
-        if (block.type === "text") {
-            element.className = "block-text";
-            const escapedVal = block.value
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-            
-            const formattedVal = escapedVal
-                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                .replace(/`(.*?)`/g, "<code style='background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; font-family: var(--font-code); font-size: 0.9rem;'>$1</code>");
-                
-            element.innerHTML = formattedVal.replace(/\n/g, "<br>");
-        } 
-        else if (block.type === "heading") {
-            element.className = "block-heading";
-            const level = block.level || 2;
-            element.innerHTML = `<h${level} style="font-family: var(--font-display); color: var(--text-main); margin: 8px 0 4px 0; font-size: ${level === 2 ? '1.4rem' : '1.15rem'}; border-bottom: ${level === 2 ? '1px solid var(--border-color)' : 'none'}; padding-bottom: ${level === 2 ? '8px' : '0'};">${escapeHtml(block.value)}</h${level}>`;
-        }
-        else if (block.type === "divider") {
-            element.innerHTML = `<hr style="border: none; border-top: 1px solid var(--border-color); margin: 12px 0;">`;
-        }
-        else if (block.type === "list") {
-            element.className = "block-list";
-            const items = block.items || [];
-            const listStyle = block.ordered ? "ol" : "ul";
-            element.innerHTML = `<${listStyle} style="margin: 0; padding-left: 24px; line-height: 1.9; color: var(--text-main);">${items.map(item => {
-                const escaped = item.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/`(.*?)`/g, "<code style='background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;font-family:var(--font-code);font-size:0.9rem;'>$1</code>");
-                return `<li>${escaped}</li>`;
-            }).join("")}</${listStyle}>`;
-        }
-        else if (block.type === "callout") {
-            const colors = { tip: "var(--accent-green)", warning: "var(--accent-yellow)", info: "var(--accent-primary)", important: "var(--accent-secondary)" };
-            const icons = { tip: "💡", warning: "⚠️", info: "ℹ️", important: "📌" };
-            const kind = block.kind || "info";
-            const borderColor = colors[kind] || colors.info;
-            element.innerHTML = `<div style="border-left: 4px solid ${borderColor}; background: rgba(255,255,255,0.03); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 4px 0;">
-                <strong style="color: ${borderColor};">${icons[kind] || ""} ${(block.title || kind).toUpperCase()}</strong>
-                <p style="margin: 6px 0 0 0; color: var(--text-main); line-height: 1.7;">${escapeHtml(block.value).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/`(.*?)`/g, "<code style='background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;font-family:var(--font-code);font-size:0.9rem;'>$1</code>").replace(/\n/g, "<br>")}</p>
-            </div>`;
-        }
-        else if (block.type === "code") {
-            element.className = "block-code";
-            const lang = block.language || "code";
-            element.innerHTML = `
-                <span class="code-lang-label">${lang}</span>
-                <pre style="margin: 0;"><code class="language-${lang}">${escapeHtml(block.value)}</code></pre>
-            `;
-        }
-        else if (block.type === "diagram") {
-            element.className = "concept-diagram";
-            const title = document.createElement("h3");
-            title.textContent = block.title || "Concept map";
+}
+
+function safeResourceURL(value) {
+    try { const parsed = new URL(value); return ["https:", "http:"].includes(parsed.protocol) ? parsed.href : null; }
+    catch { return null; }
+}
+
+function renderContentBlocks(blocks, subtopicIndex = null) {
+    const area = document.getElementById("content-blocks-area");
+    area.replaceChildren();
+    if (!blocks?.length) { area.textContent = "This lesson is being prepared. Choose another section or explore the curriculum."; return; }
+    blocks.forEach((block, blockIndex) => {
+        const element = document.createElement("section");
+        element.className = `block-${String(block.type).replace(/[^a-z_]/g, "")}`;
+        if (block.type === "heading") {
+            const heading = document.createElement(`h${[2, 3, 4].includes(block.level) ? block.level : 2}`);
+            heading.textContent = block.value;
+            element.appendChild(heading);
+        } else if (block.type === "code") {
+            const label = document.createElement("span");
+            label.className = "code-lang-label";
+            label.textContent = block.language || "code";
+            const pre = document.createElement("pre");
+            const code = document.createElement("code");
+            code.textContent = block.value;
+            pre.appendChild(code);
+            element.append(label, pre);
+            if (block.expected_output != null) {
+                const expected = document.createElement("pre");
+                expected.className = "example-output";
+                expected.textContent = `Expected output\n${block.expected_output}`;
+                element.appendChild(expected);
+            }
+        } else if (block.type === "list") {
+            const list = document.createElement(block.ordered ? "ol" : "ul");
+            (block.items || []).forEach(value => { const item = document.createElement("li"); item.innerHTML = formatLessonText(String(value)); list.appendChild(item); });
+            element.appendChild(list);
+        } else if (block.type === "callout") {
+            element.classList.add("lesson-callout");
+            const label = document.createElement("strong");
+            label.textContent = block.title || block.kind || "Note";
+            const paragraph = document.createElement("p");
+            paragraph.innerHTML = formatLessonText(block.value || "");
+            element.append(label, paragraph);
+        } else if (block.type === "diagram") {
+            const label = document.createElement("h3");
+            label.textContent = block.title || "Execution trace";
             const diagram = document.createElement("pre");
             diagram.className = "mermaid";
-            diagram.textContent = block.value || "";
-            element.append(title, diagram);
+            diagram.textContent = block.value;
+            element.append(label, diagram);
+        } else if (block.type === "knowledge_check") {
+            renderKnowledgeCheck(block, element, subtopicIndex, blockIndex);
+        } else if (block.type === "resource_link") {
+            const url = safeResourceURL(block.url);
+            if (!url) return;
+            const link = document.createElement("a");
+            link.className = "block-resource";
+            link.href = url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = block.label || url;
+            element.appendChild(link);
+        } else if (block.type === "divider") {
+            element.appendChild(document.createElement("hr"));
+        } else {
+            const paragraph = document.createElement("p");
+            paragraph.innerHTML = formatLessonText(block.value || "");
+            element.appendChild(paragraph);
         }
-        else if (block.type === "knowledge_check") {
-            element.className = "knowledge-check";
-            const question = document.createElement("p");
-            question.className = "knowledge-question";
-            question.textContent = block.question || "Quick check";
-            const answers = document.createElement("div");
-            answers.className = "knowledge-options";
-            (block.options || []).forEach((option, index) => {
-                const button = document.createElement("button");
-                button.type = "button";
-                button.className = "knowledge-option";
-                button.textContent = option;
-                button.addEventListener("click", () => {
-                    answers.querySelectorAll("button").forEach(item => item.disabled = true);
-                    button.classList.add(index === block.correct_index ? "is-correct" : "is-incorrect");
-                    const result = document.createElement("p");
-                    result.className = "knowledge-result";
-                    result.textContent = index === block.correct_index
-                        ? `Correct — ${block.explanation || ""}`
-                        : `Not quite — ${block.explanation || ""}`;
-                    answers.after(result);
-                }, { once: true });
-                answers.appendChild(button);
-            });
-            const label = document.createElement("span");
-            label.className = "knowledge-label";
-            label.textContent = "Active recall checkpoint";
-            element.append(label, question, answers);
-        }
-        
         area.appendChild(element);
     });
-
     if (window.mermaid) {
-        window.mermaid.initialize({ startOnLoad: false, theme: document.documentElement.classList.contains("light-theme") ? "default" : "dark", securityLevel: "strict" });
-        window.mermaid.run({ nodes: area.querySelectorAll(".mermaid") }).catch((error) => console.error("Diagram render error:", error));
+        mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: document.documentElement.classList.contains("light-theme") ? "default" : "dark" });
+        mermaid.run({ nodes: area.querySelectorAll(".mermaid") }).catch(() => {});
     }
-    
-    // Render resource links in a grouped section at the bottom
-    if (resourceBlocks.length > 0) {
-        const refSection = document.createElement("div");
-        refSection.style.cssText = "margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px;";
-        refSection.innerHTML = `<h3 style="font-family: var(--font-display); color: var(--text-muted); font-size: 1rem; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px;">📚 References & Recommended Reading</h3>`;
-        
-        resourceBlocks.forEach(block => {
-            const linkEl = document.createElement("div");
-            linkEl.innerHTML = `
-                <a href="${block.url}" target="_blank" class="block-resource">
-                    <span class="resource-icon">🔗</span>
-                    <div style="display: flex; flex-direction: column;">
-                        <span>${block.label || "External Resource"}</span>
-                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">${block.url}</span>
-                    </div>
-                </a>
-            `;
-            refSection.appendChild(linkEl);
+    window.MathJax?.typesetPromise?.([area]).catch(() => {});
+}
+
+function resolveLessonCheck(block, subtopicIndex, blockIndex) {
+    const identity = block.block_id || block.id;
+    if (identity) return lessonChecks.find(item => (item.block_id || item.id) === identity);
+    return lessonChecks.find(item => item.subtopic_index === subtopicIndex && item.block_index === blockIndex);
+}
+
+function renderKnowledgeCheck(block, element, subtopicIndex, blockIndex) {
+    element.className = "knowledge-check";
+    const question = document.createElement("h3");
+    question.textContent = block.question;
+    const feedback = document.createElement("p");
+    feedback.className = "knowledge-result";
+    feedback.setAttribute("aria-live", "polite");
+    const options = document.createElement("div");
+    options.className = "knowledge-options";
+    const check = resolveLessonCheck(block, subtopicIndex, blockIndex);
+    (block.options || []).forEach((option, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "knowledge-option";
+        button.textContent = option;
+        button.addEventListener("click", async () => {
+            if (!getAccessToken()) { feedback.textContent = "Sign in to answer and save your assessment."; return; }
+            if (!check) { feedback.textContent = "This assessment is temporarily unavailable. Reload the lesson to retry."; return; }
+            options.querySelectorAll("button").forEach(item => { item.disabled = true; });
+            feedback.textContent = "Checking your answer…";
+            try {
+                const response = await authFetch(`/learning/${encodeURIComponent(currentTopicSlug)}/check`, { method: "POST", body: { block_id: check.block_id || check.id, selected_index: index } });
+                const result = await response.json();
+                if (!response.ok) throw new Error("Assessment could not be saved. Please retry.");
+                button.classList.add(result.correct ? "is-correct" : "is-incorrect");
+                feedback.textContent = `${result.correct ? "Correct" : "Review this concept"}. ${result.explanation || ""}`;
+                await refreshMastery();
+                trackActivity("quiz", 1, currentTopicSlug);
+            } catch (error) { feedback.textContent = error.message; }
+            finally { options.querySelectorAll("button").forEach(item => { item.disabled = false; }); }
         });
-        
-        area.appendChild(refSection);
-    }
+        options.appendChild(button);
+    });
+    element.append(question, options, feedback);
+}
+
+async function refreshMastery() {
+    const panel = document.getElementById("mastery-panel");
+    if (!panel) return;
+    if (!getAccessToken()) { panel.textContent = "Sign in to save assessments and see evidence of your understanding."; return; }
+    const response = await authFetch(`/learning/${encodeURIComponent(currentTopicSlug)}/mastery`);
+    if (!response.ok) { panel.textContent = "Your mastery evidence is temporarily unavailable. Your lesson is still readable."; return; }
+    const mastery = await response.json();
+    panel.replaceChildren();
+    const heading = document.createElement("h2");
+    heading.textContent = `Learning evidence · ${(mastery.status || "not_assessed").replace(/_/g, " ")}`;
+    const description = document.createElement("p");
+    description.textContent = mastery.reason || (mastery.reasons || []).join(" ") || "Answer lesson checks and solve coding exercises to assess your understanding.";
+    panel.append(heading, description);
+    if (mastery.score != null) { const score = document.createElement("p"); score.textContent = `Evidence score: ${Math.round(mastery.score)}%. Reading time does not count as mastery.`; panel.appendChild(score); }
+    (mastery.missed_questions || []).forEach(item => { const missed = document.createElement("p"); missed.textContent = `Review: ${item.question || item.source_id || item}`; panel.appendChild(missed); });
 }
 
 async function loadPracticeProblem() {
     try {
-        const res = await authFetch(`/practice/${currentTopicSlug}`);
-        if (res.ok) {
-            const problems = await res.json();
-            
-            if (problems.length > 0) {
-                const problem = problems[0]; // Display the primary problem
-                currentProblemId = problem.id;
-                starterCodeCache = problem.starter_code;
-                currentProblemTestCases = problem.test_cases || [];
-                
-                document.getElementById("problem-title").textContent = problem.title;
-                document.getElementById("problem-desc").textContent = problem.description;
-                document.getElementById("editor").value = problem.starter_code;
-                
-                const diffBadge = document.getElementById("problem-difficulty-badge");
-                diffBadge.textContent = problem.difficulty;
-                diffBadge.className = `problem-difficulty diff-${problem.difficulty}`;
-                
-                document.getElementById("practice-playground").style.display = "block";
-            }
-        }
-    } catch (err) {
-        console.error("Error fetching practice problems:", err);
-    }
+        const response = await authFetch(`/practice/${encodeURIComponent(currentTopicSlug)}`);
+        if (!response.ok) return;
+        const problems = await response.json();
+        if (!problems.length) return;
+        const problem = problems[0];
+        currentProblemId = problem.id;
+        starterCodeCache = problem.starter_code;
+        document.getElementById("problem-title").textContent = problem.title;
+        document.getElementById("problem-desc").textContent = problem.description;
+        document.getElementById("editor").value = starterCodeCache;
+        document.getElementById("problem-difficulty-badge").textContent = problem.difficulty;
+        document.getElementById("practice-playground").style.display = "block";
+    } catch { }
 }
 
 async function runCodeSubmission() {
-    const code = document.getElementById("editor").value;
-    const language = document.getElementById("lang-select").value;
-    const runBtn = document.getElementById("run-code-btn");
-    const outputPanel = document.getElementById("compiler-output");
+    const button = document.getElementById("run-code-btn");
     const container = document.getElementById("test-case-container");
-    const statusTitle = document.getElementById("compiler-status-title");
-    
-    runBtn.textContent = "Running...";
-    runBtn.disabled = true;
-    outputPanel.style.display = "block";
-    container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem;">Executing code in browser sandbox...</div>`;
-    
+    button.disabled = true;
+    button.textContent = "Running…";
+    container.textContent = "Checking stored test cases in the remote sandbox…";
     try {
-        let testCases = currentProblemTestCases;
-        if (!testCases || testCases.length === 0) {
-            testCases = [{ input: "", expected_output: "" }];
-        }
-        
-        let results = [];
-        let overallPassed = true;
-        
-        if (language === "python") {
-            if (!pyodideInstance) {
-                if (isPyodideLoading) return;
-                isPyodideLoading = true;
-                container.innerHTML = `<div style="color: var(--accent-primary); font-size: 0.9rem;">Initializing Pyodide WebAssembly runtime (approx 5-10s)...</div>`;
-                pyodideInstance = await loadPyodide();
-                
-                // Set up Mock Stdin helper once loaded
-                await pyodideInstance.runPythonAsync(`
-import sys
-import io
-import builtins
-
-class MockStdin:
-    def __init__(self, data=""):
-        self.data = data
-        self.lines = data.split('\\n')
-        self.index = 0
-    def readline(self):
-        if self.index < len(self.lines):
-            val = self.lines[self.index]
-            self.index += 1
-            return val + '\\n'
-        return ''
-    def read(self):
-        return self.data
-
-def set_mock_stdin(data):
-    sys.stdin = MockStdin(data)
-    builtins.input = lambda prompt="": sys.stdin.readline().rstrip('\\r\\n')
-`);
-                isPyodideLoading = false;
-            }
-            
-            for (let idx = 0; idx < testCases.length; idx++) {
-                const tc = testCases[idx];
-                let tcOutput = "";
-                let tcError = "";
-                
-                const stdoutDecoder = new TextDecoder();
-                const stderrDecoder = new TextDecoder();
-                pyodideInstance.setStdout({
-                    write: (buf) => {
-                        tcOutput += stdoutDecoder.decode(buf, { stream: true });
-                        return buf.length;
-                    }
-                });
-                pyodideInstance.setStderr({
-                    write: (buf) => {
-                        tcError += stderrDecoder.decode(buf, { stream: true });
-                        return buf.length;
-                    }
-                });
-                
-                try {
-                    // Set the mock stdin for this test case
-                    // Safely escape inputs
-                    const escapedInput = tc.input.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
-                    await pyodideInstance.runPythonAsync(`set_mock_stdin("${escapedInput}")`);
-                    
-                    // Run user code
-                    await pyodideInstance.runPythonAsync(code);
-                    
-                    const expected = tc.expected_output.trim().replace(/\r\n/g, "\n");
-                    const actual = tcOutput.trim().replace(/\r\n/g, "\n");
-                    const passed = (actual === expected) && !tcError;
-                    
-                    if (!passed) overallPassed = false;
-                    
-                    results.push({
-                        test_case_index: idx,
-                        input: tc.input,
-                        expected: tc.expected_output,
-                        actual: tcOutput,
-                        stderr: tcError,
-                        passed: passed
-                    });
-                } catch (err) {
-                    overallPassed = false;
-                    results.push({
-                        test_case_index: idx,
-                        input: tc.input,
-                        expected: tc.expected_output,
-                        actual: tcOutput,
-                        stderr: err.message,
-                        passed: false
-                    });
-                }
-            }
-        } 
-        else if (language === "javascript") {
-            for (let idx = 0; idx < testCases.length; idx++) {
-                const tc = testCases[idx];
-                let tcOutput = "";
-                let tcError = "";
-                
-                const originalLog = console.log;
-                const originalError = console.error;
-                
-                console.log = (...args) => {
-                    tcOutput += args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(" ") + "\n";
-                };
-                console.error = (...args) => {
-                    tcError += args.join(" ") + "\n";
-                };
-                
-                try {
-                    // Mock simple prompt/input lines for JavaScript
-                    window.prompt = () => {
-                        if (!window.__js_stdin_lines) {
-                            window.__js_stdin_lines = tc.input.split('\n');
-                            window.__js_stdin_idx = 0;
-                        }
-                        if (window.__js_stdin_idx < window.__js_stdin_lines.length) {
-                            return window.__js_stdin_lines[window.__js_stdin_idx++];
-                        }
-                        return "";
-                    };
-                    window.__js_stdin_lines = tc.input.split('\n');
-                    window.__js_stdin_idx = 0;
-                    
-                    new Function(code)();
-                    
-                    const expected = tc.expected_output.trim().replace(/\r\n/g, "\n");
-                    const actual = tcOutput.trim().replace(/\r\n/g, "\n");
-                    const passed = (actual === expected) && !tcError;
-                    
-                    if (!passed) overallPassed = false;
-                    
-                    results.push({
-                        test_case_index: idx,
-                        input: tc.input,
-                        expected: tc.expected_output,
-                        actual: tcOutput,
-                        stderr: tcError,
-                        passed: passed
-                    });
-                } catch (err) {
-                    overallPassed = false;
-                    results.push({
-                        test_case_index: idx,
-                        input: tc.input,
-                        expected: tc.expected_output,
-                        actual: tcOutput,
-                        stderr: err.message,
-                        passed: false
-                    });
-                } finally {
-                    console.log = originalLog;
-                    console.error = originalError;
-                }
-            }
-        }
-        
-        container.innerHTML = "";
-        
-        if (overallPassed) {
-            statusTitle.textContent = "🟢 All Test Cases Passed!";
-            statusTitle.className = "compiler-output-header tc-success";
-            
-            // Call the completed endpoint to save progress
-            const res = await authFetch(`/practice/${currentProblemId}/completed`, {
-                method: "POST"
-            });
-            if (res.ok) {
-                console.log("Database updated: topic marked as completed.");
-            }
-            
-            // Show notification in AI sidebar that problem is solved
-            if (window.appendAssistantMessage) {
-                window.appendAssistantMessage("🎉 Excellent job! You've successfully passed all compiler test cases for this topic's coding exercise. Let me know if you want to optimize your code further or take a short quiz!");
-            }
-        } else {
-            statusTitle.textContent = "🔴 Test Cases Failed";
-            statusTitle.className = "compiler-output-header tc-failed";
-        }
-        
-        results.forEach(tc => {
-            const tcItem = document.createElement("div");
-            tcItem.className = "test-case-item";
-            
-            const statusIcon = tc.passed ? "✓ Passed" : "✗ Failed";
-            const statusClass = tc.passed ? "tc-success" : "tc-failed";
-            
-            let detailsHtml = "";
-            if (!tc.passed) {
-                detailsHtml = `
-                    <div class="test-case-details">
-                        ${tc.input ? `<div><strong>Input:</strong> ${escapeHtml(tc.input)}</div>` : ''}
-                        <div><strong>Expected Output:</strong> ${escapeHtml(tc.expected)}</div>
-                        <div><strong>Actual Output:</strong> ${escapeHtml(tc.actual || "[No Output]")}</div>
-                        ${tc.stderr ? `<div style="color: var(--accent-red);"><strong>Error/Stderr:</strong> ${escapeHtml(tc.stderr)}</div>` : ''}
-                    </div>
-                `;
-            } else {
-                detailsHtml = `
-                    <div class="test-case-details" style="opacity: 0.8;">
-                        ${tc.input ? `<div><strong>Input:</strong> ${escapeHtml(tc.input)}</div>` : ''}
-                        <div><strong>Output:</strong> ${escapeHtml(tc.actual)}</div>
-                    </div>
-                `;
-            }
-            
-            tcItem.innerHTML = `
-                <div class="test-case-status ${statusClass}">
-                    <span>${statusIcon}</span>
-                    <span style="color: var(--text-muted); font-weight: normal; font-size: 0.8rem;">(Test Case #${tc.test_case_index + 1})</span>
-                </div>
-                ${detailsHtml}
-            `;
-            
-            container.appendChild(tcItem);
+        const response = await authFetch(`/practice/${currentProblemId}/submit`, { method: "POST", body: { language: document.getElementById("lang-select").value, code: document.getElementById("editor").value } });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(typeof payload.detail === "string" ? payload.detail : "Execution is unavailable. Please retry.");
+        document.getElementById("compiler-status-title").textContent = payload.overall_passed ? "All test cases passed" : "Review failed cases";
+        container.replaceChildren();
+        payload.results.forEach((result, index) => {
+            const item = document.createElement("div");
+            item.className = "test-case-item";
+            const heading = document.createElement("strong");
+            heading.textContent = `Case ${index + 1}: ${result.passed ? "Passed" : "Failed"}`;
+            const details = document.createElement("pre");
+            details.textContent = `Input: ${result.input}\nExpected: ${result.expected}\nActual: ${result.actual || "[no output]"}${result.stderr ? `\nError: ${result.stderr}` : ""}`;
+            item.append(heading, details);
+            container.appendChild(item);
         });
-        
-    } catch (err) {
-        console.error("Local compile execution error:", err);
-        container.innerHTML = `<div style="color: var(--accent-red);">Execution error occurred in local sandbox: ${err.message}</div>`;
-    } finally {
-        runBtn.textContent = "Run Solution";
-        runBtn.disabled = false;
-    }
+        await refreshMastery();
+        trackActivity("practice", 1, currentTopicSlug);
+    } catch (error) { container.textContent = error.message; }
+    finally { button.disabled = false; button.textContent = "Run Solution"; }
 }
 
 async function updateTopicProgress(status) {
-    try {
-        await authFetch("/progress/update", {
-            method: "POST",
-            body: {
-                topic_slug: currentTopicSlug,
-                status: status
-            }
-        });
-    } catch (err) {
-        console.error("Error setting progress:", err);
-    }
+    if (!getAccessToken()) return;
+    await authFetch("/progress/update", { method: "POST", body: { topic_slug: currentTopicSlug, status } });
+}
+
+function formatLessonText(text) {
+    return escapeHtml(text).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`\n]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>");
 }
 
 function escapeHtml(text) {
-    if (!text) return "";
-    return text
-        .toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return String(text || "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
 }
-

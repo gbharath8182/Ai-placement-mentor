@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Resume Studio - EduAI Platform</title>
+    <title>AI Resume Studio - AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <nav class="dashboard-nav">
-        <a href="/dashboard" class="nav-brand"><span>EduAI Platform</span></a>
+        <a href="/dashboard" class="nav-brand"><span>AI Placement Mentor</span></a>
         <div class="nav-user">
             <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
             <a href="/roadmap" class="btn-secondary">Roadmaps</a>
@@ -48,7 +48,7 @@
             </form>
             <section class="glass-panel resume-preview">
                 <div class="resume-preview-head"><div><p class="roadmap-eyebrow">Live preview</p><h2>Your resume</h2></div><button class="btn-secondary hidden" id="download-resume" type="button">Download .md</button></div>
-                <div id="resume-status" class="muted-text">Complete the form to create your tailored resume.</div>
+                <div id="resume-status" role="status" aria-live="polite" class="muted-text">Complete the form to create your tailored resume.</div>
                 <article id="resume-output" class="mi-markdown-body hidden"></article>
             </section>
         </div>
@@ -64,6 +64,7 @@
     </template>
     <script src="/static/js/theme.js" defer></script>
     <script src="/static/js/auth.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
     <script src="/static/js/resume.js" defer></script>
 </body>

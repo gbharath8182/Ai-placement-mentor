@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mock Interview - EduAI Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Interview - AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <nav class="dashboard-nav">
-        <a href="/dashboard" class="nav-brand"><span>EduAI Platform</span></a>
+        <a href="/dashboard" class="nav-brand"><span>AI Placement Mentor</span></a>
         <div class="nav-user">
             <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
             <a href="/roadmap" class="btn-secondary">Roadmaps</a>
@@ -23,7 +24,7 @@
 
     <main class="mi-page-container">
 
-        <div id="mi-loading" class="mi-page-panel glass-panel hidden">
+        <div id="mi-loading" role="status" aria-live="polite" class="mi-page-panel glass-panel hidden">
             <p>Loading...</p>
         </div>
 
@@ -51,10 +52,11 @@
         </div>
 
         <div id="mi-interview-body" class="mi-page-panel glass-panel hidden">
-            <p id="mi-progress-text"></p>
+            <p id="mi-progress-text" role="status" aria-live="polite"></p>
             <span id="mi-category-badge"></span>
             <h3 id="mi-question-text"></h3>
-            <textarea id="mi-answer-input" rows="8" placeholder="Type your answer..."></textarea>
+            <label for="mi-answer-input" class="form-label">Your answer</label>
+            <textarea aria-label="Interview answer" id="mi-answer-input" rows="8" placeholder="Type your answer..."></textarea>
             <button id="mi-submit-btn" class="btn-primary">Submit Answer</button>
             <div class="mi-end-interview-row">
                 <button id="mi-end-btn">End Interview Now &amp; See Score</button>
@@ -67,9 +69,9 @@
             <ul id="mi-strengths-list"></ul>
             <h4>Weaknesses</h4>
             <ul id="mi-weaknesses-list"></ul>
-            <p id="mi-hint-text"></p>
+            <p id="mi-hint-text" role="status" aria-live="polite"></p>
             <button id="mi-explain-more-btn" class="btn-secondary">Explain More</button>
-            <p id="mi-explain-more-output" class="hidden"></p>
+            <p id="mi-explain-more-output" role="status" aria-live="polite" class="hidden"></p>
             <button id="mi-next-btn" class="btn-primary"></button>
         </div>
 
@@ -87,6 +89,7 @@
 
     <script src="/static/js/theme.js" defer></script>
     <script src="/static/js/auth.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
     <script src="/static/js/mock-interview.js" defer></script>
     <script src="/static/js/mock-interview-page.js" defer></script>

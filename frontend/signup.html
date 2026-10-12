@@ -3,36 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | AI-Assisted Learning Platform</title>
+    <title>Sign Up | AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <script>
-(function(){var t=localStorage.getItem('theme')||'dark';if(t==='light')document.documentElement.classList.add('light-theme');})();
+(function(){try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light-theme');}catch{}})();
 </script>
+    <script src="/static/js/theme.js" defer></script>
 </head>
 <body class="auth-container">
     <div class="auth-card glass-panel" style="max-width: 520px;">
+        <div class="auth-brand-row"><a href="/" class="footer-brand">AI Placement Mentor</a><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light theme"></button></div>
         <div class="auth-header">
-            <div class="logo-icon">✨</div>
+            <div class="logo-icon" aria-hidden="true"></div>
             <h2 class="glow-text">Create Account</h2>
-            <p class="form-label" style="margin-top: 5px;">Join the next-generation adaptive learning environment</p>
+            <p class="form-label" style="margin-top: 5px;">Save your progress, assess your understanding, and ask your tutor.</p>
         </div>
         
-        <div id="error-message" class="aptitude-result aptitude-result-incorrect" style="margin-bottom: 20px; text-align: center;"></div>
+        <div id="error-message" role="status" aria-live="polite" class="aptitude-result aptitude-result-incorrect" style="margin-bottom: 20px; text-align: center;"></div>
         
         <form id="signup-form">
             <div class="form-group">
                 <label for="name" class="form-label">Full Name</label>
-                <input type="text" id="name" class="form-input" placeholder="e.g. John Doe" required>
+                <input type="text" autocomplete="name" id="name" class="form-input" placeholder="e.g. John Doe" required>
             </div>
             
             <div class="form-group">
                 <label for="email" class="form-label">Email Address</label>
-                <input type="email" id="email" class="form-input" placeholder="e.g. learner@example.com" required>
+                <input type="email" autocomplete="email" id="email" class="form-input" placeholder="e.g. learner@example.com" required>
             </div>
             
             <div class="form-group">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" class="form-input" placeholder="Min 6 characters" minlength="6" required>
+                <input type="password" autocomplete="new-password" id="password" class="form-input" placeholder="Min 6 characters" minlength="6" required>
             </div>
             
             <div class="form-group">
@@ -47,9 +49,9 @@
             <div class="form-group">
                 <label class="form-label">Select Learning Interests</label>
                 <div class="interest-tag-container" id="interests-tags">
-                    <div class="interest-tag" data-val="python">Python Programming</div>
-                    <div class="interest-tag" data-val="ml">Machine Learning</div>
-                    <div class="interest-tag" data-val="dsa">Data Structures & Algos</div>
+                    <button type="button" class="interest-tag" data-val="python">Python Programming</button>
+                    <button type="button" class="interest-tag" data-val="ml">Machine Learning</button>
+                    <button type="button" class="interest-tag" data-val="dsa">Data Structures & Algos</button>
                 </div>
             </div>
             

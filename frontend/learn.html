@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse public Python lessons and published learning domains. Explore objectives and prerequisites without an account.">
+    <title>Public Curriculum | AI Placement Mentor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/theme.js" defer></script>
+    <script src="/static/js/home.js" defer></script>
+</head>
+<body class="public-page">
+    <a class="skip-link" href="#main-content">Skip to curriculum</a>
+    <nav class="dashboard-nav public-nav" aria-label="Main navigation">
+        <a href="/" class="nav-brand"><span class="brand-mark" aria-hidden="true">AM</span><span>AI Placement Mentor</span></a>
+        <div class="nav-user"><a href="/learn" class="nav-text-link" aria-current="page">Curriculum</a><a href="/login" class="nav-text-link">Sign in</a><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light theme"></button><a href="/signup" class="btn-secondary">Create account</a></div>
+    </nav>
+    <main id="main-content" class="public-shell catalog-shell">
+        <header class="catalog-hero"><p class="eyebrow">The public curriculum</p><h1>A foundation you<br>can <em>build on.</em></h1><p>Start with the versioned Python flagship or explore published topics across learning domains. Read at your own pace, without signing in.</p><a href="/topic/python-foundations-values-and-types" class="text-link">Preview values &amp; types <span aria-hidden="true">↗</span></a></header>
+        <section class="catalog-section" aria-labelledby="curriculum-heading">
+            <div class="catalog-section-heading"><div><p class="eyebrow">A guided starting point</p><h2 id="curriculum-heading">Python &amp; curated paths</h2></div><span class="preview-tag">Versioned curriculum</span></div>
+            <p id="curriculum-status" class="catalog-status" role="status" aria-live="polite">Loading the curriculum…</p>
+            <div id="curriculum-list" class="curriculum-list" aria-busy="true"></div>
+        </section>
+        <section class="catalog-section" aria-labelledby="published-heading">
+            <div class="catalog-section-heading"><div><p class="eyebrow">Explore further</p><h2 id="published-heading">Published learning domains</h2></div></div>
+            <p class="muted-text">Open a domain to see its currently published topics.</p>
+            <p id="domains-status" class="catalog-status" role="status" aria-live="polite">Loading published domains…</p>
+            <div id="published-domains" class="published-domains" aria-busy="true"></div>
+        </section>
+        <noscript><p class="catalog-status">Enable JavaScript to browse the live catalog, or <a href="/topic/python-foundations-values-and-types">open the Python foundations lesson</a>.</p></noscript>
+    </main>
+    <footer class="public-footer"><a href="/" class="footer-brand">AI Placement Mentor</a><p>Lessons are public. <a href="/login">Sign in</a> for assessments and AI tutoring.</p><a href="/">About the learning approach <span aria-hidden="true">↗</span></a></footer>
+</body>
+</html>

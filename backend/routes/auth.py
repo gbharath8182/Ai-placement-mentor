@@ -1,12 +1,64 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Response, Request
+import asyncio
+import hashlib
+import json
+import logging
+import os
+from urllib.parse import urlsplit
+
+from fastapi import APIRouter, HTTPException, Depends, status, Response, Request, BackgroundTasks
+from starlette.concurrency import run_in_threadpool
 from backend.database import get_collection
-from backend.models import UserCreate, UserLogin, UserResponse, TokenResponse, UserProfile, ForgotPasswordRequest, ResetPasswordRequest
-from backend.auth import hash_password, verify_password, create_access_token, create_refresh_token, create_reset_token, decode_token, get_current_user
+from backend.models import UserCreate, UserLogin, UserResponse, ForgotPasswordRequest, ResetPasswordRequest
+from backend.auth import hash_password, verify_password, create_access_token, create_refresh_token, create_reset_token, decode_token, get_current_user, validate_user_token
 from backend.config import settings
-from datetime import datetime, timezone
-from bson import ObjectId
+from backend.email_delivery import deliver_reset_email, delivery_available
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+logger = logging.getLogger("uvicorn.error")
+
+
+def is_development() -> bool:
+    environment = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", getattr(settings, "APP_ENV", "production")))
+    return environment.strip().lower() in {"development", "dev", "local", "test", "testing"}
+
+
+def cookie_secure() -> bool:
+    if not is_development():
+        return True
+    return os.getenv("COOKIE_SECURE", "false").strip().lower() not in {"false", "0", "no"}
+
+
+def set_refresh_cookie(response: Response, token: str) -> None:
+    lifetime = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+    response.headers["Cache-Control"] = "no-store"
+    response.set_cookie(
+        key="refresh_token", value=token, httponly=True,
+        max_age=lifetime, expires=lifetime, samesite="lax", secure=cookie_secure(), path="/",
+    )
+
+
+def user_token_data(user: dict) -> dict:
+    return {"sub": user["email"], "uid": str(user["_id"]), "ver": user.get("auth_version", 0)}
+
+
+def reset_base_url():
+    base_url = os.getenv("RESET_PASSWORD_BASE_URL", getattr(settings, "RESET_PASSWORD_BASE_URL", ""))
+    if not base_url:
+        base_url = getattr(settings, "APP_URL", "")
+    base_url = base_url.rstrip("/")
+    if not base_url and is_development():
+        base_url = "http://localhost:8000"
+    try:
+        parsed = urlsplit(base_url)
+        parsed.port
+    except ValueError:
+        return None
+    if (not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment
+            or parsed.scheme not in {"http", "https"}
+            or (parsed.scheme != "https" and not is_development())):
+        return None
+    return base_url
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(user_in: UserCreate):
@@ -24,7 +76,7 @@ async def signup(user_in: UserCreate):
     user_doc = {
         "name": user_in.name,
         "email": user_in.email,
-        "password_hash": hash_password(user_in.password),
+        "password_hash": await run_in_threadpool(hash_password, user_in.password),
         "created_at": datetime.now(timezone.utc),
         "profile": {
             "experience_level": user_in.experience_level,
@@ -41,25 +93,17 @@ async def login(credentials: UserLogin, response: Response):
     users_coll = get_collection("users")
     
     user = await users_coll.find_one({"email": credentials.email})
-    if not user or not verify_password(credentials.password, user["password_hash"]):
+    if not user or not await run_in_threadpool(verify_password, credentials.password, user.get("password_hash", "")):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect email or password"
         )
         
-    access_token = create_access_token(data={"sub": user["email"], "uid": str(user["_id"])})
-    refresh_token = create_refresh_token(data={"sub": user["email"], "uid": str(user["_id"])})
+    access_token = create_access_token(data=user_token_data(user))
+    refresh_token = create_refresh_token(data=user_token_data(user))
     
     # Store refresh token in HttpOnly cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        max_age=7 * 24 * 60 * 60,  # 7 days in seconds
-        expires=7 * 24 * 60 * 60,
-        samesite="lax",
-        secure=False  # Set to True in production with HTTPS
-    )
+    set_refresh_cookie(response, refresh_token)
     
     return {
         "access_token": access_token,
@@ -75,16 +119,25 @@ async def login(credentials: UserLogin, response: Response):
 
 @router.post("/refresh")
 async def refresh_token_route(request: Request, response: Response):
-    # Try getting refresh token from cookie first, then fall back to Authorization header or request body
+    # Try getting refresh token from cookie first, then fall back to request body
     refresh_token = request.cookies.get("refresh_token")
     
     if not refresh_token:
-        # Try getting from JSON body
+        async def read_body():
+            body = bytearray()
+            async for chunk in request.stream():
+                body.extend(chunk)
+                if len(body) > 16384:
+                    raise HTTPException(status_code=413, detail="Refresh request too large")
+            return body
+
         try:
-            body = await request.json()
-            refresh_token = body.get("refresh_token")
-        except Exception:
-            pass
+            body = json.loads(await asyncio.wait_for(read_body(), timeout=5))
+        except (ValueError, asyncio.TimeoutError):
+            raise HTTPException(status_code=401, detail="Invalid refresh request")
+        if not isinstance(body, dict):
+            raise HTTPException(status_code=401, detail="Invalid refresh request")
+        refresh_token = body.get("refresh_token")
             
     if not refresh_token:
         raise HTTPException(
@@ -100,7 +153,6 @@ async def refresh_token_route(request: Request, response: Response):
         )
         
     email = payload.get("sub")
-    uid = payload.get("uid")
     
     users_coll = get_collection("users")
     user = await users_coll.find_one({"email": email})
@@ -110,20 +162,13 @@ async def refresh_token_route(request: Request, response: Response):
             detail="User not found"
         )
         
+    validate_user_token(payload, user)
     # Generate new access token
-    new_access_token = create_access_token(data={"sub": email, "uid": uid})
-    new_refresh_token = create_refresh_token(data={"sub": email, "uid": uid})
+    new_access_token = create_access_token(data=user_token_data(user))
+    new_refresh_token = create_refresh_token(data=user_token_data(user))
     
     # Update cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=new_refresh_token,
-        httponly=True,
-        max_age=7 * 24 * 60 * 60,
-        expires=7 * 24 * 60 * 60,
-        samesite="lax",
-        secure=False
-    )
+    set_refresh_cookie(response, new_refresh_token)
     
     return {
         "access_token": new_access_token,
@@ -137,62 +182,38 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 @router.post("/logout")
 async def logout(response: Response):
-    response.delete_cookie("refresh_token")
+    response.headers["Cache-Control"] = "no-store"
+    response.delete_cookie("refresh_token", path="/", secure=cookie_secure(), httponly=True, samesite="lax")
     return {"message": "Logged out successfully"}
 
-import smtplib
-from email.mime.text import MIMEText
-
-import logging
-logger = logging.getLogger("uvicorn.error")
-
-def send_reset_email(to_email: str, reset_link: str):
-    # Log to uvicorn console so it's guaranteed to show up in terminal logs
-    logger.warning("\n" + "="*80)
-    logger.warning(f" PASSWORD RESET REQUESTED FOR: {to_email}")
-    logger.warning(f" RESET LINK: {reset_link}")
-    logger.warning("="*80 + "\n")
-    
-    if not settings.SMTP_HOST:
-        return
-        
-    try:
-        msg = MIMEText(f"Hello,\n\nPlease click the following link to reset your password:\n{reset_link}\n\nThis link is valid for 15 minutes.\n")
-        msg['Subject'] = "Password Reset Request"
-        msg['From'] = settings.SMTP_FROM_EMAIL
-        msg['To'] = to_email
-        
-        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-            if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
-                server.starttls()
-                server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-            server.send_message(msg)
-    except Exception as e:
-        logger.error(f"Failed to send email via SMTP: {e}")
+async def send_reset_email(to_email: str, reset_link: str):
+    return await deliver_reset_email(to_email, reset_link)
 
 @router.post("/forgot-password")
-async def forgot_password(req: ForgotPasswordRequest, request: Request):
+async def forgot_password(req: ForgotPasswordRequest, response: Response, background_tasks: BackgroundTasks):
+    response.headers["Cache-Control"] = "no-store"
+    response_data = {"message": "If the email exists in our system, a reset link has been sent."}
+    base_url = reset_base_url()
+    if not delivery_available() or not base_url:
+        logger.warning("Password reset delivery unavailable: configure email delivery and a trusted reset base URL")
+        return response_data
     users_coll = get_collection("users")
     user = await users_coll.find_one({"email": req.email})
-    
-    token = create_reset_token(req.email)
-    
-    # Generate the base URL dynamically based on the request host
-    base_url = str(request.base_url).rstrip('/')
-    reset_link = f"{base_url}/reset-password?token={token}"
-    
     if user:
-        send_reset_email(req.email, reset_link)
-        
-    # Return success message; in dev mode (no SMTP host), also return the reset link in the response
-    response_data = {"message": "If the email exists in our system, a reset link has been sent."}
-    if not settings.SMTP_HOST and user:
-        response_data["reset_link"] = reset_link
-        
+        token = create_reset_token(req.email)
+        await users_coll.update_one(
+            {"_id": user["_id"]},
+            {"$set": {
+                "password_reset_token_hash": hashlib.sha256(token.encode("utf-8")).hexdigest(),
+                "password_reset_expires_at": datetime.now(timezone.utc) + timedelta(minutes=15),
+            }},
+        )
+        background_tasks.add_task(send_reset_email, req.email, f"{base_url}/reset-password?token={token}")
     return response_data
 
 @router.post("/reset-password")
-async def reset_password(req: ResetPasswordRequest):
+async def reset_password(req: ResetPasswordRequest, response: Response):
+    response.headers["Cache-Control"] = "no-store"
     try:
         payload = decode_token(req.token)
     except HTTPException as e:
@@ -223,11 +244,19 @@ async def reset_password(req: ResetPasswordRequest):
         )
         
     # Update user's password
-    new_hash = hash_password(req.password)
-    await users_coll.update_one(
-        {"_id": user["_id"]},
-        {"$set": {"password_hash": new_hash}}
+    digest = hashlib.sha256(req.token.encode("utf-8")).hexdigest()
+    if user.get("password_reset_token_hash") != digest:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    new_hash = await run_in_threadpool(hash_password, req.password)
+    result = await users_coll.update_one(
+        {"_id": user["_id"], "password_reset_token_hash": digest,
+         "password_reset_expires_at": {"$gt": datetime.now(timezone.utc)}},
+        {"$set": {"password_hash": new_hash}, "$inc": {"auth_version": 1},
+         "$unset": {"password_reset_token_hash": "", "password_reset_expires_at": ""}},
     )
+    if result.modified_count != 1:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    response.delete_cookie("refresh_token", path="/", secure=cookie_secure(), httponly=True, samesite="lax")
     
     return {"message": "Password has been reset successfully."}
 

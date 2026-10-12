@@ -18,7 +18,8 @@ function setRefreshToken(token) {
 
 function getUser() {
     const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+    try { return userStr ? JSON.parse(userStr) : null; }
+    catch { return null; }
 }
 
 function setUser(user) {
@@ -76,7 +77,7 @@ async function attemptRefresh() {
     
     onRefreshed(null);
     isRefreshing = false;
-    localStorage.clear();
+    clearAuthStorage();
     return false;
 }
 
@@ -119,7 +120,7 @@ async function authFetch(url, options = {}) {
 }
 
 function logoutUser() {
-    localStorage.clear();
+    clearAuthStorage();
     // HttpOnly cookie deletion
     fetch("/auth/logout", { method: "POST" }).finally(() => {
         const path = window.location.pathname;
@@ -134,13 +135,19 @@ function checkAuth() {
     const token = getAccessToken();
     const path = window.location.pathname;
     
-    const isAuthPage = path.endsWith("login.html") || path.endsWith("signup.html") || path === "/" || path === "/login" || path === "/signup";
+    const isPublicPage = path === "/" || path === "/learn" || path.startsWith("/topic/") || path === "/forgot-password" || path === "/reset-password";
+    if (isPublicPage) return;
+    const isAuthPage = path.endsWith("login.html") || path.endsWith("signup.html") || path === "/login" || path === "/signup";
     
     if (!token && !isAuthPage) {
         window.location.href = "/login";
     } else if (token && isAuthPage) {
         window.location.href = "/dashboard";
     }
+}
+
+function clearAuthStorage() {
+    ["access_token", "refresh_token", "user"].forEach(key => localStorage.removeItem(key));
 }
 
 // Auto-run auth guard check
