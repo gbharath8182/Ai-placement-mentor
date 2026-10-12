@@ -12,6 +12,19 @@ async function main() {
     fs.mkdirSync(output, { recursive: true });
     let failures = 0;
     try {
+        const diagramPage = await browser.newPage();
+        try {
+            await diagramPage.goto(baseURL + '/topic/python-foundations-values-and-types', { waitUntil: 'networkidle' });
+            await diagramPage.waitForFunction(() => Boolean(window.mermaid));
+            const readme = fs.readFileSync(path.resolve('README.md'), 'utf8');
+            const diagrams = [...readme.matchAll(/```mermaid\r?\n([\s\S]*?)```/g)].map(match => match[1]);
+            assert.equal(diagrams.length, 2);
+            for (const diagram of diagrams) {
+                const parsed = await diagramPage.evaluate(source => window.mermaid.parse(source), diagram);
+                assert.ok(parsed);
+            }
+            console.log(JSON.stringify({ check: 'readme_mermaid', diagrams: diagrams.length, passed: true }));
+        } finally { await diagramPage.close(); }
         for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
             const context = await browser.newContext({ viewport, reducedMotion: 'reduce' });
             const page = await context.newPage();

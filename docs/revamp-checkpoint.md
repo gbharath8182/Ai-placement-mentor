@@ -7,19 +7,21 @@
 | 0 — Investigation | Audited FastAPI, MongoDB schemas, vanilla frontend and deployment assumptions; preserved the original stack and records. | Intended remote verified; production collection counts read only. |
 | 1 — Groq | Replaced duplicated deprecated-model clients with configurable 20b/120b routing, bounded retries, structured schemas and safe SSE errors. | Real account model access, both completions and streaming passed; mocked failures and fallback passed. |
 | 2 — Reliability | Bounded MongoDB operations, verified TLS, reconnectable lifecycle, liveness/readiness and curated content fallback. | Database recovery tests and real Atlas ping passed. |
-| 3 — Design | Public home/catalog, restrained navy/teal design, consistent branding, readable themes, keyboard focus and collapsible mobile tutor. | Twelve real Edge page/viewport checks passed, including theme and mobile-panel behavior. |
+| 3 — Design | Public home/catalog, restrained navy/teal design, consistent branding, readable themes, keyboard focus and collapsible mobile tutor. | Fourteen real Edge page/viewport checks passed, including the library, theme and mobile-panel behavior. |
 | 4 — Curriculum | Fifteen original Python lessons, prerequisites, examples, diagrams and thirty server-graded checks; fifteen linked coding tasks. | Strict schema/reference validation passed; final example/reference-solution tests are reported in the final test run. |
 | 5 — Mastery | User-scoped bounded evidence, distinct quiz/coding sources, missed-concept feedback and fourteen-day review. Reading never counts as mastery. | Thirty-six isolated mastery tests; practice and API integration tests. |
 | 6 — AI quality | Selected-lesson grounding, scoped persistent chat, structured interview rubrics, persisted sessions and a twelve-case benchmark. | Mocked tutoring/interview/resume tests; benchmark is deterministic contract testing, not a live-model consistency study. |
 | 7 — Security | Validated JWTs, single-use hashed reset tokens, reset revocation, secure production cookies, origin checks, rate limits, sanitized Markdown and remote-only code execution. | Authentication, isolation, hostile-response and execution-boundary tests. |
-| 8 — Verification | Backend/API/frontend tests, CI, optional live-service diagnostics and real browser smoke tooling. | Final local run: 325 tests and 381 subtests; 35 Node behavior tests. |
+| 8 — Verification | Backend/API/frontend tests, CI, optional live-service diagnostics and real browser smoke tooling. | Final local run: 331 tests and 381 subtests; 35 Node behavior tests. |
 | Contributor cleanup | Archived 95 historical root scripts under scripts/legacy; kept their contents for reference and warned against execution. Added contributor, architecture, recovery and deployment guidance. | Diff/secret-pattern checks before commit. |
 
 ## Data safety
 
-Existing Atlas inspection found 10 users, 10 domains, 71 topics and 41 progress records. These were read-only checks, not exports. No historical seed, collection replacement, index application or production curriculum migration was performed.
+Initial Atlas inspection found 10 users, 10 domains, 71 topics and 41 progress records. On 12 October, the owner explicitly requested synchronizing the new content to the same cluster. The backed-up insert-only import added 15 topics, 15 practice tasks and one domain, preserving every existing content document. Current totals: 86 topics, 109 practice tasks and 11 domains. Users remain 10 and progress records remain 41. No historical seed, collection replacement, index application or updates/deletes were performed.
 
-The authored curriculum and practice tasks are served directly from version-controlled files when their slugs are absent from MongoDB. Database documents retain priority. New mastery/interview records are written lazily by authenticated workflows. No deployment migration is required to browse the new lessons. The insert-only importer defaults to dry-run; any later import needs a verified backup, an exclusive maintenance window and an external recovery receipt. See database-recovery.md and curriculum.md.
+All three affected content collections were exported locally as canonical Extended JSON, hashed and round-trip verified before writes. The generated backup is in ignored backups/; a durable recovery receipt is outside the repository. Neither was committed. Six isolated tests cover conflict rejection, preservation, BSON round trips, idempotency and partial-failure journaling. A subsequent read-only preview skipped all 31 authored documents with zero inserts or conflicts.
+
+The authored curriculum and practice tasks still support file fallback when their slugs are absent from MongoDB. Database documents retain priority. New mastery/interview records are written lazily by authenticated workflows. Future content changes must use a reviewed insert-only preview or a separately approved migration; conflicts are not overwritten. See database-recovery.md and curriculum.md.
 
 ## External configuration still required
 
@@ -31,17 +33,17 @@ The authored curriculum and practice tasks are served directly from version-cont
 
 ## Honest validation boundaries
 
-Local isolated tests use Python 3.13 with updated dependencies. CI targets Python 3.11, matching the deployed runtime family, but its remote result must be checked after push. No automatic Render deployment, Render logs or deployed authenticated workflow is implied by a successful Git push.
+Local isolated tests use Python 3.13 with updated dependencies. GitHub CI passed on Python 3.11 for commit 8822630. The original remote confirms that commit on main. Follow-up tooling/documentation changes need their own CI result. Render still served the old revision at the last check (/health/ready returned 404); no successful upgraded deployment or authenticated production workflow is claimed.
 
 Rate limiting is per-process and requires a shared store for multi-worker enforcement. Refresh tokens are not backed by a rotating replay-detection session store. Browser access tokens remain susceptible to any future same-origin XSS. Reset mail uses in-process background delivery, not a durable queue. The Motor driver is retained for compatibility; a separately tested migration to PyMongo's async API remains future work.
-
-## Resume next session
 
 ## Recovery from the interrupted session
 
 The local source survived the usage limit. Restricted pytest discovery to tests/ to avoid collecting an operational helper with the same basename. Restored scoped tutor history in the UI and fixed legacy quiz identity and normalized coding-source identity. Added the missing curriculum guide. All fifteen lessons' trusted worked examples and all fifteen tasks' reference outputs are checked offline.
 
 Replaced commercial publisher/companion cards with actual legal open resources, corrected the Algorithms PDF filename, replaced a misleading HTTP-200 security-error PDF destination, updated Eloquent JavaScript's edition, and verified all twelve library destinations. The link checker validates PDF signatures, chapter fragments and readable content without storing books. Reset-test mailboxes are now private environment configuration rather than hardcoded personal data.
+
+The public README now describes the product rather than internal release status, and includes Mermaid architecture and learning-loop diagrams. Internal progress remains in this checkpoint.
 
 ## Resume next session
 

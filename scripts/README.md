@@ -30,6 +30,12 @@ Use `python -m scripts.live_smoke --database`, `--ai`, or `--deployment https://
 
 Add new supported utilities directly here with clear usage and safety documentation. Keep secrets and private exports out of the repository. Scripts must not execute database writes merely on import or while displaying help.
 
+## Backed-up content synchronization
+
+`python -m scripts.sync_curriculum` previews missing authored topics, tasks and domains on the configured MongoDB target. It prints a credential-free target fingerprint and action counts. Existing differing or duplicate content is a conflict, not an invitation to overwrite it.
+
+Applying requires the reviewed `--expected-target`, `--apply` and `--exclusive-writes-confirmed`. It exports all affected content collections under ignored backups/, verifies canonical BSON/JSON round trips and unchanged snapshots, then inserts only missing documents with a flushed recovery journal outside the repository. Users, progress and private histories are never written. Reference solutions are excluded from persisted practice documents. Partial errors do not trigger automatic deletion; inspect the receipt and backup before any retry. The backup covers content only, not the entire Atlas database, and is not a substitute for a full disaster-recovery backup.
+
 ## Resource and email verification
 
 `python -m scripts.check_resources` makes bounded, read-only HTTPS requests to the twelve free-library destinations. It checks status, readable content type, PDF signatures and chapter anchors without storing books. A passing result is a point-in-time check, not a guarantee that an external host will never change.

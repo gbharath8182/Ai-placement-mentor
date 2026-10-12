@@ -26,4 +26,6 @@ python -m scripts.import_curriculum --dry-run --database YOUR_EXPECTED_DATABASE
 
 Dry-run reads candidate slugs without writing. Identical documents are skipped; conflicts stop the operation instead of overwriting. `--apply` additionally requires the expected database, an external new recovery receipt and `--exclusive-writes-confirmed`. Do not put import commands in Render startup/build scripts. A partial failure leaves a journal; inspect it before retrying. No automatic destructive rollback is provided.
 
-The importer covers domain/topic documents, not private reference solutions or user data. Practice tasks remain file-backed unless a separately reviewed import is added later. Never replay `scripts/legacy/` against production.
+That importer covers domain/topic documents, not practice documents, private reference solutions or user data. For the separate public-practice synchronization workflow, see below. Never replay `scripts/legacy/` against production.
+
+For synchronizing all three authored content collections, `scripts.sync_curriculum` provides a separate backed-up insert-only workflow. It previews domains, topics and public practice documents, binds application to a reviewed target fingerprint, excludes reference solutions and verifies existing-document preservation after inserts. See [tool operations](../scripts/README.md#backed-up-content-synchronization). The owner-authorized 12 October synchronization is recorded in the maintainer checkpoint; it does not change the safety requirements for future imports.

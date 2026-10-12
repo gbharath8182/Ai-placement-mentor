@@ -2,21 +2,54 @@
 
 A placement-preparation learning app built with FastAPI, MongoDB, and vanilla HTML/CSS/JavaScript. Browse lessons publicly, then sign in for contextual AI tutoring, assessments, coding practice, interview preparation, and resume drafting.
 
-> **[Live application](https://ai-placement-mentor-zo2w.onrender.com/)** · **[GitHub repository](https://github.com/gbharath8182/Ai-placement-mentor)**
->
-> This repository documents V2 source. A successful push does not by itself confirm that Render has deployed it; check the deployed version and readiness before using new workflows.
+[Live application](https://ai-placement-mentor-zo2w.onrender.com/) · [Source code](https://github.com/gbharath8182/Ai-placement-mentor)
 
-**Operational warning:** do NOT run `scripts/legacy/` or `backend/seed.py.DEPRECATED_DO_NOT_RUN` against production. No production database import, migration, or reset was performed during this work.
-
-## What the current source supports
+## Features
 
 - **Public learning:** landing page at `/`, curriculum at `/learn`, and lessons at `/topic/{slug}`, without a login wall. Personal learning actions require authentication.
 - **Structured curriculum:** fifteen version-controlled Python lessons and fifteen linked tasks with objectives, prerequisites, worked examples, diagrams and thirty knowledge checks. Existing MongoDB content takes priority; new authored lessons are available without a seed or import.
 - **Contextual tutor:** lesson/section-grounded prompts, SSE streaming, stop/retry controls, and per-topic history. Groq defaults to `openai/gpt-oss-20b` with `openai/gpt-oss-120b` as fallback; model selection, retries, and structured-response validation are centralized. Missing credentials produce an unavailable error, not pretend successful AI output.
 - **Assessment feedback:** server-graded lesson checks and server-verified coding evidence inform transparent mastery/review heuristics. These scores are **not scientifically calibrated learning probabilities, proof of retention, or employment guarantees**.
-- **Remote coding:** topic submissions use stored test cases; the playground accepts bounded user-authored cases. Neither executes submitted code in the browser. Both require a trusted Piston-compatible HTTPS service. **`PISTON_EXECUTE_URL` is intentionally empty; live execution is unavailable until configured.**
+- **Remote coding:** topic submissions use stored test cases; the playground accepts bounded user-authored cases. Neither executes submitted code in the browser. Both require a configured, trusted Piston-compatible HTTPS service.
 - **Interview and resume:** authenticated interviews with persisted sessions and structured feedback; two-stage resume planning/drafting with safe frontend rendering. Generated advice and resumes still require human review.
 - **Accounts and tracking:** bcrypt password hashing, bearer access tokens, refresh cookies, password recovery, progress, activity, analytics, roadmap, cheatsheets, and aptitude views. Frontend auth storage also contains tokens; this is not a cookie-only authentication design.
+
+## Application architecture
+
+```mermaid
+flowchart LR
+    Reader[Web browser] --> UI[HTML, CSS and JavaScript]
+    UI -->|HTTPS API and SSE| API[FastAPI]
+    API -->|Public lesson fallback| Files[Version-controlled curriculum]
+    API -->|Accounts, progress and history| DB[(MongoDB Atlas)]
+    API -->|Contextual model requests| AI[Groq provider]
+    API -->|Password reset via HTTPS| Mail[Brevo or Resend]
+    API -->|Bounded submissions| Runner[Trusted remote sandbox]
+    Runner -->|Expected vs actual output| API
+```
+
+The browser renders lessons and feedback; it does not execute submitted code. Private routes authorize the learner before database access. Provider failures produce explicit errors, not simulated success. Public authored lessons can remain readable during a database outage.
+
+## Learning workflow
+
+```mermaid
+flowchart TD
+    Browse[Browse public curriculum] --> Lesson[Study objectives and worked examples]
+    Lesson --> Account[Sign in for personal learning]
+    Account --> Check[Answer server-graded knowledge checks]
+    Account --> Practice[Submit code to the remote sandbox]
+    Check --> Evidence[Save user-scoped assessment evidence]
+    Practice --> Evidence
+    Evidence --> Feedback[Review scores, missed concepts and reasons]
+    Feedback --> Decision{Evidence meets mastery criteria?}
+    Decision -->|Not yet| Review[Review weak concepts and retry]
+    Review --> Lesson
+    Decision -->|Yes| Next[Continue to the next lesson]
+    Next --> Reassess[Reassess when evidence becomes stale]
+    Reassess --> Check
+```
+
+Tutoring supports explanation and reasoning alongside this loop; an AI answer or time spent reading does not establish mastery. Coding requires a configured remote runner, and the mastery heuristic is transparent rather than scientifically calibrated.
 
 ## Stack and layout
 
@@ -84,9 +117,10 @@ Open [the local app](http://localhost:8000). Launch from the repository root bec
 - `APP_URL`, `ALLOWED_ORIGINS`, and `RESET_PASSWORD_BASE_URL` must match your trusted application origin. Production uses HTTPS and secure refresh cookies.
 - `GROQ_PRIMARY_MODEL` and `GROQ_FALLBACK_MODEL` default to `openai/gpt-oss-20b` and `openai/gpt-oss-120b`. AI requests may incur costs.
 - `EMAIL_PROVIDER` accepts `auto`, `smtp`, `resend`, or `brevo`. All transports use `SMTP_FROM_EMAIL` as the sender. HTTPS providers use `RESEND_API_KEY` or canonical `BREVO_API_KEY`.
-- The current Brevo 401 was confirmed as an **IP authorization block**, not an invalid key. Authorizing the user's trusted source IP is pending; sender verification and actual delivery remain unverified. See [email troubleshooting](docs/deployment.md#email-on-render-free-and-brevo-troubleshooting).
+- On Render Free, use an HTTPS email provider, verify the sender and authorize the service's outbound IPs in Brevo. See [email troubleshooting](docs/deployment.md#email-on-render-free-and-brevo-troubleshooting).
 - `PISTON_EXECUTE_URL` must identify an operator-approved HTTPS sandbox; optional `PISTON_API_KEY` authenticates to it. Do not point the app at an untrusted runner or execute untrusted code in the web-service process.
 - Built-in authored content is distinct from existing Atlas content. The maintained importer previews domains/topics and requires explicit, journaled insert-only application. It is not an automatic production migration; consult [tool safety](scripts/README.md).
+- Never run archived scripts or the deprecated seed against production. Keep environment files, recovery backups and exports out of Git.
 
 ## Validation
 
@@ -97,10 +131,6 @@ python scripts/check_secrets.py
 ```
 
 Run these inside the chosen virtual environment. CI uses Python 3.11, installs `requirements-dev.txt`, and runs pytest, the Node suite, all frontend JavaScript syntax checks, and the tracked-file secret scan. After staging changes locally, use `python scripts/check_secrets.py --staged`; a pre-stage scan does not cover untracked files.
-
-**Verified locally (2026-10-12):** 325 backend tests and 381 subtests passed; 35 Node behavior tests passed. All twelve free-library destinations passed bounded live checks, including PDF signatures and chapter anchors. Real Edge checks cover desktop/mobile layout and theme/tutor controls. Local checks do not establish that the upgraded revision is deployed. Node tests use isolated VM/fake-DOM behavior checks; browser checks are separate.
-
-Real Groq 20b/120b completions and streaming passed. Read-only Atlas checks passed with 10 users, 10 domains, 71 topics, and 41 progress records at that checkpoint. No production database writes were made; service connectivity does not prove all features are ready. Email remains IP-blocked and remote execution remains unconfigured.
 
 Optional maintained smoke checks require explicit approval of their targets and side effects. Do not substitute archived scripts for tests. See [contributor guidance](CONTRIBUTING.md), [architecture](docs/architecture.md), [mastery limitations](docs/mastery.md), and [database recovery](docs/database-recovery.md).
 
