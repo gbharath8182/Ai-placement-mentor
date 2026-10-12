@@ -5,7 +5,11 @@
         ['Career', [['Mock interviews', '/mock-interview'], ['Resume studio', '/resume']]],
     ];
     const path = window.location.pathname;
-    const user = typeof getUser === 'function' ? getUser() : null;
+    function readUser() {
+        try { return typeof getUser === 'function' ? getUser() : JSON.parse(localStorage.getItem('user') || 'null'); }
+        catch { return null; }
+    }
+    const user = readUser();
 
     function element(tag, className, text) {
         const result = document.createElement(tag);

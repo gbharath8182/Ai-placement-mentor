@@ -6,6 +6,7 @@
     <title>AI Resume Studio - AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="/static/css/resume.css">
     <script src="/static/js/app-shell.js" defer></script>
 </head>
 <body>
@@ -16,13 +17,13 @@
     </nav>
     <main class="resume-shell">
         <header class="resume-hero">
-            <p class="roadmap-eyebrow">AI Resume Studio</p>
-            <h1>A resume shaped around your real work.</h1>
-            <p>Give your details, skills, education, projects, and links. The first AI model finds your strongest honest angle; the second writes an ATS-friendly resume—without inventing claims.</p>
+            <p class="roadmap-eyebrow">Career / Resume studio</p>
+            <h1>Make your work speak clearly.</h1>
+            <p>Build a focused resume from your real experience. Review a clean document preview, then download a searchable PDF with working links.</p>
         </header>
         <div class="resume-grid">
             <form id="resume-form" class="glass-panel resume-form">
-                <h2>Your details</h2>
+                <div class="resume-section-heading"><span>01</span><h2>Personal details</h2></div>
                 <div class="resume-field-grid">
                     <label>Full name<input required name="full_name" placeholder="Your full name"></label>
                     <label>Target role<input required name="target_role" placeholder="e.g., Backend Developer"></label>
@@ -33,20 +34,26 @@
                     <label>GitHub URL<input type="url" name="github_url" placeholder="https://github.com/..."></label>
                     <label>LinkedIn URL<input type="url" name="linkedin_url" placeholder="https://linkedin.com/in/..."></label>
                     <label>Portfolio URL<input type="url" name="portfolio_url" placeholder="https://..."></label>
-                    <label>Style<select name="tone"><option value="concise">One-page concise</option><option value="detailed">Detailed</option></select></label>
+                    <label>Content length<select name="tone"><option value="concise">Concise</option><option value="detailed">Detailed</option></select></label>
                 </div>
+                <p class="resume-link-guidance">Use your actual profile and repository addresses. These destinations are preserved in the preview and PDF.</p>
+                <div class="resume-section-heading"><span>02</span><h2>Background</h2></div>
                 <label>Skills / stack <span class="resume-help">Separate with commas</span><textarea name="skills" rows="2" placeholder="Python, FastAPI, MongoDB, React, Docker"></textarea></label>
                 <label>Education<textarea name="education" rows="3" placeholder="B.Tech in Computer Science — College name, graduation year, CGPA (optional)"></textarea></label>
                 <label>Achievements / certifications <span class="resume-help">One per line</span><textarea name="achievements" rows="3" placeholder="AWS Certified Cloud Practitioner&#10;Winner, college hackathon"></textarea></label>
                 <label>Target job description (optional)<textarea name="job_description" rows="4" placeholder="Paste role requirements or keywords to tailor your resume."></textarea></label>
-                <div class="resume-project-head"><h2>Projects</h2><button type="button" id="add-project" class="btn-secondary">+ Add project</button></div>
+                <div class="resume-project-head"><div class="resume-section-heading"><span>03</span><h2>Selected projects</h2></div><button type="button" id="add-project" class="btn-secondary">Add project</button></div>
                 <div id="projects"></div>
-                <button class="btn-primary resume-submit" type="submit">Generate unique resume</button>
+                <button class="btn-primary resume-submit" type="submit">Generate resume</button>
             </form>
             <section class="glass-panel resume-preview">
-                <div class="resume-preview-head"><div><p class="roadmap-eyebrow">Live preview</p><h2>Your resume</h2></div><button class="btn-secondary hidden" id="download-resume" type="button">Download .md</button></div>
+                <div class="resume-preview-head"><div><p class="roadmap-eyebrow">Document preview</p><h2>Your resume</h2></div><button class="btn-primary hidden" id="download-resume" type="button">Download PDF</button></div>
                 <div id="resume-status" role="status" aria-live="polite" class="muted-text">Complete the form to create your tailored resume.</div>
-                <article id="resume-output" class="mi-markdown-body hidden"></article>
+                <div class="resume-preview-surface">
+                    <div id="resume-empty" class="resume-empty"><p class="resume-empty-label">A clear, single-column document</p><h3>Your experience, thoughtfully arranged.</h3><p>Add your background and projects, then generate your resume. Only the details you provide belong in it.</p><span>Selectable text / Clickable links / PDF export</span></div>
+                    <article id="resume-output" aria-label="Generated resume" class="resume-paper hidden"></article>
+                </div>
+                <p class="resume-preview-note">The PDF uses A4 pages. Longer content continues onto additional pages rather than shrinking to unreadable text.</p>
             </section>
         </div>
     </main>
@@ -61,8 +68,6 @@
     </template>
     <script src="/static/js/theme.js" defer></script>
     <script src="/static/js/auth.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
     <script src="/static/js/resume.js" defer></script>
 </body>
 </html>

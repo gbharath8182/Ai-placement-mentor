@@ -53,3 +53,12 @@ def test_dashboard_preserves_controls_and_has_no_decorative_svg():
 def test_authenticated_catalog_loads_auth_before_shell():
     sources = [attrs["src"] for tag, attrs in Page("learn").elements if tag == "script" and "src" in attrs]
     assert sources.index("/static/js/auth.js") < sources.index("/static/js/app-shell.js")
+
+
+def test_resume_has_pdf_controls_and_no_cdn_rendering_dependency():
+    page = Page("resume")
+    sources = [attrs["src"] for tag, attrs in page.elements if tag == "script" and "src" in attrs]
+    assert all(source.startswith("/static/") for source in sources)
+    text = (FRONTEND / "resume.html").read_text(encoding="utf-8")
+    assert "Download PDF" in text and "Download .md" not in text
+    assert any(attrs.get("id") == "resume-output" and "resume-paper" in attrs.get("class", "") for tag, attrs in page.elements)

@@ -466,7 +466,7 @@ test('explain failures sanitize unknown error objects and reset controls', async
     harness.assertIdle();
 });
 
-function resumeBrowser(markdown, libraries) {
+function resumeBrowser(documentData, libraries = {}) {
     const harness = browser();
     const form = harness.element('resume-form', 'form');
     const submit = harness.element('resume-submit', 'button');
@@ -495,42 +495,88 @@ function resumeBrowser(markdown, libraries) {
         assert.equal(options.body.full_name, 'Test Learner');
         assert.equal(JSON.stringify(options.body.skills), JSON.stringify(['Python', 'SQL']));
         assert.equal(options.body.projects[0].title, 'Test project');
-        return { ok: true, json: async () => ({ resume_markdown: markdown }) };
+        return { ok: true, json: async () => ({ resume_document: documentData }) };
     };
     harness.load('resume.js');
     return { ...harness, form, submit };
 }
 
-test('resume passes parsed Markdown through DOMPurify before setting HTML', async () => {
-    const markdown = '# Test\n<img src=x onerror=alert(1)>';
-    const calls = [];
-    const parsed = '<h1>Test</h1><img src=x onerror=alert(1)>';
-    const sanitized = '<h1>Test</h1>';
-    const harness = resumeBrowser(markdown, {
-        marked: { parse(value) { calls.push(['parse', value]); return parsed; } },
-        DOMPurify: { sanitize(value) { calls.push(['sanitize', value]); return sanitized; } },
-    });
+const resumeFixture = {
+    full_name: 'Test Learner', target_role: 'Backend engineer',
+    contacts: [{ text: 'GitHub', href: 'https://github.com/example/my project' }],
+    blocks: [{ kind: 'heading', spans: [{ text: 'Projects' }] },
+        { kind: 'bullet', spans: [{ text: '<img src=x onerror=alert(1)>', bold: true }, { text: 'Source', href: 'https://github.com/example/repo' }] }],
+};
+
+test('resume renders structured sections safely without CDN libraries', async () => {
+    const harness = resumeBrowser(resumeFixture);
     await harness.document.emit('DOMContentLoaded');
     await harness.form.emit('submit');
-    assert.deepEqual(calls, [['parse', markdown], ['sanitize', parsed]]);
-    assert.equal(harness.document.getElementById('resume-output').innerHTML, sanitized);
-    assert.equal(harness.document.getElementById('resume-output').classList.contains('hidden'), false);
+    const output = harness.document.getElementById('resume-output');
+    assert.equal(output.innerHTML, '');
+    assert.ok(output.textContent.includes('<img src=x onerror=alert(1)>'));
+    assert.equal(output.children[0].children[0].tagName, 'h1');
+    assert.equal(output.children[1].tagName, 'h2');
+    assert.equal(output.children[2].tagName, 'ul');
+    assert.equal(output.classList.contains('hidden'), false);
+    const link = output.children[0].children[2].children[0].children[0];
+    assert.equal(link.href, 'https://github.com/example/my%20project');
+    assert.equal(link.rel, 'noopener noreferrer');
     assert.equal(harness.submit.disabled, false);
 });
 
-for (const missing of ['both', 'sanitizer', 'parser']) {
-    test(`resume uses text-only fallback when ${missing} is missing`, async () => {
-        const markdown = '<script>alert(1)</script> **Test resume**';
-        const libraries = {};
-        if (missing === 'sanitizer') libraries.marked = { parse() { assert.fail('Unsanitized Markdown must not be parsed'); } };
-        if (missing === 'parser') libraries.DOMPurify = { sanitize() { assert.fail('No parser is available'); } };
-        const harness = resumeBrowser(markdown, libraries);
+for (const href of ['javascript:alert(1)', '//evil.example', 'data:text/html,evil', 'https://user:password@example.com', 'https://example.com\n/evil']) {
+    test(`resume does not activate unsafe link: ${JSON.stringify(href)}`, async () => {
+        const harness = resumeBrowser({ ...resumeFixture, contacts: [{ text: 'Profile', href }] });
         await harness.document.emit('DOMContentLoaded');
         await harness.form.emit('submit');
         const output = harness.document.getElementById('resume-output');
-        assert.equal(output.textContent, markdown);
-        assert.equal(output.innerHTML, '');
-        assert.equal(output.classList.contains('hidden'), false);
-        assert.equal(harness.submit.disabled, false);
+        assert.equal(output.children[0].children[2].children[0].children[0].tagName, 'span');
     });
 }
+
+test('resume export requests a real PDF without making another AI call', async () => {
+    const harness = resumeBrowser(resumeFixture);
+    await harness.document.emit('DOMContentLoaded');
+    await harness.form.emit('submit');
+    const events = [];
+    harness.document.body = harness.document.createElement('body');
+    const create = harness.document.createElement;
+    harness.document.createElement = tag => {
+        const element = create(tag);
+        element.click = () => events.push(['download', element.download]);
+        return element;
+    };
+    harness.context.URL = class extends URL {
+        static createObjectURL(blob) { assert.equal(blob.type, 'application/pdf'); return 'blob:fixture'; }
+        static revokeObjectURL(value) { events.push(['revoke', value]); }
+    };
+    harness.context.setTimeout = callback => callback();
+    harness.context.authFetch = async (url, options) => {
+        assert.equal(url, '/resume/export');
+        assert.equal(options.body.full_name, 'Test Learner');
+        return { ok: true, headers: { get: () => 'application/pdf' }, blob: async () => new Blob(['%PDF-1.4'], { type: 'application/pdf' }) };
+    };
+    await harness.document.getElementById('download-resume').emit('click');
+    assert.deepEqual(events, [['download', 'Test-Learner-Resume.pdf'], ['revoke', 'blob:fixture']]);
+    assert.equal(harness.document.getElementById('download-resume').disabled, false);
+});
+
+test('resume export reports a failed PDF without downloading an error page', async () => {
+    const harness = resumeBrowser(resumeFixture);
+    await harness.document.emit('DOMContentLoaded');
+    await harness.form.emit('submit');
+    harness.context.authFetch = async () => ({ ok: true, headers: { get: () => 'text/html' } });
+    await harness.document.getElementById('download-resume').emit('click');
+    assert.ok(harness.document.getElementById('resume-status').textContent.includes('did not return a PDF'));
+    assert.equal(harness.document.getElementById('download-resume').disabled, false);
+});
+
+test('resume rejects a missing document instead of displaying unformatted Markdown', async () => {
+    const harness = resumeBrowser(null);
+    harness.document.getElementById('download-resume').classList.add('hidden');
+    await harness.document.emit('DOMContentLoaded');
+    await harness.form.emit('submit');
+    assert.ok(harness.document.getElementById('resume-status').textContent.includes('could not be formatted'));
+    assert.equal(harness.document.getElementById('download-resume').classList.contains('hidden'), true);
+});

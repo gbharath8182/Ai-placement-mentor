@@ -9,5 +9,7 @@ python-multipart==0.0.32
 pydantic>=2.7,<3
 email-validator>=2,<3
 python-dotenv==1.0.1
+markdown-it-py>=4,<5
+reportlab>=4.4,<5
 
 certifi

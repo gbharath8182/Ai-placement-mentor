@@ -11,7 +11,7 @@ A placement-preparation learning app built with FastAPI, MongoDB, and vanilla HT
 - **Contextual tutor:** lesson/section-grounded prompts, SSE streaming, stop/retry controls, and per-topic history. Groq defaults to `openai/gpt-oss-20b` with `openai/gpt-oss-120b` as fallback; model selection, retries, and structured-response validation are centralized. Missing credentials produce an unavailable error, not pretend successful AI output.
 - **Assessment feedback:** server-graded lesson checks and server-verified coding evidence inform transparent mastery/review heuristics. These scores are **not scientifically calibrated learning probabilities, proof of retention, or employment guarantees**.
 - **Remote coding:** topic submissions use stored test cases; the playground accepts bounded user-authored cases. Neither executes submitted code in the browser. Both require a configured, trusted Piston-compatible HTTPS service.
-- **Interview and resume:** authenticated interviews with persisted sessions and structured feedback; two-stage resume planning/drafting with safe frontend rendering. Generated advice and resumes still require human review.
+- **Interview and resume:** authenticated interviews with persisted sessions and structured feedback; two-stage resume drafting with a document-style preview and searchable PDF export. Profile and project links remain clickable in the PDF. Generated advice and resumes still require human review.
 - **Accounts and tracking:** bcrypt password hashing, bearer access tokens, refresh cookies, password recovery, progress, activity, analytics, roadmap, cheatsheets, and aptitude views. Frontend auth storage also contains tokens; this is not a cookie-only authentication design.
 
 ## Application architecture

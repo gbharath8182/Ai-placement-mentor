@@ -61,6 +61,7 @@ async function main() {
                     assert.equal(await page.locator('.workspace-sidebar').count(), 1);
                     assert.equal(await page.locator('.dashboard-nav').count(), 0);
                     assert.equal(await page.locator('.workspace-sidebar svg').count(), 0);
+                    assert.equal(await page.locator('.workspace-profile #user-name').innerText(), 'Alex Morgan');
                     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'horizontal overflow');
                     if (width > 960) {
                         const sidebar = await page.locator('.workspace-sidebar').boundingBox();

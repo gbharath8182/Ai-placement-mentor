@@ -54,6 +54,12 @@ Applying requires the reviewed `--expected-target`, `--apply` and `--exclusive-w
 
 Node unit tests also cover safe domain-card and topic-link rendering; pytest checks shared-shell inclusion, fallback navigation, preserved dashboard control IDs and an unchanged public homepage. Browser fixtures are not a live AI, email or sandbox execution test.
 
+## Resume preview and PDF verification
+
+Run `python -m tests.resume_preview` from the repository root to start a fixture-only service bound to 127.0.0.1:8881. It uses synthetic candidate details, overridden authentication and mocked AI; it never connects to MongoDB or a live AI provider. Do not expose it publicly or use it as the application server.
+
+In a separate terminal, run `node scripts/resume_smoke.cjs PATH_TO_PLAYWRIGHT http://127.0.0.1:8881`. Desktop/mobile checks generate a structured preview without CDN libraries, validate profile destinations and download real PDFs through the authenticated export handler. PDF and screenshot artifacts stay in ignored artifacts/resume/. Stop the fixture server when finished. Python regressions additionally verify selectable PDF text, link annotations, pagination, escaped input, authentication and export limits.
+
 ## Historical archive
 
 [`legacy/README.md`](legacy/README.md) explains the archived file families and their risks. **Do NOT run archived scripts against production.** They are reference material, not supported imports, migrations, smoke checks, or a reproducible setup pipeline. Their old relative paths, absolute paths, and database assumptions have intentionally not been repaired.

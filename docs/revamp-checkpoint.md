@@ -53,6 +53,14 @@ Dashboard cards now use native buttons and textContent; topic entries use encode
 
 The deployed revision 6d1947b was confirmed by the owner in Render and public API readiness returned 200 with version 2.0.0. Brevo's verified sender was confirmed, and the owner authorized the two actual Render outbound ranges while keeping API IP blocking enabled. The owner subsequently confirmed the new reset attempt completed; no credentials or reset links were shared or committed.
 
+## Resume studio PDF correction
+
+Replaced the resume's CDN-dependent Markdown preview and .md download with server-parsed, bounded document blocks and an authenticated ReportLab PDF export. The frontend renders text through native DOM nodes, uses a white document surface in both themes, and presents grouped form sections. PDF text is selectable and supplied profile/project destinations are encoded and clickable. GitHub/LinkedIn fields reject app URLs and lookalike domains; the application preserves original contact facts, suppresses invented active links, never fetches user URLs, and rejects unformatted or oversized writer output rather than displaying a fake complete document. Export does not rerun AI or write to MongoDB.
+
+Regressions cover PDF annotations, pagination, escaping, authentication, response type, download filenames, safe browser links, missing renderer libraries and malformed AI output. Thirty workspace checks and two full resume browser flows passed with synthetic fixtures. The rendered PDF and desktop/mobile previews were inspected visually. Latest local suites: 385 Python tests with 381 subtests and 43 Node tests. Production requires deploying this correction separately from c2144b0.
+
+The shared shell now reads the existing local account safely even when deferred auth helpers have not loaded yet, preserving its initialization before older page handlers need shell control IDs. The reference library loads the auth helper for working account/sign-out controls.
+
 ## Resume next session
 
 1. Check git status, recent commits, CI and the existing Render deployment before making changes.

@@ -1,0 +1,50 @@
+.app-page .resume-shell { max-width: 1540px; }
+.resume-hero { max-width: 700px; }
+.resume-hero > p:last-child { font-size: 14px; max-width: 65ch; }
+.app-page .resume-grid { grid-template-columns: minmax(340px, .9fr) minmax(440px, 1.1fr); gap: 28px; }
+.app-page .resume-form { padding: 28px; }
+.resume-section-heading { display: flex; align-items: center; gap: 12px; margin: 0 0 20px; }
+.resume-section-heading:not(:first-child) { border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 22px; }
+.resume-section-heading > span { font-size: 10px; color: var(--text-muted); letter-spacing: .1em; }
+.resume-form .resume-section-heading h2 { margin: 0; font-size: 17px; font-weight: 500; }
+.resume-form label { font-size: 12px; font-weight: 500; }
+.resume-form :is(input, textarea, select) { font-size: 13px; font-weight: 400; }
+.resume-link-guidance { font-size: 11px; color: var(--text-muted); line-height: 1.7; }
+.resume-project-head { margin-top: 28px; flex-wrap: wrap; }
+.resume-project-head .resume-section-heading { margin: 0; }
+.resume-project-head button { font-size: 11px; padding: 9px 12px; }
+.resume-project { background: var(--bg-primary); border-radius: 8px; padding: 18px; }
+.app-page .resume-preview { padding: 0; border: 0; background: transparent; min-height: 0; position: sticky; top: 24px; }
+.resume-preview-head { align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.resume-preview-head > div { flex: 1; }
+.resume-preview-head h2 { font-size: 19px; font-weight: 500; }
+.resume-preview-head .roadmap-eyebrow { font-size: 10px; margin-bottom: 4px; }
+#download-resume { font-size: 12px; padding: 12px 18px; width: auto; flex: 0 0 auto; }
+#resume-status { font-size: 12px; padding: 0 0 16px; min-height: 38px; }
+.resume-preview-surface { padding: 22px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-tertiary); }
+.resume-paper { background: #fff; color: #202832; padding: 36px 34px; min-height: 660px; border: 1px solid #e1e4e7; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.resume-paper-header { text-align: center; margin-bottom: 25px; }
+.resume-paper h1 { font-family: inherit; font-size: 25px; font-weight: 700; letter-spacing: -.035em; line-height: 1.25; margin: 0 0 7px; color: #202832; }
+.resume-paper-role { margin: 0 0 9px; font-size: 12px; color: #4b5662; }
+.resume-paper-contacts { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; font-size: 10px; line-height: 1.6; }
+.resume-paper a { color: #28475c; text-decoration: underline; text-underline-offset: 2px; }
+.resume-paper h2 { font-family: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: .09em; line-height: 1.4; border-bottom: 1px solid #d7dce0; padding-bottom: 5px; margin: 21px 0 9px; color: #202832; }
+.resume-paper h3 { font-family: inherit; font-size: 12px; font-weight: 700; margin: 13px 0 6px; color: #202832; }
+.resume-paper p { margin: 0 0 8px; }
+.resume-paper ul { padding-left: 18px; margin: 0 0 10px; }
+.resume-paper li { margin-bottom: 5px; }
+.resume-preview-note { font-size: 10px; line-height: 1.7; color: var(--text-muted); margin-top: 12px; }
+.resume-empty { padding: 90px 34px; min-height: 540px; background: var(--bg-secondary); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; }
+.resume-empty .resume-empty-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
+.resume-empty h3 { font-size: 23px; font-weight: 500; line-height: 1.3; letter-spacing: -.035em; margin: 14px 0; }
+.resume-empty p { color: var(--text-muted); font-size: 13px; line-height: 1.8; }
+.resume-empty > span { font-size: 10px; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 22px; margin-top: 40px; }
+@media (max-width: 1250px) { .app-page .resume-grid { grid-template-columns: minmax(0, 1fr); } .app-page .resume-preview { position: static; } }
+@media (max-width: 650px) {
+    .app-page .resume-form { padding: 20px; }
+    .resume-preview-surface { padding: 8px; }
+    .resume-paper { padding: 27px 18px; min-height: 500px; font-size: 11px; }
+    .resume-paper h1 { font-size: 22px; }
+    .resume-paper-contacts { font-size: 10px; }
+    .resume-empty { min-height: 350px; padding: 35px 20px; }
+}
