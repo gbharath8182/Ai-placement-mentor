@@ -53,3 +53,52 @@ jobs:
           node --check scripts/workspace_smoke.cjs
           node --check scripts/resume_smoke.cjs
           node --check scripts/spoken_smoke.cjs
+          node --check scripts/product_smoke.cjs
+
+  product-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APP_ENV: test
+      MONGO_URI: mongodb://127.0.0.1:27017/placement_mentor_ci
+      JWT_SECRET: ci-test-only-signing-key-not-a-production-secret
+      GROQ_API_KEY: ""
+      RESEND_API_KEY: ""
+      BREVO_API_KEY: ""
+      SMTP_HOST: ""
+      PISTON_EXECUTE_URL: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install isolated browser test dependencies
+        run: |
+          python -m pip install -r requirements-dev.txt
+          npm install --prefix artifacts/browser-deps --no-package-lock --no-save playwright@1.62.1
+          artifacts/browser-deps/node_modules/.bin/playwright install --with-deps chromium
+      - name: Desktop, mobile, themes and failure recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m tests.product_preview > artifacts/product-preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8883/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/product_smoke.cjs "$PWD/artifacts/browser-deps/node_modules/playwright" http://127.0.0.1:8883
+      - name: Save browser screenshots and fixture logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-browser-results
+          path: |
+            artifacts/product/
+            artifacts/product-preview.log
+          retention-days: 7

@@ -1,5 +1,9 @@
 # Repository tools
 
+## Product experience checks
+
+Run `python -m tests.product_preview` in an isolated local/test environment, then `node scripts/product_smoke.cjs <absolute-path-to-playwright> http://127.0.0.1:8883`. The fixture server uses synthetic users and in-memory content/progress; it never connects to MongoDB or calls AI/email providers. Do not expose or deploy it. The smoke checks cover desktop/mobile, both themes, keyboard search, stale responses, injection safety, offline messaging and recoverable/empty dashboard states. Screenshots stay in ignored `artifacts/product/`. GitHub Actions runs the same product checks with headless Chromium.
+
 This directory separates maintained tools from one-off historical scripts. The running application is in `backend/` and `frontend/`; operational helpers are not application startup hooks.
 
 ## Maintained tool roles

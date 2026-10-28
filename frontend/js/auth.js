@@ -26,59 +26,36 @@ function setUser(user) {
     localStorage.setItem("user", JSON.stringify(user));
 }
 
-let isRefreshing = false;
-let refreshSubscribers = [];
-
-function subscribeTokenRefresh(cb) {
-    refreshSubscribers.push(cb);
-}
-
-function onRefreshed(token) {
-    refreshSubscribers.forEach(cb => cb(token));
-    refreshSubscribers = [];
-}
+let refreshPromise = null;
+let authGeneration = 0;
 
 async function attemptRefresh() {
-    if (isRefreshing) {
-        return new Promise(resolve => {
-            subscribeTokenRefresh(token => {
-                resolve(!!token);
+    if (refreshPromise) return refreshPromise;
+    const generation = authGeneration;
+    refreshPromise = (async () => {
+        try {
+            const payload = {};
+            const token = getRefreshToken();
+            if (token) payload.refresh_token = token;
+            const response = await fetch('/auth/refresh', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload), signal: AbortSignal.timeout(15000),
             });
-        });
-    }
-    
-    isRefreshing = true;
-    try {
-        const payload = {};
-        const rf = getRefreshToken();
-        if (rf) {
-            payload.refresh_token = rf;
-        }
-        
-        const res = await fetch("/auth/refresh", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-        
-        if (res.ok) {
-            const data = await res.json();
-            setAccessToken(data.access_token);
-            if (data.refresh_token) {
-                setRefreshToken(data.refresh_token);
+            if (generation !== authGeneration) return null;
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) { clearAuthStorage(); return false; }
+                return null;
             }
-            onRefreshed(data.access_token);
-            isRefreshing = false;
+            const data = await response.json();
+            if (generation !== authGeneration) return null;
+            if (typeof data.access_token !== 'string' || !data.access_token || data.access_token.length > 8192) return null;
+            setAccessToken(data.access_token);
+            if (typeof data.refresh_token === 'string' && data.refresh_token && data.refresh_token.length <= 8192) setRefreshToken(data.refresh_token);
             return true;
-        }
-    } catch (e) {
-        console.error("Token refresh failed", e);
-    }
-    
-    onRefreshed(null);
-    isRefreshing = false;
-    clearAuthStorage();
-    return false;
+        } catch { return null; }
+    })();
+    try { return await refreshPromise; }
+    finally { refreshPromise = null; }
 }
 
 // Authenticated fetch wrapper
@@ -106,9 +83,13 @@ async function authFetch(url, options = {}) {
                 const newToken = getAccessToken();
                 options.headers["Authorization"] = `Bearer ${newToken}`;
                 response = await fetch(url, options);
-            } else {
+            } else if (refreshed === false) {
                 // Refresh failed; clear cache and redirect to login
                 logoutUser();
+            } else {
+                const error = new Error('Your session could not be refreshed. Check your connection and retry; your sign-in has been preserved.');
+                error.code = 'session_unavailable';
+                throw error;
             }
         }
         
@@ -121,13 +102,9 @@ async function authFetch(url, options = {}) {
 
 function logoutUser() {
     clearAuthStorage();
-    // HttpOnly cookie deletion
-    fetch("/auth/logout", { method: "POST" }).finally(() => {
-        const path = window.location.pathname;
-        if (!path.endsWith("login.html") && path !== "/" && path !== "/login") {
-            window.location.href = "/login";
-        }
-    });
+    fetch('/auth/logout', { method: 'POST', signal: AbortSignal.timeout(10000), keepalive: true }).catch(() => {});
+    const path = window.location.pathname;
+    if (!path.endsWith('login.html') && path !== '/' && path !== '/login') window.location.href = '/login';
 }
 
 // Simple route guard check
@@ -147,6 +124,7 @@ function checkAuth() {
 }
 
 function clearAuthStorage() {
+    authGeneration += 1;
     ["access_token", "refresh_token", "user"].forEach(key => localStorage.removeItem(key));
 }
 

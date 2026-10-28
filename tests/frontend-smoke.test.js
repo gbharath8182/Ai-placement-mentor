@@ -64,7 +64,7 @@ function browser({ pathname = '/topic/python-foundations', storage = {}, fetch }
     window.location = { pathname, href: pathname };
     const values = new Map(Object.entries(storage));
     const context = vm.createContext({
-        document, window, AbortController, TextDecoder, TextEncoder, FormData,
+        document, window, AbortController, AbortSignal, TextDecoder, TextEncoder, FormData,
         Blob, URL, currentTopicSlug: 'python-foundations',
         console: { log() {}, warn() {}, error() {} },
         localStorage: {
@@ -263,20 +263,21 @@ test('authenticated fetch preserves recorded audio blobs instead of JSON-seriali
     await harness.context.authFetch('/mock-interview/spoken/transcribe/fixture/1', { method: 'POST', body: blob, headers: { 'Content-Type': 'audio/webm' } });
 });
 
-for (const failure of ['http', 'network', 'invalid-json']) {
-    test(`failed refresh (${failure}) clears only auth storage`, async () => {
+for (const failure of ['http', 'network', 'invalid-json', 'unavailable', 'rate-limit', 'invalid-token']) {
+    test(`refresh (${failure}) only clears auth when the server rejects credentials`, async () => {
+        const storage = { access_token: 'expired-test', refresh_token: 'test-refresh', user: '{}', theme: 'light', editor_theme: 'dark' };
         const harness = browser({
-            storage: { access_token: 'expired-test', refresh_token: 'test-refresh', user: '{}', theme: 'light', editor_theme: 'dark' },
+            storage,
             fetch: async (url, options) => {
                 assert.equal(url, '/auth/refresh');
                 assert.deepEqual(JSON.parse(options.body), { refresh_token: 'test-refresh' });
                 if (failure === 'network') throw new Error('test offline');
-                return { ok: failure === 'invalid-json', json: async () => { throw new SyntaxError('invalid test response'); } };
+                return { ok: ['invalid-json', 'invalid-token'].includes(failure), status: failure === 'http' ? 401 : failure === 'rate-limit' ? 429 : 503, json: async () => { if (failure === 'invalid-token') return {}; throw new SyntaxError('invalid test response'); } };
             },
         });
         harness.load('auth.js');
-        assert.equal(await harness.context.attemptRefresh(), false);
-        assert.deepEqual(Object.fromEntries(harness.values), { theme: 'light', editor_theme: 'dark' });
+        assert.equal(await harness.context.attemptRefresh(), failure === 'http' ? false : null);
+        assert.deepEqual(Object.fromEntries(harness.values), failure === 'http' ? { theme: 'light', editor_theme: 'dark' } : storage);
     });
 }
 
@@ -316,6 +317,35 @@ test('failed authFetch refresh logs out without deleting theme preferences', asy
     assert.deepEqual(calls, ['/protected', '/auth/refresh', '/auth/logout']);
     assert.equal(harness.window.location.href, '/login');
     assert.deepEqual(Object.fromEntries(harness.values), { theme: 'dark' });
+});
+
+test('concurrent transient refresh failures preserve sign-in and settle every caller', async () => {
+    const refresh = deferred();
+    let refreshCalls = 0;
+    const harness = browser({ pathname: '/dashboard', storage: { access_token: 'expired-test', user: '{}' }, fetch: async url => {
+        if (url === '/auth/refresh') { refreshCalls++; return refresh.promise; }
+        if (url === '/auth/logout') throw new Error('Must not log out during an outage');
+        return { status: 401 };
+    } });
+    harness.load('auth.js');
+    const requests = [harness.context.authFetch('/protected/one'), harness.context.authFetch('/protected/two')];
+    refresh.resolve({ status: 503, ok: false });
+    const results = await Promise.allSettled(requests);
+    assert.equal(refreshCalls, 1);
+    assert.ok(results.every(result => result.status === 'rejected' && result.reason.code === 'session_unavailable'));
+    assert.equal(harness.values.get('access_token'), 'expired-test');
+    assert.equal(harness.window.location.href, '/dashboard');
+});
+
+test('logging out during an in-flight refresh cannot restore tokens', async () => {
+    const refresh = deferred();
+    const harness = browser({ storage: { access_token: 'expired-test' }, fetch: async () => refresh.promise });
+    harness.load('auth.js');
+    const pending = harness.context.attemptRefresh();
+    harness.context.clearAuthStorage();
+    refresh.resolve({ ok: true, json: async () => ({ access_token: 'must-not-be-restored' }) });
+    assert.equal(await pending, null);
+    assert.equal(harness.values.has('access_token'), false);
 });
 
 test('sidebar decodes byte-fragmented UTF-8 SSE, escapes HTML, and consumes DONE', async () => {

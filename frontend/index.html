@@ -3,69 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Learn the foundations, practice with purpose, and prepare for technical interviews with AI Placement Mentor. Explore public lessons without signing in.">
-    <title>AI Placement Mentor | Build understanding. Practice with purpose.</title>
+    <meta name="description" content="A technical interview workspace: public programming lessons, assessed practice, contextual voice interviews and resume PDFs with clickable links.">
+    <meta name="theme-color" content="#101c27">
+    <title>AI Placement Mentor — Technical interview workspace</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/landing.css">
     <script src="/static/js/theme.js" defer></script>
+    <script src="/static/js/landing.js" defer></script>
 </head>
-<body class="public-page">
+<body class="public-page product-home">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <nav class="dashboard-nav public-nav" aria-label="Main navigation">
-        <a href="/" class="nav-brand"><span class="brand-mark" aria-hidden="true">AM</span><span>AI Placement Mentor</span></a>
-        <div class="nav-user">
-            <a href="/learn" class="nav-text-link">Curriculum</a>
-            <a href="/login" class="nav-text-link">Sign in</a>
-            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light theme"></button>
-            <a href="/learn" class="btn-primary public-button">Start learning <span aria-hidden="true">↗</span></a>
-        </div>
-    </nav>
-    <main id="main-content" class="public-shell">
-        <section class="landing-hero" aria-labelledby="hero-title">
-            <div class="hero-copy">
-                <p class="eyebrow">A clearer path to technical confidence</p>
-                <h1 id="hero-title">Don’t just learn<br>the answer.<br><em>Understand it.</em></h1>
-                <p class="hero-description">Build your foundations, reason through real problems, and turn what you know into what you can do.</p>
-                <div class="public-actions">
-                    <a href="/learn" class="btn-primary public-button">Explore the curriculum <span aria-hidden="true">→</span></a>
-                    <a href="/topic/python-foundations-values-and-types" class="text-link">Read a Python lesson <span aria-hidden="true">↗</span></a>
-                </div>
-                <p class="quiet-note">Public lessons. No account needed to explore.</p>
+    <header class="product-header">
+        <a class="product-brand" href="/" aria-label="AI Placement Mentor home"><span class="product-monogram" aria-hidden="true">am<span>.</span></span><span>AI Placement<br>Mentor</span></a>
+        <nav aria-label="Main navigation"><a href="/learn">Curriculum</a><a href="#workspace">The workspace</a><a href="/login">Sign in</a><a class="product-nav-cta" href="/signup">Create account <span aria-hidden="true">↗</span></a></nav>
+    </header>
+    <main id="main-content">
+        <section class="product-hero" aria-labelledby="hero-title">
+            <div class="product-hero-copy">
+                <p class="product-kicker"><span class="product-rule"></span> Study / Practice / Interview</p>
+                <h1 id="hero-title">Technical<br>interview<br><span>preparation.</span></h1>
+                <p class="product-intro">Lessons, coding practice, spoken interviews and your resume. One workspace, built around the work you still need to do.</p>
+                <div class="product-actions"><a class="product-primary" href="/learn">Explore the curriculum <span aria-hidden="true">↗</span></a><a href="/login">Open my workspace <span aria-hidden="true">→</span></a></div>
+                <p class="product-caption">Read lessons without an account. Sign in to save your progress.</p>
             </div>
-            <a class="lesson-preview" href="/topic/python-foundations-values-and-types" aria-label="Preview the Python foundations lesson: Values and types">
-                <div class="preview-topline"><span class="eyebrow">Inside a lesson</span><span class="preview-tag">Python / Foundations</span></div>
-                <h2>A name is not<br>the value.</h2>
-                <p>Follow the idea from a line of code to a mental model.</p>
-                <pre class="preview-code"><code><span class="code-muted"># A small example</span>
-score = <span class="code-warm">42</span>
-label = <span class="code-teal">"ready"</span>
-print(type(score)) <span class="code-muted"># &lt;class 'int'&gt;</span></code></pre>
-                <div class="value-diagram" aria-label="The name score refers to the integer value 42">
-                    <div><span class="diagram-label">Name</span><code>score</code></div>
-                    <span class="diagram-arrow" aria-hidden="true">→</span>
-                    <div><span class="diagram-label">Value · int</span><code>42</code></div>
+            <div class="product-exhibit">
+                <div class="exhibit-topline"><span>WORKSPACE / FIELD NOTES</span><span>01—03</span></div>
+                <div class="exhibit-tabs" role="tablist" aria-label="Workspace examples">
+                    <button id="tab-study" type="button" role="tab" aria-selected="true" aria-controls="example-study" tabindex="0" data-example="study">01 Study</button>
+                    <button id="tab-interview" type="button" role="tab" aria-selected="false" aria-controls="example-interview" tabindex="-1" data-example="interview">02 Interview</button>
+                    <button id="tab-resume" type="button" role="tab" aria-selected="false" aria-controls="example-resume" tabindex="-1" data-example="resume">03 Resume</button>
                 </div>
-                <div class="preview-question"><span class="eyebrow">Think it through</span><p>If <code>score</code> becomes <code>"42"</code>, what changes?</p></div>
-                <span class="preview-bottom">Open the full lesson <span aria-hidden="true">↗</span></span>
-            </a>
+                <section id="example-study" class="exhibit-panel" role="tabpanel" aria-labelledby="tab-study" tabindex="0">
+                    <p class="exhibit-label">Python foundations / Example</p>
+                    <h2>Values &amp; types</h2><p>Read the code. Then explain what changes.</p>
+                    <pre><code><span class="exhibit-muted">01</span>  retries = <span class="exhibit-accent">2</span>
+<span class="exhibit-muted">02</span>  label = <span class="exhibit-accent">"2"</span>
+<span class="exhibit-muted">03</span>  type(retries) == type(label)
+
+<span class="exhibit-muted">Expected result</span>  False</code></pre>
+                    <div class="exhibit-insight"><span>THE DISTINCTION</span><p>The same symbol can represent different kinds of values. An integer and a string behave differently.</p></div>
+                    <a href="/topic/python-foundations-values-and-types">Read the full lesson <span aria-hidden="true">↗</span></a>
+                </section>
+                <section id="example-interview" class="exhibit-panel" role="tabpanel" aria-labelledby="tab-interview" tabindex="0" hidden>
+                    <p class="exhibit-label">Spoken interview / Illustrative exchange</p>
+                    <h2>Follow the reasoning.</h2><p>Your answer shapes the next question.</p>
+                    <div class="exhibit-conversation"><p><span>YOU</span>“I built an inference engine and worked on request batching.”</p><p><span>INTERVIEWER</span>“What trade-off did you make between throughput and the time each request waits?”</p></div>
+                    <div class="exhibit-insight"><span>YOU STAY IN CONTROL</span><p>Review your transcript before sending. Camera preview stays on your device; submitted audio goes to the speech provider.</p></div>
+                    <a href="/mock-interview">Practice an interview <span aria-hidden="true">↗</span></a>
+                </section>
+                <section id="example-resume" class="exhibit-panel" role="tabpanel" aria-labelledby="tab-resume" tabindex="0" hidden>
+                    <p class="exhibit-label">Resume studio / Sample document</p>
+                    <h2>Your work, on paper.</h2><p>A readable document, not a Markdown download.</p>
+                    <div class="exhibit-resume"><strong>Alex Morgan</strong><span>Software engineering · Portfolio · GitHub</span><hr><b>SELECTED PROJECT</b><p>Request scheduler</p><p>Implemented batching and evaluated latency under concurrent workloads.</p></div>
+                    <div class="exhibit-insight"><span>READY TO REVIEW</span><p>Searchable PDF, clickable profile links and your actual project details. Review AI-written claims before sharing.</p></div>
+                    <a href="/resume">Open Resume Studio <span aria-hidden="true">↗</span></a>
+                </section>
+                <div class="exhibit-footer"><span>Product examples, not personal results</span><span aria-hidden="true">AM / WORKSPACE</span></div>
+            </div>
         </section>
-        <section class="learning-method" aria-labelledby="method-title">
-            <div class="section-heading"><p class="eyebrow">The learning loop</p><h2 id="method-title">From “I’ve seen this”<br>to “I can explain this.”</h2><p>A lesson is a starting point. Understanding comes from connecting the idea, trying it, and checking your reasoning.</p></div>
-            <ol class="method-steps">
-                <li><span class="step-index">01 / Learn</span><h3>Make the concept concrete.</h3><p>Read explanations, trace examples, and use diagrams to build a mental model before reaching for a solution.</p></li>
-                <li><span class="step-index">02 / Practice</span><h3>Put your reasoning to work.</h3><p>Move from a worked example to a problem. Use test results to see where your approach holds up.</p></li>
-                <li><span class="step-index">03 / Reflect</span><h3>Find the next useful question.</h3><p>Sign in for assessments and contextual AI tutoring. Revisit the parts you cannot yet explain in your own words.</p></li>
-            </ol>
+        <section class="product-index" aria-label="Workspace capabilities"><span>PUBLIC LESSONS</span><span>ASSESSED PRACTICE</span><span>CONTEXTUAL INTERVIEWS</span><span>PDF RESUMES</span></section>
+        <section class="product-section" id="workspace" aria-labelledby="workspace-title">
+            <div class="product-section-heading"><p class="product-kicker">The workspace</p><h2 id="workspace-title">Less switching.<br>More useful feedback.</h2><p>Start with a concept. Test it. Explain your decisions out loud. Keep the evidence in your workspace.</p></div>
+            <div class="product-feature-grid">
+                <a href="/learn" class="product-feature"><span class="feature-number">01 / KNOWLEDGE</span><h3>A curriculum you can inspect.</h3><p>Objectives, prerequisites, worked examples and knowledge checks. Browse before you create an account.</p><span class="feature-destination">Browse lessons <span aria-hidden="true">↗</span></span></a>
+                <a href="/dashboard" class="product-feature"><span class="feature-number">02 / CONTINUITY</span><h3>A next step, not another catalog.</h3><p>Return to unfinished lessons and revisit concepts that need fresh assessment. Reading alone doesn’t count as mastery.</p><span class="feature-destination">Open your study queue <span aria-hidden="true">↗</span></span></a>
+                <a href="/mock-interview" class="product-feature"><span class="feature-number">03 / COMMUNICATION</span><h3>Explain the decisions behind the code.</h3><p>Practice aloud, correct the transcript and answer contextual follow-ups. Review specific feedback rather than a personality score.</p><span class="feature-destination">Explore interview practice <span aria-hidden="true">↗</span></span></a>
+                <a href="/resume" class="product-feature"><span class="feature-number">04 / PRESENTATION</span><h3>A resume grounded in your projects.</h3><p>Bring your experience and links. Shape a concise document and export a searchable PDF with working hyperlinks.</p><span class="feature-destination">Build a resume <span aria-hidden="true">↗</span></span></a>
+            </div>
         </section>
-        <section class="flagship-feature" aria-labelledby="flagship-title">
-            <div><p class="eyebrow">The flagship path</p><h2 id="flagship-title">Start with Python.<br>Build a stronger foundation.</h2><p>Explore the versioned Python curriculum, beginning with values and types. See lesson objectives and prerequisites before you dive in.</p><a href="/learn" class="text-link">View the learning path <span aria-hidden="true">→</span></a></div>
-            <div class="path-visual"><p class="eyebrow">Your first step</p><a href="/topic/python-foundations-values-and-types"><span class="path-node" aria-hidden="true">01</span><span><strong>Values &amp; types</strong><small>Names, objects, and the meaning of a value</small></span><span aria-hidden="true">↗</span></a><p class="quiet-note">Then follow the published lessons in the curriculum.</p></div>
-        </section>
-        <section class="placement-tools" aria-labelledby="tools-title">
-            <div class="section-heading"><p class="eyebrow">Beyond the lesson</p><h2 id="tools-title">Prepare to show your work.</h2><p>When you’re ready, sign in to connect your learning with placement preparation.</p></div>
-            <div class="tool-links"><a href="/mock-interview"><span class="eyebrow">Explain your thinking</span><h3>Mock interviews <span aria-hidden="true">↗</span></h3><p>Practice coding, technical, and behavioral answers.</p></a><a href="/resume"><span class="eyebrow">Tell your story</span><h3>Resume Studio <span aria-hidden="true">↗</span></h3><p>Shape a resume around your real projects and skills.</p></a><a href="/aptitude"><span class="eyebrow">Sharpen your reasoning</span><h3>Aptitude practice <span aria-hidden="true">↗</span></h3><p>Work through questions and review your approach.</p></a></div>
-        </section>
-        <section class="landing-close"><p class="eyebrow">One concept at a time</p><h2>Your next step doesn’t<br>have to be a leap.</h2><a href="/learn" class="btn-primary public-button">Find your first lesson <span aria-hidden="true">→</span></a></section>
+        <section class="product-start" aria-labelledby="start-title"><div><p class="product-kicker">A practical starting point</p><h2 id="start-title">Python foundations.</h2><p>Start with values and types, then follow the published sequence. Each lesson makes its objectives and prerequisites visible.</p><a class="product-primary" href="/topic/python-foundations-values-and-types">Open the first lesson <span aria-hidden="true">↗</span></a></div><ol class="product-path"><li><span>01</span><div><strong>Read a worked example</strong><p>Trace what the code does and why.</p></div></li><li><span>02</span><div><strong>Check your understanding</strong><p>Sign in to submit answers and save evidence.</p></div></li><li><span>03</span><div><strong>Review the next step</strong><p>See what needs practice, not just what you visited.</p></div></li></ol></section>
+        <section class="product-notes" aria-labelledby="notes-title"><h2 id="notes-title">Before you begin</h2><details><summary>What can I use without signing in?</summary><p>The curriculum and lesson explanations are public. Saving progress, submitting assessments, AI tutoring, interviews and resume generation require an account.</p></details><details><summary>What happens to my camera and microphone?</summary><p>Camera video stays in your browser and is not uploaded. When you choose to transcribe, the audio is sent to the speech provider. Confirmed answers and interview feedback are saved to your account; sessions can be deleted in the interview workspace.</p></details><details><summary>Does a score mean I’m ready to be hired?</summary><p>No. Assessment and interview feedback are practice aids, not hiring predictions or validated measures of ability. Check generated claims and use real interviews and project work as additional evidence.</p></details><details><summary>Are coding and AI tools always available?</summary><p>Code execution requires a configured remote sandbox. AI tools depend on provider availability and quotas. You can continue reading lessons when those services are unavailable.</p></details></section>
     </main>
-    <footer class="public-footer"><a href="/" class="footer-brand">AI Placement Mentor</a><p>Lessons are public. <a href="/login">Sign in</a> for assessments and AI tutoring.</p><a href="/learn">Browse curriculum <span aria-hidden="true">↗</span></a></footer>
+    <footer class="product-footer"><a class="product-brand" href="/">AI Placement Mentor</a><span>A workspace for the work before the interview.</span><div><a href="/learn">Curriculum</a><a href="https://github.com/gbharath8182/Ai-placement-mentor">Source &amp; documentation</a><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch appearance"></button></div></footer>
 </body>
 </html>

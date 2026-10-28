@@ -7,6 +7,7 @@ A placement-preparation learning app built with FastAPI, MongoDB, and vanilla HT
 ## Features
 
 - **Public learning:** landing page at `/`, curriculum at `/learn`, and lessons at `/topic/{slug}`, without a login wall. Personal learning actions require authentication.
+- **Personal workspace:** unfinished lessons, evidence-based reviews, distinct completion/mastery counts and explicit unavailable states. Search tools and published lessons from the header or Ctrl/Cmd+K; keyboard, mobile and both themes are covered by browser regression checks.
 - **Structured curriculum:** fifteen version-controlled Python lessons and fifteen linked tasks with objectives, prerequisites, worked examples, diagrams and thirty knowledge checks. Existing MongoDB content takes priority; new authored lessons are available without a seed or import.
 - **Contextual tutor:** lesson/section-grounded prompts, SSE streaming, stop/retry controls, and per-topic history. Groq defaults to `openai/gpt-oss-20b` with `openai/gpt-oss-120b` as fallback; model selection, retries, and structured-response validation are centralized. Missing credentials produce an unavailable error, not pretend successful AI output.
 - **Assessment feedback:** server-graded lesson checks and server-verified coding evidence inform transparent mastery/review heuristics. These scores are **not scientifically calibrated learning probabilities, proof of retention, or employment guarantees**.
@@ -16,6 +17,8 @@ A placement-preparation learning app built with FastAPI, MongoDB, and vanilla HT
 - **Accounts and tracking:** bcrypt password hashing, bearer access tokens, refresh cookies, password recovery, progress, activity, analytics, roadmap, cheatsheets, and aptitude views. Frontend auth storage also contains tokens; this is not a cookie-only authentication design.
 
 ## Application architecture
+
+Deployment gates, operational requirements and product priorities are documented in [production readiness](docs/production-readiness.md).
 
 ```mermaid
 flowchart LR

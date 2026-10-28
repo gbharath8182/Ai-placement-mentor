@@ -1,5 +1,9 @@
 # V2 checkpoint — 12 October 2026
 
+## Product experience increment — 28 October 2026
+
+Replaced the slogan-led landing page with an interactive, clearly labeled product walkthrough; added a real personal study/review queue, shared tool/lesson search, refreshed slate/petrol/copper workspace styling and honest unavailable/offline states. New read-only endpoints use the existing collections without production writes or migrations. Session refresh now preserves sign-in on transient outages and rejects late token restoration after local logout. Security headers cover rejection paths and authenticated responses; completed API requests have server-generated correlation IDs and safe route-template logs. A dedicated browser CI job checks desktop/mobile, both themes, keyboard behavior, search injection/stale-response safety and failure recovery. See production-readiness.md for launch gates that remain operational rather than pretending a visual update resolves them.
+
 ## Implemented increment
 
 | Phase | Root cause and implementation | Verification |

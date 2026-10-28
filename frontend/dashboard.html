@@ -25,12 +25,18 @@
             <p class="workspace-eyebrow">Your workspace / <span id="hero-user-name">Learner</span></p>
             <div class="workspace-heading-row">
                 <div>
-                    <h1 class="dashboard-title">Make room for focused learning.</h1>
-                    <p class="dashboard-subtitle">Choose a path, work through its lessons and put your understanding into practice.</p>
+                    <h1 class="dashboard-title">Your next session.</h1>
+                    <p class="dashboard-subtitle">Continue your work, revisit a concept, or prepare for an interview.</p>
                 </div>
                 <a class="btn-secondary" href="/learn">Browse curriculum</a>
             </div>
         </header>
+
+        <section class="study-overview" aria-label="Personal study queue" aria-busy="true" id="study-overview">
+            <div class="study-main" id="study-main"><p class="workspace-eyebrow">Study queue</p><h2>Finding your next step…</h2><p class="study-description" role="status">Loading your saved progress and assessment evidence.</p></div>
+            <aside class="study-reviews" aria-labelledby="review-heading"><div class="study-panel-heading"><h2 id="review-heading">Review queue</h2><span id="review-count">—</span></div><div id="study-reviews"><p class="study-description">Checking recent assessments…</p></div></aside>
+        </section>
+        <p id="study-note" class="study-footnote" role="status"></p>
 
         <!-- Stats Widgets -->
         <div class="stats-panel-grid">
@@ -48,15 +54,21 @@
             </div>
             <div class="stat-box glass-panel">
                 <div class="stat-info">
-                    <a class="stat-val" id="stats-aptitude" href="/aptitude">Practice</a>
-                    <span class="stat-lbl">Aptitude workspace</span>
+                    <span class="stat-val" id="stats-mastered">—</span>
+                    <span class="stat-lbl">With fresh mastery evidence</span>
                 </div>
             </div>
         </div>
         
+        <section class="career-shortcuts" aria-label="Career preparation">
+            <a href="/mock-interview"><span class="shortcut-index">01 / INTERVIEW</span><strong>Practice your explanation <span aria-hidden="true">↗</span></strong><span>Text or spoken sessions with contextual follow-ups.</span></a>
+            <a href="/resume"><span class="shortcut-index">02 / RESUME</span><strong>Update your project story <span aria-hidden="true">↗</span></strong><span>Build a document and export a linked PDF.</span></a>
+            <a href="/playground"><span class="shortcut-index">03 / CODE</span><strong>Test an approach <span aria-hidden="true">↗</span></strong><span id="runner-note">Execution requires a configured remote sandbox.</span></a>
+        </section>
+
         <!-- Domain Cards Grid -->
         <div class="workspace-section-head">
-            <div><h2>Learning paths</h2><p>Foundations first. Depth at your own pace.</p></div>
+            <div><h2>Browse learning paths</h2><p>Choose a subject to see its published lessons.</p></div>
             <label class="sr-only" for="domain-search">Find a learning path</label>
             <input class="workspace-search" id="domain-search" type="search" placeholder="Find a learning path…" autocomplete="off">
         </div>

@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from backend.database import db_client
 from backend.routes import auth, content, ai, practice, progress, domain_details, activity, analytics, mock_interview, resume, learning
 from backend.config import settings
-from backend.routes import spoken_interview
+from backend.routes import spoken_interview, workspace
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -54,6 +54,7 @@ app.include_router(mock_interview.router)
 app.include_router(spoken_interview.router)
 app.include_router(resume.router)
 app.include_router(learning.router)
+app.include_router(workspace.router)
 
 @app.exception_handler(AIProviderError)
 async def ai_provider_error(request: Request, error: AIProviderError):
