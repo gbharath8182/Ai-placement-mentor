@@ -61,6 +61,16 @@ Regressions cover PDF annotations, pagination, escaping, authentication, respons
 
 The shared shell now reads the existing local account safely even when deferred auth helpers have not loaded yet, preserving its initialization before older page handlers need shell control IDs. The reference library loads the auth helper for working account/sign-out controls.
 
+## Spoken interviews and repository policies — 28 October 2026
+
+Added a separate Camera & voice studio under Mock interviews without replacing the existing text modes. Candidates choose an Orpheus female voice, optionally use a local camera mirror, record audio, review/correct the Whisper transcript and submit confirmed answers. AI follow-ups receive the actual conversation, validated quote references and domain/role context. Private per-turn feedback becomes an end-of-session review with specific practice exercises and clearly limited transcript-based estimates. New user-scoped sessions are stored lazily in spoken_interview_sessions; there is no content migration, video upload, persisted raw audio, gaze/appearance/accent/personality scoring or continuous-listening/video-call claim.
+
+Implemented consent, 8 MB server upload bounds, three-minute client recording limits, strict schema validation, server-owned spoken questions, 24-hour answer expiry, optimistic concurrency, recent-session recovery, account-scoped deletion, explicit audio/provider errors, retry without re-recording and camera/microphone/playback cleanup on exit, hiding or completion. The synthetic Edge fixture needed a fresh browser process per viewport to avoid fake capture-device reuse failures; device-disconnection handling remained explicit throughout.
+
+Final local verification: 414 Python tests plus 381 subtests and 44 Node tests passed. Desktop and mobile fixture flows exercised synthetic camera/mic recording, transcript retry, contextual follow-ups, reload/resume, end feedback and deletion; separate denied-device/unavailable-voice flows verified typed completion. A live Groq TTS/STT round-trip passed with the existing key after the owner accepted Orpheus terms; a separate synthetic STT test recognized inference/latency. Two real AI follow-up calls, stored only in memory, stayed on Leaf's scheduler, batching and arrival-rate context. These are not real candidate camera or production Render checks.
+
+At the owner's request, added SECURITY.md, a source-available prior-permission notice (not an open-source license), CODEOWNERS, a PR checklist and contribution/access guidance. Existing grants, third-party licenses and GitHub view/fork rights remain unchanged. GitHub API metadata confirmed that the available Git identity can push but has no admin/maintain permission. No account pages were controlled and no protection settings were changed. The owner/admin must apply branch protection/private reporting using the documented command or manual settings procedure; committed policy files do not enforce those controls.
+
 ## Resume next session
 
 1. Check git status, recent commits, CI and the existing Render deployment before making changes.

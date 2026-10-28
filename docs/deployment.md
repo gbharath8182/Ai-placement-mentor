@@ -81,6 +81,12 @@ A generic forgot-password response does not prove delivery, and provider accepta
 
 The authored catalog contains 15 Python topics and 15 practice tasks. Built-in content does not mean it was imported into production. Do not add a seed/import operation to Render's build or start command. For a separately approved data operation, preview the maintained insert-only importer and review database identity, conflicts, exclusive-write confirmation, and an external recovery receipt. Never replay `scripts/legacy/` or the deprecated seed. See [tool guide](../scripts/README.md) and [database recovery](database-recovery.md).
 
+## Spoken interview audio
+
+The existing server-side `GROQ_API_KEY` is reused for spoken interviews. The defaults are `GROQ_STT_MODEL=whisper-large-v3-turbo`, `GROQ_TTS_MODEL=canopylabs/orpheus-v1-english`, and `INTERVIEW_AUDIO_TIMEOUT_SECONDS=45`; these optional variables need not be added to Render unless overriding defaults. Accept the English Orpheus terms in the same Groq organization. No new key is required merely to enable voice mode.
+
+Deploy the new source normally. No seed/migration is needed: `spoken_interview_sessions` is created lazily for actual practice sessions in the existing configured database. Verify microphone/camera permission on the HTTPS deployment with a consenting test account; do not claim a live-device check from synthetic browser fixtures. See [voice setup and privacy](spoken-interviews.md).
+
 ## Release gate and checkpoint
 
 For the user-approved release, main should rerun `python -m pytest tests` in the chosen isolated environment, `node --test tests/frontend-smoke.test.js`, JS syntax checks, and `python scripts/check_secrets.py --staged` after staging. CI targets Python 3.11; local Python 3.13 success is not a completed production-runtime validation. Keep secrets, backups, and browser artifacts out of the commit.

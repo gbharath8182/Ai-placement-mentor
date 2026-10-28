@@ -91,7 +91,7 @@ async function authFetch(url, options = {}) {
     }
     
     // Detect if we should serialize JSON body
-    if (options.body && typeof options.body === "object" && !(options.body instanceof FormData)) {
+    if (options.body && typeof options.body === "object" && !(options.body instanceof FormData) && !(options.body instanceof Blob)) {
         options.headers["Content-Type"] = "application/json";
         options.body = JSON.stringify(options.body);
     }

@@ -12,6 +12,7 @@ A placement-preparation learning app built with FastAPI, MongoDB, and vanilla HT
 - **Assessment feedback:** server-graded lesson checks and server-verified coding evidence inform transparent mastery/review heuristics. These scores are **not scientifically calibrated learning probabilities, proof of retention, or employment guarantees**.
 - **Remote coding:** topic submissions use stored test cases; the playground accepts bounded user-authored cases. Neither executes submitted code in the browser. Both require a configured, trusted Piston-compatible HTTPS service.
 - **Interview and resume:** authenticated interviews with persisted sessions and structured feedback; two-stage resume drafting with a document-style preview and searchable PDF export. Profile and project links remain clickable in the PDF. Generated advice and resumes still require human review.
+- **Spoken interview practice:** optional local camera mirror, selectable female interviewer voices, audio transcription, answer-aware follow-ups and an evidence-based session review. Review transcripts before submitting; camera video is not uploaded and no gaze/accent/personality scores are inferred. See [spoken interviews](docs/spoken-interviews.md).
 - **Accounts and tracking:** bcrypt password hashing, bearer access tokens, refresh cookies, password recovery, progress, activity, analytics, roadmap, cheatsheets, and aptitude views. Frontend auth storage also contains tokens; this is not a cookie-only authentication design.
 
 ## Application architecture
@@ -141,3 +142,7 @@ Public pages: `/`, `/learn`, `/topic/{slug}`, `/login`, `/signup`, `/forgot-pass
 Personal views: `/dashboard`, `/playground`, `/mock-interview`, `/resume`, `/analytics`, `/profile`, `/roadmap`, `/cheatsheets`, `/aptitude`.
 
 API groups include `/auth`, `/curriculum`, `/domains`, `/topics`, `/learning`, `/ai`, `/practice`, `/progress`, `/activity`, `/analytics`, `/mock-interview`, and `/resume`. `/health/live` checks process liveness; `/health/ready` checks MongoDB connectivity.
+
+## Usage, contribution and security
+
+This repository is public for review, but its original code is **source-available with prior permission required**, not open-source licensed. See [usage terms](LICENSE.md), [contributor guidance](CONTRIBUTING.md) and [security reporting](SECURITY.md). Existing third-party licenses and GitHub's view/fork rights remain unchanged. Public visibility does not grant write or deletion rights; maintainers should configure [GitHub repository protections](docs/repository-protection.md).

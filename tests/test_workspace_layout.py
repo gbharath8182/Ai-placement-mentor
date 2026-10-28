@@ -62,3 +62,14 @@ def test_resume_has_pdf_controls_and_no_cdn_rendering_dependency():
     text = (FRONTEND / "resume.html").read_text(encoding="utf-8")
     assert "Download PDF" in text and "Download .md" not in text
     assert any(attrs.get("id") == "resume-output" and "resume-paper" in attrs.get("class", "") for tag, attrs in page.elements)
+
+
+def test_spoken_interview_has_explicit_consent_local_mirror_and_review_controls():
+    page = Page("mock-interview")
+    ids = [attrs["id"] for tag, attrs in page.elements if "id" in attrs]
+    assert len(ids) == len(set(ids))
+    assert {"spoken-consent", "spoken-video", "spoken-transcript", "spoken-record", "spoken-submit", "spoken-delete", "spoken-report"} <= set(ids)
+    video = next(attrs for tag, attrs in page.elements if tag == "video")
+    assert "muted" in video and "playsinline" in video
+    consent = next(attrs for tag, attrs in page.elements if attrs.get("id") == "spoken-consent")
+    assert "checked" not in consent

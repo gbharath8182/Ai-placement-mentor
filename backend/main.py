@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from backend.database import db_client
 from backend.routes import auth, content, ai, practice, progress, domain_details, activity, analytics, mock_interview, resume, learning
 from backend.config import settings
+from backend.routes import spoken_interview
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,6 +51,7 @@ app.include_router(domain_details.router)
 app.include_router(activity.router)
 app.include_router(analytics.router)
 app.include_router(mock_interview.router)
+app.include_router(spoken_interview.router)
 app.include_router(resume.router)
 app.include_router(learning.router)
 

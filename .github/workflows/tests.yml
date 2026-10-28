@@ -52,3 +52,4 @@ jobs:
           node --check tests/frontend-smoke.test.js
           node --check scripts/workspace_smoke.cjs
           node --check scripts/resume_smoke.cjs
+          node --check scripts/spoken_smoke.cjs

@@ -1,5 +1,13 @@
 # Contributing
 
+## Permission and review
+
+Read [LICENSE.md](LICENSE.md) before reusing code. This is a public, source-available project with prior-permission requirements, not an open-source license. GitHub's rights to view/fork and third-party licenses remain unchanged.
+
+Before starting a substantial contribution, open an issue describing the proposed work and obtain maintainer approval. Submit changes from your own fork through a pull request; acceptance, deployment and repository access remain maintainer decisions. Do not force-push to shared branches, alter access settings or delete content without explicit authorization. Public visibility never grants deletion or administrator rights.
+
+Only contribute code and assets you have the right to submit. Identify third-party sources and licenses; do not include another person's name, image, voice or likeness as branding or an endorsement without appropriate permission. Discuss contribution licensing with the maintainer before submission; submitting a patch is not a transfer of another author's copyright. Use [SECURITY.md](SECURITY.md) for vulnerabilities rather than public exploit details. See [repository protection](docs/repository-protection.md) for the distinction between policy files and enforced GitHub settings.
+
 ## Find the active code
 
 - `backend/`: FastAPI application, request models, authentication, and API routes.

@@ -60,6 +60,12 @@ Run `python -m tests.resume_preview` from the repository root to start a fixture
 
 In a separate terminal, run `node scripts/resume_smoke.cjs PATH_TO_PLAYWRIGHT http://127.0.0.1:8881`. Desktop/mobile checks generate a structured preview without CDN libraries, validate profile destinations and download real PDFs through the authenticated export handler. PDF and screenshot artifacts stay in ignored artifacts/resume/. Stop the fixture server when finished. Python regressions additionally verify selectable PDF text, link annotations, pagination, escaped input, authentication and export limits.
 
+## Spoken interview verification
+
+`python -m tests.spoken_preview` starts an isolated loopback fixture on port 8882 with mocked authentication, AI, audio and in-memory sessions. It must never be exposed publicly or used as the production server. `node scripts/spoken_smoke.cjs PATH_TO_PLAYWRIGHT http://127.0.0.1:8882` uses synthetic Edge camera/microphone devices to exercise consent, recording, transcript retry, follow-ups, feedback, deletion and permission/audio-failure fallback. Screenshots stay in ignored artifacts/spoken/. Stop the fixture server when finished.
+
+`python -m scripts.check_interview_audio --confirm-provider-call` performs one billable synthetic Groq TTS/STT round-trip using server-side configuration. It does not use a real microphone, send candidate details, write to MongoDB or save audio. Run only with an explicitly approved provider/account. See [spoken interview operations](../docs/spoken-interviews.md).
+
 ## Historical archive
 
 [`legacy/README.md`](legacy/README.md) explains the archived file families and their risks. **Do NOT run archived scripts against production.** They are reference material, not supported imports, migrations, smoke checks, or a reproducible setup pipeline. Their old relative paths, absolute paths, and database assumptions have intentionally not been repaired.

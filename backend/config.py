@@ -16,6 +16,9 @@ class Settings:
     GROQ_TIMEOUT_SECONDS: float = float(os.getenv("GROQ_TIMEOUT_SECONDS", "30"))
     GROQ_MAX_RETRIES: int = min(2, max(0, int(os.getenv("GROQ_MAX_RETRIES", "1"))))
     GROQ_MAX_TOKENS: int = min(8192, max(256, int(os.getenv("GROQ_MAX_TOKENS", "2048"))))
+    GROQ_STT_MODEL: str = os.getenv("GROQ_STT_MODEL", "whisper-large-v3-turbo")
+    GROQ_TTS_MODEL: str = os.getenv("GROQ_TTS_MODEL", "canopylabs/orpheus-v1-english")
+    INTERVIEW_AUDIO_TIMEOUT_SECONDS: float = float(os.getenv("INTERVIEW_AUDIO_TIMEOUT_SECONDS", "45"))
     APP_ENV: str = os.getenv("APP_ENV", "production" if os.getenv("RENDER") else "development")
     APP_URL: str = os.getenv("APP_URL", os.getenv("RENDER_EXTERNAL_URL", "http://localhost:8000"))
     COOKIE_SECURE: bool = os.getenv("COOKIE_SECURE", str(APP_ENV == "production")).lower() == "true"

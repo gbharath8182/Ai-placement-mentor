@@ -6,6 +6,7 @@
     <title>Mock Interview - AI Placement Mentor</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="/static/css/spoken-interview.css">
     <script src="/static/js/app-shell.js" defer></script>
 </head>
 <body>
@@ -41,8 +42,30 @@
                     <button class="mi-mode-btn" data-mode="technical">Technical Panel<span class="mi-mode-desc">In-depth engineering interview</span></button>
                     <button class="mi-mode-btn" data-mode="mixed">Mixed<span class="mi-mode-desc">A bit of everything</span></button>
                 </div>
+                <button type="button" class="spoken-mode-card" id="spoken-open"><span class="spoken-eyebrow">Camera & voice / New practice format</span><strong>A conversation, not a questionnaire.</strong><span>Speak about your work. Your AI interviewer listens, remembers your answers and asks relevant follow-ups.</span><span class="spoken-mode-action">Set up spoken interview →</span></button>
             </div>
         </div>
+
+        <section id="spoken-studio" class="hidden" aria-label="Spoken interview studio">
+            <header class="spoken-heading"><div><p class="spoken-eyebrow">Interview studio / Camera & voice</p><h1>Practice the conversation.</h1><p>A focused interview with a spoken AI interviewer. No animated avatar. No distractions.</p></div><button type="button" id="spoken-back" class="btn-secondary">Back to interview modes</button></header>
+            <p id="spoken-status" role="status" aria-live="polite"></p>
+            <div id="spoken-setup" class="spoken-setup glass-panel">
+                <div><h2>Make yourself comfortable.</h2><p>Choose a voice and a short session. Use headphones to keep the interviewer’s voice out of your microphone.</p>
+                    <label for="spoken-role">Target role (optional)</label><input id="spoken-role" maxlength="150" placeholder="e.g. Inference engineer">
+                    <div class="spoken-fields"><div><label for="spoken-count">Questions</label><select id="spoken-count"><option value="3">3 questions</option><option value="5" selected>5 questions</option><option value="8">8 questions</option></select></div><div><label for="spoken-voice">Interviewer voice</label><select id="spoken-voice"><option value="hannah">Hannah</option><option value="diana">Diana</option><option value="autumn">Autumn</option></select></div></div>
+                    <button type="button" id="spoken-preview" class="btn-secondary">Listen to voice sample</button><p class="spoken-small">Three female Orpheus voices. Audition them to choose the tone you prefer; audio availability depends on the server’s Groq access.</p><label for="spoken-saved">Recent saved sessions (up to 50)</label><select id="spoken-saved"><option value="">No saved session selected</option></select>
+                </div>
+                <div class="spoken-privacy"><p class="spoken-eyebrow">You control the session</p><h3>Camera stays on your device.</h3><p>Your camera is a local mirror for face-to-face practice. We do not upload video, track your gaze or score your appearance.</p><p>When you stop a recording, that answer’s audio is sent to Groq for transcription, then discarded by this app. Confirmed text answers and practice feedback are saved in your account until you delete the session. Groq’s own data policy also applies.</p><p>Sessions accept answers for 24 hours. Each recording is limited to 3 minutes or 8 MB. Feedback evaluates the confirmed transcript—not accent, vocal confidence or eye contact.</p><label class="spoken-check"><input type="checkbox" id="spoken-camera" checked> Enable my local camera mirror</label><label class="spoken-check"><input type="checkbox" id="spoken-consent"> I agree to send recorded audio for transcription and save confirmed answers and feedback.</label><div class="spoken-actions"><button type="button" id="spoken-start" class="btn-primary">Start practice session</button><button type="button" id="spoken-resume" class="btn-secondary hidden">Resume saved session</button><button type="button" id="spoken-delete-saved" class="btn-secondary hidden">Delete saved session</button></div></div>
+            </div>
+            <div id="spoken-session" class="hidden">
+                <div class="spoken-room">
+                    <div class="spoken-interviewer glass-panel"><div class="spoken-presence" aria-hidden="true">AI</div><p class="spoken-eyebrow" id="spoken-interviewer-label">Your AI interviewer</p><p id="spoken-progress"></p><h2 id="spoken-question" tabindex="-1"></h2><div class="spoken-actions"><button type="button" id="spoken-replay" class="btn-secondary">Replay question</button><button type="button" id="spoken-hide-question" class="btn-secondary" aria-pressed="false">Hide question text</button></div><p class="spoken-small">Listen, take a breath, then answer. Follow-ups use your earlier confirmed answers.</p></div>
+                    <div class="spoken-camera-card glass-panel"><div class="spoken-video-frame"><video id="spoken-video" autoplay playsinline muted aria-label="Local camera mirror"></video><p id="spoken-camera-placeholder">Camera off. You can still practice by voice.</p><span class="spoken-camera-label">You / Local mirror only</span></div><div class="spoken-actions"><button type="button" id="spoken-camera-toggle" class="btn-secondary">Turn camera off</button><button type="button" id="spoken-reconnect" class="btn-secondary">Reconnect devices</button></div><p class="spoken-small">For face-to-face practice, glance toward your camera lens while answering. There is no automated eye-contact score.</p></div>
+                </div>
+                <div class="spoken-answer glass-panel"><div class="spoken-answer-head"><h2>Your answer</h2><span id="spoken-timer">Not recording</span></div><div class="spoken-actions"><button type="button" id="spoken-record" class="btn-primary">Record answer</button><button type="button" id="spoken-stop" class="btn-secondary" disabled>Stop & transcribe</button><button type="button" id="spoken-retry-transcript" class="btn-secondary hidden">Retry transcription</button></div><label for="spoken-transcript">Review your transcript before sending</label><textarea id="spoken-transcript" maxlength="6000" rows="5" placeholder="Your transcript appears here. Correct names such as Leaf, or type an answer if audio is unavailable."></textarea><p class="spoken-small">Recording never submits an answer automatically. Fix transcription errors before continuing. Editing the text affects transcript-based delivery estimates.</p><div class="spoken-actions"><button type="button" id="spoken-submit" class="btn-primary">Send answer & continue</button><button type="button" id="spoken-end" class="btn-secondary">End session & review</button></div></div>
+            </div>
+            <section id="spoken-report" class="glass-panel hidden" aria-label="Spoken interview feedback"><p class="spoken-eyebrow">Session review</p><h2>What to build on next.</h2><p id="spoken-report-limitations"></p><div id="spoken-scores" class="spoken-scores"></div><div id="spoken-review-turns"></div><div class="spoken-self-review"><h3>Face-to-face self-review</h3><p>Did you explain your own contribution? Did you pause before answering? Could you speak toward the camera without reading? Use these reflections alongside the transcript feedback. We did not analyze your video or voice acoustics.</p></div><div class="spoken-actions"><button type="button" id="spoken-again" class="btn-primary">Set up another session</button><button type="button" id="spoken-delete" class="btn-secondary">Delete this session & transcript</button></div></section>
+        </section>
 
         <div id="mi-interview-body" class="mi-page-panel glass-panel hidden">
             <p id="mi-progress-text" role="status" aria-live="polite"></p>
@@ -86,5 +109,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" defer></script>
     <script src="/static/js/mock-interview.js" defer></script>
     <script src="/static/js/mock-interview-page.js" defer></script>
+    <script src="/static/js/spoken-interview.js" defer></script>
 </body>
 </html>

@@ -250,6 +250,19 @@ test('authenticated guard preserves public/protected routes but redirects login 
     }
 });
 
+test('authenticated fetch preserves recorded audio blobs instead of JSON-serializing them', async () => {
+    const blob = new Blob(['recorded-audio-fixture'], { type: 'audio/webm' });
+    const harness = browser({ storage: { access_token: 'test-access' } });
+    harness.context.fetch = async (url, options) => {
+        assert.equal(options.body, blob);
+        assert.equal(options.headers['Content-Type'], 'audio/webm');
+        assert.equal(options.headers.Authorization, 'Bearer test-access');
+        return { ok: true, status: 200 };
+    };
+    harness.load('auth.js');
+    await harness.context.authFetch('/mock-interview/spoken/transcribe/fixture/1', { method: 'POST', body: blob, headers: { 'Content-Type': 'audio/webm' } });
+});
+
 for (const failure of ['http', 'network', 'invalid-json']) {
     test(`failed refresh (${failure}) clears only auth storage`, async () => {
         const harness = browser({
