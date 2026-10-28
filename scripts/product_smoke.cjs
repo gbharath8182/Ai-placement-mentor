@@ -75,6 +75,7 @@ async function main() {
         assert.equal(await page.locator('.command-results a[href="/resume"]').count(), 1);
         await page.keyboard.press('Escape');
         await context.setOffline(true);
+        await page.locator('.workspace-connection').waitFor({ state: 'visible' });
         assert.equal(await page.locator('.workspace-connection').isVisible(), true);
         await context.setOffline(false);
         await page.waitForFunction(() => document.querySelector('.workspace-connection').hidden);
